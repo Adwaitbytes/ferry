@@ -38,7 +38,6 @@ export function createLlmJson(model: LanguageModel, opts: { timeoutMs?: number }
       system: `${system}\n\nRespond with a single JSON value matching the ${schemaName} schema and nothing else.`,
       prompt: user,
       maxOutputTokens: maxTokens,
-      temperature: 0,
       maxRetries: 2,
       abortSignal: AbortSignal.timeout(opts.timeoutMs ?? 45_000),
     });
