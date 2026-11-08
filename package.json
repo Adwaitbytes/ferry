@@ -13,12 +13,15 @@
     "lint": "turbo run lint && eslint scripts/*.ts scripts/lib",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
-    "redteam": "vitest run --project redteam",
+    "redteam": "node scripts/redteam.mjs",
     "format": "prettier --write .",
     "copycheck": "node scripts/copycheck.mjs",
     "secretscan": "node scripts/bundle-keyscan.mjs",
     "publish-public": "tsx --env-file-if-exists=.env.local scripts/publish-public.ts",
-    "count-memories": "tsx --env-file-if-exists=.env.local scripts/count-memories.ts"
+    "count-memories": "tsx --env-file-if-exists=.env.local scripts/count-memories.ts",
+    "e2e": "pnpm --filter @ferry/e2e run e2e",
+    "dev": "turbo run dev --filter=@ferry/web --filter=@ferry/gate",
+    "dev:extension": "pnpm --filter @ferry/extension dev"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

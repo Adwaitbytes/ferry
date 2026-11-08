@@ -32,9 +32,47 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test:coverage
+      - name: Red-team suite (RT cases, at least 25 must run)
+        run: pnpm redteam
+        env:
+          REDTEAM_MIN: '25'
       - run: pnpm build
       - run: pnpm secretscan
       - run: pnpm audit --prod --audit-level high
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        run: pnpm --filter @ferry/e2e exec playwright install --with-deps chromium
+      - name: Build web (e2e env) and extension
+        run: |
+          pnpm --filter @ferry/e2e run build:web
+          pnpm --filter @ferry/extension build
+      - name: Run e2e and accessibility suites
+        run: pnpm e2e
+        env:
+          E2E_SKIP_BUILD: '1'
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 14
 
   secrets:
     runs-on: ubuntu-latest
