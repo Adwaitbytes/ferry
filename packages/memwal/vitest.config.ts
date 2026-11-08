@@ -1,0 +1,13 @@
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    include: ['src/**/*.test.ts'],
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/index.ts', 'src/test/**'],
+      thresholds: { lines: 85, branches: 85, functions: 85, statements: 85 },
+    },
+  },
+});

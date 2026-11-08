@@ -61,7 +61,7 @@ const Confidence = z.number().min(0).max(1);
 /** base64url, as produced by `hashShort`. */
 export const ShortHash = z.string().regex(/^[A-Za-z0-9_-]{8,43}$/);
 /** Opaque Walrus Memory reference (blob id). Kept loose until research pins the exact shape. */
-export const MemoryRef = z.string().min(8).max(128).regex(/^[A-Za-z0-9_\-:x]+$/);
+export const MemoryRef = z.string().min(8).max(128).regex(/^[A-Za-z0-9_:-]+$/);
 export type MemoryRef = z.infer<typeof MemoryRef>;
 
 /** Where one fact was heard. The raw conversation id and quote never leave the device in clear. */
@@ -123,6 +123,9 @@ export const StoredMemory = z.object({
   receipts: z.array(Receipt),
   writtenAt: IsoDate,
   supersededBy: MemoryRef.nullable(),
+  /** Walrus storage end epoch: "forget" hides a fact, the blob itself lives until this epoch. */
+  endEpoch: z.number().int().nonnegative().optional(),
+  expiresAt: z.iso.datetime({ offset: true }).optional(),
 });
 export type StoredMemory = z.infer<typeof StoredMemory>;
 
