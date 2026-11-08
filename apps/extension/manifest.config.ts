@@ -74,7 +74,10 @@ export function resolveOrigins(env: Record<string, string | undefined>): Origins
     throw new Error('FERRY_WEB_ORIGIN_PROD must use https');
   const extra = optionalOrigin(env.FERRY_WEB_ORIGIN, 'FERRY_WEB_ORIGIN');
   const api = parseOrigin(env.FERRY_API_ORIGIN ?? prod ?? LOCAL_WEB_ORIGIN, 'FERRY_API_ORIGIN');
-  const web = [...new Set([prod, extra, LOCAL_WEB_ORIGIN].filter((o): o is string => o !== null))];
+  // A release build must not trust whatever happens to serve localhost:3000 on a user's machine.
+  const local = env.FERRY_RELEASE === '1' ? null : LOCAL_WEB_ORIGIN;
+  if (env.FERRY_RELEASE === '1' && prod === null) throw new Error('FERRY_RELEASE=1 requires FERRY_WEB_ORIGIN_PROD');
+  const web = [...new Set([prod, extra, local].filter((o): o is string => o !== null))];
   return { api, web };
 }
 
