@@ -1,0 +1,72 @@
+[
+  {
+    "header": "Gemini Apps",
+    "title": "Prompted What is a good stretching routine for a desk worker? I sit about ten hours a day.",
+    "time": "2025-06-07T14:52:31.927Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"],
+    "safeHtmlItem": [{ "html": "<p>Try these <b>five</b> stretches &amp; take breaks every hour.</p><script>alert('never runs')</script>" }]
+  },
+  {
+    "header": "Gemini Apps",
+    "title": "Prompted I prefer routines under 10 minutes, I have a bad lower back.",
+    "time": "2025-06-07T15:01:02.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"],
+    "safeHtmlItem": [{ "html": "<p>Here is a 7&#8209;minute routine.</p>" }]
+  },
+  {
+    "header": "Gemini Apps",
+    "title": "Prompted I prefer routines under 10 minutes, I have a bad lower back.",
+    "time": "2025-06-07T15:02:00.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"]
+  },
+  {
+    "header": "Gemini Apps",
+    "title": "Gave feedback: Good response",
+    "time": "2025-06-07T15:03:00.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"]
+  },
+  {
+    "header": "Gemini Apps",
+    "title": "Prompted Translate 'good morning' into Portuguese, I'm learning it for a trip to a fictional city.",
+    "time": "2025-06-20T08:00:00.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"],
+    "safeHtmlItem": [{ "html": "Bom dia" }]
+  },
+  {
+    "header": "Gemini",
+    "title": "Used Gemini Apps",
+    "titleUrl": "https://gemini.google.com/app/c/abc123def456",
+    "time": "2024-02-17T22:05:10.123Z",
+    "products": ["Gemini Apps"],
+    "details": [
+      { "name": "Request", "value": "I am a synthetic persona who keeps bees as a hobby." },
+      { "name": "Response", "value": "Beekeeping is a rewarding hobby." }
+    ]
+  },
+  {
+    "header": "Gemini",
+    "title": "Used Gemini Apps",
+    "titleUrl": "https://gemini.google.com/app/c/abc123def456",
+    "time": "2024-02-17T22:09:10.123Z",
+    "products": ["Gemini Apps"],
+    "userInteractions": [
+      { "userInteraction": { "endpoint": 2, "request": "[[\"How many hives should a beginner start with? I have a small garden.\"]]", "response": "[[\"Two hives is a common recommendation.\"]]" } }
+    ]
+  },
+  {
+    "header": "Gemini",
+    "title": "Used Gemini Apps",
+    "titleUrl": "https://evil.example.com/app/c/abc123def456",
+    "time": "2024-02-18T10:00:00.000Z",
+    "products": ["Gemini Apps"],
+    "userInteractions": [{ "userInteraction": { "endpoint": 2, "request": "plain text request that is not JSON" } }]
+  },
+  { "header": "Gemini Apps", "title": "Prompted no time field" },
+  { "header": "Gemini Apps", "title": "Prompted bad time", "time": "yesterday" },
+  "stray"
+]
