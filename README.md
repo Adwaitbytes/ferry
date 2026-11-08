@@ -10,7 +10,7 @@ Built for [Total Recall](https://{{FILL: hackathon page URL}}) by Tatum x Walrus
 |---|---|
 | Web app | https://ferry-memory.vercel.app |
 | Ferry Gate (paid recall API) | https://ferry-gate.vercel.app ([health](https://ferry-gate.vercel.app/health), [public profile](https://ferry-gate.vercel.app/v1/profile)) |
-| Extension ZIP | {{FILL: GitHub release URL for ferry-extension-<version>-chrome.zip}} |
+| Extension ZIP | https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 |
 | Demo video (under 3 min) | {{FILL: video URL}} |
 | Blog post | {{FILL: dev.to URL}} |
 
@@ -246,7 +246,7 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm copycheck
 
 ## Install the release build
 
-1. Download {{FILL: GitHub release URL for ferry-extension-<version>-chrome.zip}} and unzip it.
+1. Download https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 and unzip it.
 2. Open `chrome://extensions`, turn on Developer mode, click Load unpacked and pick the unzipped folder.
 3. Open {{FILL: live web app URL}}, connect your wallet and pair.
 
