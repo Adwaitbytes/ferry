@@ -1,0 +1,12 @@
+export * from './types.js';
+export { adapterFor, adapters } from './registry.js';
+export { chatgptAdapter } from './sites/chatgpt.js';
+export { claudeAdapter } from './sites/claude.js';
+export { geminiAdapter } from './sites/gemini.js';
+export { createAdapter, CHIP_GAP_PX } from './adapter.js';
+export type { SiteSpec } from './adapter.js';
+export { observeDebounced, DEFAULT_DEBOUNCE_MS } from './observe.js';
+export type { DebouncedObserverOptions } from './observe.js';
+export { MAX_USER_TEXT_CHARS, plainText } from './dom.js';
+export { setAdapterErrorReporter } from './errors.js';
+export type { AdapterErrorReporter } from './errors.js';
