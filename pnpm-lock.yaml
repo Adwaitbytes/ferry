@@ -172,6 +172,21 @@ importers:
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.14.0(jiti@2.7.0))
+      '@ferry/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@ferry/distill':
+        specifier: workspace:*
+        version: link:packages/distill
+      '@ferry/memwal':
+        specifier: workspace:*
+        version: link:packages/memwal
+      '@ferry/pay':
+        specifier: workspace:*
+        version: link:packages/pay
+      '@neondatabase/serverless':
+        specifier: 1.2.0
+        version: 1.2.0
       '@types/node':
         specifier: 24.19.2
         version: 24.19.2
@@ -184,9 +199,15 @@ importers:
       eslint-plugin-security:
         specifier: 4.2.1
         version: 4.2.1
+      fake-indexeddb:
+        specifier: 6.2.5
+        version: 6.2.5
       prettier:
         specifier: 3.9.10
         version: 3.9.10
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
       turbo:
         specifier: 2.11.10
         version: 2.11.10
@@ -287,6 +308,9 @@ importers:
       '@ferry/pay':
         specifier: workspace:*
         version: link:../../packages/pay
+      '@hono/node-server':
+        specifier: 2.1.6
+        version: 2.1.6(hono@4.13.17)
       '@mysten-incubation/memwal':
         specifier: 0.1.13
         version: 0.1.13(@mysten/seal@1.5.4(@mysten/sui@2.39.1(typescript@6.0.3)))(@mysten/sui@2.39.1(typescript@6.0.3))(@mysten/walrus@1.2.39(@mysten/sui@2.39.1(typescript@6.0.3)))(ai@7.0.165(zod@4.6.7))(zod@4.6.7)
@@ -309,9 +333,15 @@ importers:
       '@suimpp/mpp':
         specifier: 0.9.0
         version: 0.9.0(hono@4.13.17)(typescript@6.0.3)(viem@2.57.16)
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
       mppx:
         specifier: 0.4.12
         version: 0.4.12(hono@4.13.17)(typescript@6.0.3)(viem@2.57.16)
+      tsup:
+        specifier: 9.0.0
+        version: 9.0.0(jiti@2.7.0)(postcss@8.5.32)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1)
 
   apps/web:
     dependencies:
@@ -330,6 +360,9 @@ importers:
       '@ferry/importers':
         specifier: workspace:*
         version: link:../../packages/importers
+      '@ferry/pay':
+        specifier: workspace:*
+        version: link:../../packages/pay
       '@ferry/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1098,6 +1131,12 @@ packages:
     resolution: {integrity: sha512-wtF6h+DY6M3YaDBPAmvuuA6jV8Sif9MjtOI5euKFWRgCDl5PeDpPsHR9u2l6St5ceY8AZgoNDww5+HvEsXFsGg==}
     engines: {node: '>=6'}
     hasBin: true
+
+  '@hono/node-server@2.1.6':
+    resolution: {integrity: sha512-p/KH9MnfNcsm3sR6x4lNgm5j+QN4Et8srKredl9DZfXiyZ1UQ3aQ2YVpFLbqktYN5JI+DB+VZFKM2PqE5hLKjQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      hono: ^4 || ^5.0.0-0
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -5179,6 +5218,10 @@ snapshots:
       long: 5.3.2
       protobufjs: 7.6.6
       yargs: 17.7.3
+
+  '@hono/node-server@2.1.6(hono@4.13.17)':
+    dependencies:
+      hono: 4.13.17
 
   '@humanfs/core@0.19.2':
     dependencies:

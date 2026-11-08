@@ -1,8 +1,5 @@
+import { getRequestListener } from '@hono/node-server';
 import app from './index.js';
 
-/** Web-standard handlers for the Vercel Node runtime; Hono does the routing. */
-const handle = (request: Request): Response | Promise<Response> => app.fetch(request);
-export const GET = handle;
-export const POST = handle;
-export const PATCH = handle;
-export const OPTIONS = handle;
+/** Node (req, res) handler for the Vercel function emitted by scripts/bundle.mjs. */
+export default getRequestListener(app.fetch);

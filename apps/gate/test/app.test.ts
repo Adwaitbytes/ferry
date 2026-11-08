@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { GateRecallResult } from '@ferry/core';
+import { GateCardList, GateEarnings, GateNonce, GateOwnerCard, GateProfile, GateRecallResult, GateSession } from '@ferry/core';
 import { siwsMessage } from '@ferry/pay';
 import { CARD_ID, OWNER, PAYER, WEB_ORIGIN, credentialFor, harness, ownerKey, paidTx, strangerKey, type Harness } from './harness.js';
 
@@ -145,13 +145,13 @@ describe('Gate paid recall', () => {
 
 describe('Gate card management and earnings', () => {
   async function login(harnessed: Harness, key = ownerKey) {
-    const { nonce } = (await (await harnessed.app.request(post('/v1/auth/nonce', {}))).json()) as { nonce: string };
+    const { nonce } = GateNonce.parse(await (await harnessed.app.request(post('/v1/auth/nonce', {}))).json());
     const now = Date.now();
     const message = siwsMessage({ domain: new URL(WEB_ORIGIN).host, address: key.toSuiAddress(), nonce, issuedAt: new Date(now).toISOString(), expiry: new Date(now + 3_600_000).toISOString() });
     const { signature } = await key.signPersonalMessage(new TextEncoder().encode(message));
     const res = await harnessed.app.request(post('/v1/auth/session', { message, signature }));
     expect(res.status).toBe(200);
-    return { Authorization: `Bearer ${((await res.json()) as { token: string }).token}`, message, signature };
+    return { Authorization: `Bearer ${GateSession.parse(await res.json()).token}`, message, signature };
   }
 
   it('creates, updates and kills a card only with the owner session', async () => {
@@ -164,7 +164,7 @@ describe('Gate card management and earnings', () => {
     expect((await h.app.request(post('/v1/manage/cards', { name: '<b>', scopeLabel: 'x' }, auth))).status).toBe(400);
     const created = await h.app.request(post('/v1/manage/cards', { name: 'Travel', scopeLabel: 'Travel', priceMicros: '20000', allowedAgents: [PAYER] }, auth));
     expect(created.status).toBe(201);
-    const card = (await created.json()) as { id: string; price: string; allowedAgents: string[] };
+    const card = GateOwnerCard.parse(await created.json());
     expect(card).toMatchObject({ price: '0.02', allowedAgents: [PAYER] });
 
     const patch = (id: string, body: unknown, headers = auth) =>
@@ -173,13 +173,21 @@ describe('Gate card management and earnings', () => {
     expect((await h.app.request(patch(card.id, { dailyCap: 7 }, { Authorization: stranger.Authorization }))).status).toBe(404);
     expect((await h.app.request(patch('bad', {}))).status).toBe(400);
     expect((await h.app.request(patch(card.id, { killed: false }))).status).toBe(400);
-    expect((await h.app.request(new Request(`${base}/v1/manage/cards`, { headers: auth }))).status).toBe(200);
+    const listed = await h.app.request(new Request(`${base}/v1/manage/cards`, { headers: auth }));
+    expect(GateCardList.parse(await listed.json()).cards.map((c) => c.id)).toContain(card.id);
     expect((await h.app.request(post(`/v1/manage/cards/${card.id}/kill`, {}, { Authorization: stranger.Authorization }))).status).toBe(404);
     expect(await (await h.app.request(post(`/v1/manage/cards/${card.id}/kill`, {}, auth))).json()).toEqual({ id: card.id, killed: true });
     expect((await h.app.request(post('/v1/manage/cards/bad/kill', {}, auth))).status).toBe(400);
     expect((await h.app.request(new Request(`${base}/v1/manage/cards`))).status).toBe(401);
     expect((await h.app.request(new Request(`${base}/v1/manage/cards/${card.id}/kill`, { method: 'POST' }))).status).toBe(401);
     expect((await h.app.request(patch(card.id, {}, {} as typeof auth))).status).toBe(401);
+  });
+
+  it('publishes the Public profile owner so the web app can gate card creation honestly', async () => {
+    h = await harness();
+    const res = await h.app.request(get('/v1/profile', { Origin: WEB_ORIGIN }));
+    expect(res.headers.get('access-control-allow-origin')).toBe(WEB_ORIGIN);
+    expect(GateProfile.parse(await res.json())).toMatchObject({ owner: OWNER, namespace: 'ferry-public' });
   });
 
   it('rejects a reused SIWS signature and malformed session requests', async () => {
@@ -200,7 +208,7 @@ describe('Gate card management and earnings', () => {
     const res = await h.app.request(get(`/v1/earnings?owner=${OWNER}`, { Authorization: owner.Authorization, Origin: WEB_ORIGIN }));
     expect(res.status).toBe(200);
     expect(res.headers.get('access-control-allow-origin')).toBe(WEB_ORIGIN);
-    const body = (await res.json()) as { totals: { total: string; count: number }; payments: { agent: string; explorerUrl: string; querySha256: string }[] };
+    const body = GateEarnings.parse(await res.json());
     expect(body.totals).toMatchObject({ total: '0.01', count: 1, usdcUsd: '0.9998', totalUsd: '0.00' });
     expect(body.payments[0]).toMatchObject({ agent: PAYER, explorerUrl: expect.stringContaining('suiscan.xyz/mainnet/tx/') });
     expect(body.payments[0]?.querySha256).toMatch(/^[0-9a-f]{64}$/);

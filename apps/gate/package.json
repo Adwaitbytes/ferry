@@ -17,6 +17,7 @@
     "@ferry/chain": "workspace:*",
     "@ferry/core": "workspace:*",
     "@ferry/pay": "workspace:*",
+    "@hono/node-server": "2.1.6",
     "@mysten-incubation/memwal": "0.1.13",
     "@mysten/seal": "1.5.4",
     "@mysten/sui": "2.39.1",
