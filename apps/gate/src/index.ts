@@ -1,4 +1,4 @@
-import { getChainService } from '@ferry/chain';
+import { getChainService, type ChainService } from '@ferry/chain';
 import { GateGuard, GatePayments, PayStore, neonSqlClient } from '@ferry/pay';
 import { SuiGrpcClient } from '@mysten/sui/grpc';
 import { createApp } from './app.js';
@@ -10,7 +10,12 @@ import { tatumVerifier } from './verifier.js';
 // Vercel zero-config entry (src/index.ts, default export of a Hono app), Node runtime.
 const config = loadGateConfig(process.env);
 const store = new PayStore(neonSqlClient(config.DATABASE_URL));
-const chain = getChainService(process.env);
+// Lazy so the Gate still answers health checks and 402 challenges while the Tatum key is being
+// provisioned; verification then fails closed (NOT_FOUND, digest never consumed).
+const chain = {
+  verifyUsdcPayment: (...args: Parameters<ChainService['verifyUsdcPayment']>) => getChainService(process.env).verifyUsdcPayment(...args),
+  getUsdPrice: (symbol: string) => getChainService(process.env).getUsdPrice(symbol),
+};
 
 const app = createApp({
   store,
