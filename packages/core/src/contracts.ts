@@ -103,7 +103,7 @@ export type WebAppRequest = z.infer<typeof WebAppRequest>;
 
 export const WorkerError = z.object({
   ok: z.literal(false),
-  code: z.enum(['invalid_message', 'forbidden_sender', 'locked', 'not_paired', 'cooling_down', 'upstream', 'internal']),
+  code: z.enum(['invalid_message', 'forbidden_sender', 'locked', 'not_paired', 'cooling_down', 'key_rejected', 'upstream', 'internal']),
   message: z.string().max(300),
   retryAfterMs: z.number().int().nonnegative().optional(),
 });
@@ -115,6 +115,8 @@ export const ImportProgress = z.object({
   total: z.number().int().nonnegative(),
   written: z.number().int().nonnegative(),
   failed: z.number().int().nonnegative(),
+  /** Blocked or quarantined facts: never written, shown separately so totals stay honest. */
+  skipped: z.number().int().nonnegative().optional(),
   state: z.enum(['idle', 'writing', 'cooling_down', 'paused', 'done', 'error']),
   resumeAt: z.iso.datetime().optional(),
 });

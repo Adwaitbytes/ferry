@@ -4,7 +4,16 @@ packages:
   - examples/*
 allowBuilds:
   protobufjs: false
+  esbuild: false
 
+minimumReleaseAgeExclude:
+  - '@ai-sdk/anthropic@4.0.99'
+  - '@ai-sdk/gateway@4.0.138'
+  - '@ai-sdk/google@4.0.114'
+  - '@ai-sdk/openai@4.0.111'
+  - '@ai-sdk/provider-utils@5.0.76'
+  - '@ai-sdk/provider@4.0.37'
+  - ai@7.0.165
 overrides:
   # GHSA-g3hv-75wg-m249 (ReDoS) in minimatch below 11.0.1, pulled in by eslint.
   minimatch: ^11.0.1
