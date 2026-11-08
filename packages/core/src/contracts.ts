@@ -190,7 +190,8 @@ export type DeskRequest = z.infer<typeof DeskRequest>;
 export const SuiObjectId = z.string().regex(/^0x[0-9a-f]{1,64}$/);
 
 export const DelegateKeyInfo = z.object({
-  publicKey: z.string(),
+  /** Same format as MEMWAL_AGENT_ID: 32-byte Ed25519 key, lowercase hex, no 0x. */
+  publicKey: z.string().regex(/^[0-9a-f]{64}$/),
   suiAddress: z.string(),
   label: z.string(),
   createdAt: z.iso.datetime().nullable(),
@@ -203,6 +204,10 @@ export const AccountView = z.object({
   active: z.boolean(),
   delegates: z.array(DelegateKeyInfo),
   version: z.string(),
+  createdAt: z.iso.datetime().nullable().optional(),
+  adminQuarantined: z.boolean().optional(),
+  /** Seal identity component; bumps when a delegate is removed. */
+  accessCounterVersion: z.string().optional(),
 });
 export type AccountView = z.infer<typeof AccountView>;
 

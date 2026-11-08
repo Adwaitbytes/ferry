@@ -1,0 +1,32 @@
+{
+  "objectId": "0x212ffaa5009725d12f70e2699e5163a1f93f4d5574c2c9c2b87a2b243493d56e",
+  "version": "1033038161",
+  "digest": "8RGKQerES9oTsvmHp6SNxd7oUniM65jPzsyHT6ECUq1R",
+  "content": {
+    "$bytes": "212ffaa5009725d12f70e2699e5163a1f93f4d5574c2c9c2b87a2b243493d56e80086403f99ead1f34d51b8e55a53377bf5574bc2b35796b3153948060828b730120745d25c00f7889d8a4708e3e129df0b6ef442f3594b51a6ef640b546b5909a2519e0e7ff343f5ccdef9c95f106bf71f8e412a8d85c9d4915882ee3a7e44f7cbf07576562204170700e5c8c05a101000000448c05a10100000100000000000000000000"
+  },
+  "owner": {
+    "$kind": "Shared",
+    "Shared": {
+      "initialSharedVersion": "1033038160"
+    }
+  },
+  "type": "0xe7c16fbea0560e7057e2bf7422feaa4fb313749fc69c9e9092fac7a33b81d7f5::account::MemWalAccount",
+  "json": {
+    "access_counter_version": "0",
+    "active": true,
+    "admin_quarantined": false,
+    "created_at": "1791094440960",
+    "delegate_keys": [
+      {
+        "created_at": "1791094447118",
+        "label": "Web App",
+        "public_key": "dF0lwA94idikcI4+Ep3wtu9ELzWUtRpu9kC1RrWQmiU=",
+        "sui_address": "0x19e0e7ff343f5ccdef9c95f106bf71f8e412a8d85c9d4915882ee3a7e44f7cbf"
+      }
+    ],
+    "id": "0x212ffaa5009725d12f70e2699e5163a1f93f4d5574c2c9c2b87a2b243493d56e",
+    "legacy_account_id": null,
+    "owner": "0x80086403f99ead1f34d51b8e55a53377bf5574bc2b35796b3153948060828b73"
+  }
+}

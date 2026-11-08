@@ -1,0 +1,14 @@
+{
+  "objectId": "0x0ae6c892c35c5532c69c00e1655936ec11b701a3b04951dc63420386e37ef3cb",
+  "version": "1070299368",
+  "digest": "EEPGfkucSfweuwioFJwsfk5nCyBc7JWa1sutJTT3sdcn",
+  "content": {
+    "$bytes": "0ae6c892c35c5532c69c00e1655936ec11b701a3b04951dc63420386e37ef3cb0400000000000000e8030008194800000000085cd1cd9501000023ec98c791548aad0712822afab68a2a8c2a548b346193873cc80eb2f66d5b5e89000000000000002b000000"
+  },
+  "owner": {
+    "$kind": "ObjectOwner",
+    "ObjectOwner": "0x10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a3904"
+  },
+  "type": "0x0000000000000000000000000000000000000000000000000000000000000002::dynamic_field::Field<u64,0xfdc88f7d7cf30afab2f82e8380d11ee8f70efb90e863d1de8616fae1bb09ea77::staking_inner::StakingInnerV1>",
+  "note": "content truncated to the fixed-size prefix through the epoch field"
+}

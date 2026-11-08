@@ -1,0 +1,29 @@
+{
+  "objectId": "0x8bf82c9e09e36b8d1c38298f68b7cb68e7b8762887e7592add9986d5e9cf199f",
+  "version": "1074813339",
+  "digest": "FBYwK9zXs5CdC36uhD1BvW6AxyBtE42JVhM6QYKtb5jb",
+  "content": {
+    "$bytes": "8bf82c9e09e36b8d1c38298f68b7cb68e7b8762887e7592add9986d5e9cf199fcfe04623a8c72ede45fc02babcb9711625df8549e53d3107d507efa696d5efdeb92c000000000000010120501a43c1df9d70c398e42f78ca145252074897d38151df940fb7a6c25a1421f144110000000000001713000000000000441100000000000017130000000000000400000000000000"
+  },
+  "owner": {
+    "$kind": "Shared",
+    "Shared": {
+      "initialSharedVersion": "941215778"
+    }
+  },
+  "type": "0xe7c16fbea0560e7057e2bf7422feaa4fb313749fc69c9e9092fac7a33b81d7f5::account::AccountRegistry",
+  "json": {
+    "accounts": {
+      "id": "0xcfe04623a8c72ede45fc02babcb9711625df8549e53d3107d507efa696d5efde",
+      "size": "11449"
+    },
+    "expected_account_imports": "4420",
+    "expected_delegate_imports": "4887",
+    "id": "0x8bf82c9e09e36b8d1c38298f68b7cb68e7b8762887e7592add9986d5e9cf199f",
+    "imported_accounts": "4420",
+    "imported_delegates": "4887",
+    "migration_finalized": true,
+    "pinned_allowlist_root": "UBpDwd+dcMOY5C94yhRSUgdIl9OBUd+UD7emwloUIfE=",
+    "version": "4"
+  }
+}

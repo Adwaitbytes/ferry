@@ -1,0 +1,21 @@
+{
+  "objectId": "0x2134d52768ea07e8c43570ef975eb3e4c27a39fa6396bef985b5abc58d03ddd2",
+  "version": "1076811532",
+  "digest": "CzKURToaQ2T2Cy1He35v5pV7osweejA32egQtc78zPw6",
+  "content": {
+    "$bytes": "2134d52768ea07e8c43570ef975eb3e4c27a39fa6396bef985b5abc58d03ddd20400000000000000a9ac4281c72b0ed3277c08e821ab77eccea7b187f2b402ffa3b33f548d4bbf1e00"
+  },
+  "owner": {
+    "$kind": "Shared",
+    "Shared": {
+      "initialSharedVersion": "317862159"
+    }
+  },
+  "type": "0xfdc88f7d7cf30afab2f82e8380d11ee8f70efb90e863d1de8616fae1bb09ea77::system::System",
+  "json": {
+    "id": "0x2134d52768ea07e8c43570ef975eb3e4c27a39fa6396bef985b5abc58d03ddd2",
+    "new_package_id": null,
+    "package_id": "0xa9ac4281c72b0ed3277c08e821ab77eccea7b187f2b402ffa3b33f548d4bbf1e",
+    "version": "4"
+  }
+}
