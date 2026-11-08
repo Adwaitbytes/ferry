@@ -2,3 +2,9 @@ packages:
   - apps/*
   - packages/*
   - examples/*
+allowBuilds:
+  protobufjs: false
+
+overrides:
+  # GHSA-g3hv-75wg-m249 (ReDoS) in minimatch below 11.0.1, pulled in by eslint.
+  minimatch: ^11.0.1
