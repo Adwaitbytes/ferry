@@ -1,0 +1,87 @@
+[
+  {
+    "uuid": "0f1e2d3c-0000-4000-8000-00000000c001",
+    "name": "SYNTHETIC: Choosing a database",
+    "summary": "",
+    "created_at": "2025-03-02T09:15:00.000000+00:00",
+    "updated_at": "2025-03-02T09:40:00.000000+00:00",
+    "account": { "uuid": "acc-SYNTHETIC" },
+    "chat_messages": [
+      {
+        "uuid": "m-c001-1",
+        "text": "",
+        "content": [
+          { "start_timestamp": "2025-03-02T09:15:01.000000+00:00", "stop_timestamp": "2025-03-02T09:15:01.000000+00:00", "type": "text", "text": "I'm a backend engineer at a fictional startup called Example Labs. We decided to use Postgres for everything.", "citations": [] }
+        ],
+        "sender": "human",
+        "created_at": "2025-03-02T09:15:01.000000+00:00",
+        "updated_at": "2025-03-02T09:15:01.000000+00:00",
+        "attachments": [{ "file_name": "schema.sql", "file_size": 120, "file_type": "text/plain", "extracted_content": "CREATE TABLE synthetic (id int);" }],
+        "files": []
+      },
+      {
+        "uuid": "m-c001-2",
+        "text": "",
+        "content": [
+          { "type": "thinking", "thinking": "The user wants database advice. Internal reasoning that must never be treated as user text.", "summaries": [], "cut_off": false },
+          { "type": "tool_use", "name": "web_search", "input": { "query": "postgres" }, "id": null, "message": "Searching the web" },
+          { "type": "tool_result", "tool_use_id": null, "name": "web_search", "content": [{ "type": "knowledge", "title": "Synthetic page", "url": "https://example.com" }], "is_error": false },
+          { "type": "text", "text": "Postgres is a solid default. Do you need full text search?", "citations": [] },
+          { "type": "token_budget" }
+        ],
+        "sender": "assistant",
+        "created_at": "2025-03-02T09:15:20.000000+00:00",
+        "updated_at": "2025-03-02T09:15:20.000000+00:00",
+        "attachments": [],
+        "files": []
+      },
+      {
+        "uuid": "m-c001-3",
+        "text": "Yes, and I prefer managed services over self hosting.",
+        "sender": "human",
+        "created_at": "2025-03-02T09:16:00.000000+00:00",
+        "updated_at": "2025-03-02T09:16:00.000000+00:00",
+        "attachments": [],
+        "files": [{ "file_name": "diagram.png" }]
+      },
+      {
+        "uuid": "m-c001-4",
+        "text": "yes, and I prefer managed services over self hosting.",
+        "content": [],
+        "sender": "human",
+        "created_at": "2025-03-02T09:17:00.000000+00:00",
+        "attachments": [],
+        "files": []
+      },
+      {
+        "uuid": "m-c001-5",
+        "text": "",
+        "content": [{ "type": "text", "text": "   " }],
+        "sender": "human",
+        "created_at": "not-a-date",
+        "attachments": [],
+        "files": []
+      },
+      "garbage message element"
+    ]
+  },
+  {
+    "uuid": "0f1e2d3c-0000-4000-8000-00000000c002",
+    "name": "",
+    "created_at": "bad",
+    "updated_at": "2025-04-10T18:00:00Z",
+    "chat_messages": [
+      {
+        "uuid": "m-c002-1",
+        "text": "My daughter (synthetic) starts school in September; remind me to plan around pickups at 15:00.",
+        "content": [{ "type": "text", "text": "My daughter (synthetic) starts school in September; remind me to plan around pickups at 15:00." }],
+        "sender": "human",
+        "created_at": "2025-04-10T18:00:05Z",
+        "attachments": [],
+        "files": []
+      }
+    ]
+  },
+  { "uuid": "0f1e2d3c-0000-4000-8000-00000000c003", "name": "SYNTHETIC: empty", "created_at": "2025-05-01T00:00:00Z", "chat_messages": [] },
+  { "name": "SYNTHETIC: missing uuid", "chat_messages": [] }
+]

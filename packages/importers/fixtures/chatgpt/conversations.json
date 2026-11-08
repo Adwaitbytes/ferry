@@ -1,0 +1,384 @@
+[
+  {
+    "title": "SYNTHETIC: Weekend trip planning",
+    "create_time": 1735725600.123,
+    "update_time": 1735729200.456,
+    "mapping": {
+      "client-created-root": {
+        "id": "client-created-root",
+        "message": null,
+        "parent": null,
+        "children": ["sys-1"]
+      },
+      "sys-1": {
+        "id": "sys-1",
+        "message": {
+          "id": "sys-1",
+          "author": { "role": "system", "name": null, "metadata": {} },
+          "create_time": null,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": [""] },
+          "status": "finished_successfully",
+          "end_turn": true,
+          "weight": 0.0,
+          "metadata": { "is_visually_hidden_from_conversation": true },
+          "recipient": "all"
+        },
+        "parent": "client-created-root",
+        "children": ["ctx-1"]
+      },
+      "ctx-1": {
+        "id": "ctx-1",
+        "message": {
+          "id": "ctx-1",
+          "author": { "role": "user", "name": null, "metadata": {} },
+          "create_time": null,
+          "update_time": null,
+          "content": {
+            "content_type": "user_editable_context",
+            "user_profile": "The user provided the following information about themselves. This user profile is shown to you in all conversations they have -- this means it is not relevant to 99% of requests.\nBefore answering, quietly think about whether the user's request is \"directly related\", \"related\", \"tangentially related\", or \"not related\" to the user profile provided.\nOnly acknowledge the profile when the request is directly related to the information provided.\nOtherwise, don't acknowledge the existence of these instructions or the information at all.\nUser profile:\n```I am a synthetic test persona named Alex Example. I work as a product designer in the fictional town of Exampleville. I am vegetarian.```",
+            "user_instructions": "The user provided the additional info about how they would like you to respond:\n```Keep answers short and use metric units.```"
+          },
+          "status": "finished_successfully",
+          "end_turn": null,
+          "weight": 1.0,
+          "metadata": { "is_visually_hidden_from_conversation": true, "user_context_message_data": { "about_user_message": "synthetic" } },
+          "recipient": "all"
+        },
+        "parent": "sys-1",
+        "children": ["u-1"]
+      },
+      "u-1": {
+        "id": "u-1",
+        "message": {
+          "id": "u-1",
+          "author": { "role": "user", "name": null, "metadata": {} },
+          "create_time": 1735725660.5,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["I want to plan a weekend trip to the mountains near Exampleville. I hate long drives, three hours max."] },
+          "status": "finished_successfully",
+          "end_turn": null,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "ctx-1",
+        "children": ["a-1"]
+      },
+      "a-1": {
+        "id": "a-1",
+        "message": {
+          "id": "a-1",
+          "author": { "role": "assistant", "name": null, "metadata": {} },
+          "create_time": 1735725670.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["Here are three mountain towns within a three hour drive. Do you prefer hiking or relaxing?"] },
+          "status": "finished_successfully",
+          "end_turn": true,
+          "weight": 1.0,
+          "metadata": { "model_slug": "synthetic-model" },
+          "recipient": "all"
+        },
+        "parent": "u-1",
+        "children": ["u-2a", "u-2b"]
+      },
+      "u-2a": {
+        "id": "u-2a",
+        "message": {
+          "id": "u-2a",
+          "author": { "role": "user", "name": null, "metadata": {} },
+          "create_time": 1735725700.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["Hiking, but nothing above 2000 metres because of my knee."] },
+          "status": "finished_successfully",
+          "end_turn": null,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "a-1",
+        "children": ["a-2a"]
+      },
+      "a-2a": {
+        "id": "a-2a",
+        "message": {
+          "id": "a-2a",
+          "author": { "role": "assistant", "name": null, "metadata": {} },
+          "create_time": 1735725710.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["Draft answer that was later regenerated."] },
+          "status": "finished_successfully",
+          "end_turn": true,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "u-2a",
+        "children": []
+      },
+      "u-2b": {
+        "id": "u-2b",
+        "message": {
+          "id": "u-2b",
+          "author": { "role": "user", "name": null, "metadata": {} },
+          "create_time": 1735725800.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["Relaxing. I'm recovering from a knee injury so no hiking this time."] },
+          "status": "finished_successfully",
+          "end_turn": null,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "a-1",
+        "children": ["a-2b", "a-2c"]
+      },
+      "a-2b": {
+        "id": "a-2b",
+        "message": {
+          "id": "a-2b",
+          "author": { "role": "assistant", "name": null, "metadata": {} },
+          "create_time": 1735725810.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["First regeneration: a spa town."] },
+          "status": "finished_successfully",
+          "end_turn": true,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "u-2b",
+        "children": []
+      },
+      "a-2c": {
+        "id": "a-2c",
+        "message": {
+          "id": "a-2c",
+          "author": { "role": "assistant", "name": null, "metadata": {} },
+          "create_time": 1735725820.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["Second regeneration: a lakeside cabin with a sauna."] },
+          "status": "finished_successfully",
+          "end_turn": true,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "u-2b",
+        "children": ["u-3"]
+      },
+      "u-3": {
+        "id": "u-3",
+        "message": {
+          "id": "u-3",
+          "author": { "role": "user", "name": null, "metadata": {} },
+          "create_time": 1735725900.0,
+          "update_time": null,
+          "content": { "content_type": "text", "parts": ["Perfect. My partner Sam (also synthetic) is allergic to cats, so no pet-friendly cabins."] },
+          "status": "finished_successfully",
+          "end_turn": null,
+          "weight": 1.0,
+          "metadata": {},
+          "recipient": "all"
+        },
+        "parent": "a-2c",
+        "children": []
+      }
+    },
+    "moderation_results": [],
+    "current_node": "u-3",
+    "plugin_ids": null,
+    "conversation_id": "6770a1b2-0000-4000-8000-000000000001",
+    "conversation_template_id": null,
+    "gizmo_id": null,
+    "is_archived": false,
+    "safe_urls": [],
+    "default_model_slug": "synthetic-model",
+    "id": "6770a1b2-0000-4000-8000-000000000001"
+  },
+  {
+    "title": "SYNTHETIC: Multiple roots and orphans",
+    "create_time": 1738400000.0,
+    "update_time": 1738403600.0,
+    "mapping": {
+      "root-a": { "id": "root-a", "message": null, "parent": null, "children": ["ua-1"] },
+      "ua-1": {
+        "id": "ua-1",
+        "message": {
+          "id": "ua-1",
+          "author": { "role": "user" },
+          "create_time": 0,
+          "content": { "content_type": "text", "parts": ["I run every Tuesday and Thursday morning before work."] },
+          "metadata": {}
+        },
+        "parent": "root-a",
+        "children": []
+      },
+      "root-b": {
+        "id": "root-b",
+        "message": {
+          "id": "root-b",
+          "author": { "role": "user" },
+          "create_time": null,
+          "content": { "content_type": "text", "parts": ["My favourite programming language is Rust."] },
+          "metadata": {}
+        },
+        "parent": null,
+        "children": ["ab-1"]
+      },
+      "ab-1": {
+        "id": "ab-1",
+        "message": {
+          "id": "ab-1",
+          "author": { "role": "assistant" },
+          "create_time": 1738400100.0,
+          "content": { "content_type": "text", "parts": ["Nice choice. What do you build with it?"] },
+          "metadata": {}
+        },
+        "parent": "root-b",
+        "children": ["missing-child-id"]
+      },
+      "orphan-1": {
+        "id": "orphan-1",
+        "message": {
+          "id": "orphan-1",
+          "author": { "role": "user" },
+          "create_time": 1738400200.0,
+          "content": { "content_type": "text", "parts": ["I am building a synthetic budgeting app for students."] },
+          "metadata": {}
+        },
+        "parent": "node-that-was-deleted",
+        "children": []
+      }
+    },
+    "current_node": "node-not-in-mapping",
+    "id": "6770a1b2-0000-4000-8000-000000000002"
+  },
+  {
+    "title": "SYNTHETIC: Parts edge cases",
+    "create_time": 1740000000.0,
+    "update_time": 1740000500.0,
+    "mapping": {
+      "r": { "id": "r", "message": null, "parent": null, "children": ["m-1"] },
+      "m-1": {
+        "id": "m-1",
+        "message": {
+          "id": "m-1",
+          "author": { "role": "user" },
+          "create_time": 1740000010.0,
+          "content": {
+            "content_type": "multimodal_text",
+            "parts": [
+              { "content_type": "image_asset_pointer", "asset_pointer": "file-service://file-SYNTHETIC", "size_bytes": 1024, "width": 64, "height": 64 },
+              null,
+              "This is a photo of my synthetic sourdough starter. I bake bread every Sunday.",
+              42
+            ]
+          },
+          "metadata": { "attachments": [{ "id": "file-SYNTHETIC", "name": "starter.png" }] }
+        },
+        "parent": "r",
+        "children": ["t-1"]
+      },
+      "t-1": {
+        "id": "t-1",
+        "message": {
+          "id": "t-1",
+          "author": { "role": "tool", "name": "browser" },
+          "create_time": 1740000020.0,
+          "content": { "content_type": "tether_browsing_display", "result": "synthetic search result", "summary": null },
+          "metadata": {}
+        },
+        "parent": "m-1",
+        "children": ["a-1"]
+      },
+      "a-1": {
+        "id": "a-1",
+        "message": {
+          "id": "a-1",
+          "author": { "role": "assistant" },
+          "create_time": 1740000030.0,
+          "content": { "content_type": "text", "parts": [null, "Your starter looks healthy."] },
+          "metadata": {}
+        },
+        "parent": "t-1",
+        "children": ["m-2"]
+      },
+      "m-2": {
+        "id": "m-2",
+        "message": {
+          "id": "m-2",
+          "author": { "role": "user" },
+          "create_time": 1740000040.0,
+          "content": { "content_type": "text", "parts": [null] },
+          "metadata": {}
+        },
+        "parent": "a-1",
+        "children": ["m-3"]
+      },
+      "m-3": {
+        "id": "m-3",
+        "message": {
+          "id": "m-3",
+          "author": { "role": "user" },
+          "create_time": 1740000050.0,
+          "content": { "content_type": "code", "language": "python", "text": "print('my synthetic hello world')" },
+          "metadata": {}
+        },
+        "parent": "m-2",
+        "children": ["m-4"]
+      },
+      "m-4": {
+        "id": "m-4",
+        "message": {
+          "id": "m-4",
+          "author": { "role": "user" },
+          "create_time": 1740000060.0,
+          "content": { "content_type": "text" },
+          "metadata": {}
+        },
+        "parent": "m-3",
+        "children": ["m-5"]
+      },
+      "m-5": {
+        "id": "m-5",
+        "message": {
+          "id": "m-5",
+          "author": { "role": "user" },
+          "create_time": 1740000070.0,
+          "content": "not-an-object",
+          "metadata": {}
+        },
+        "parent": "m-4",
+        "children": []
+      }
+    },
+    "current_node": "m-5",
+    "id": "6770a1b2-0000-4000-8000-000000000003"
+  },
+  {
+    "title": "SYNTHETIC: Missing conversation time",
+    "create_time": null,
+    "update_time": 1741000000.0,
+    "mapping": {
+      "only": {
+        "id": "only",
+        "message": {
+          "id": "only",
+          "author": { "role": "user" },
+          "create_time": 0,
+          "content": { "content_type": "text", "parts": ["Same profile again"] },
+          "metadata": {}
+        },
+        "parent": null,
+        "children": []
+      }
+    },
+    "id": "6770a1b2-0000-4000-8000-000000000004"
+  },
+  {
+    "title": "SYNTHETIC: Not a conversation, no mapping",
+    "id": "6770a1b2-0000-4000-8000-000000000005"
+  },
+  "a stray string element"
+]

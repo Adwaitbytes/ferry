@@ -1,0 +1,29 @@
+[
+  {
+    "uuid": "9a8b7c6d-0000-4000-8000-0000000000p1",
+    "name": "How to use Claude",
+    "description": "An example project that also doubles as a how-to guide for using Claude.",
+    "is_private": false,
+    "is_starter_project": true,
+    "prompt_template": "",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z",
+    "creator": { "uuid": "acc-SYNTHETIC", "full_name": "Synthetic User" },
+    "docs": []
+  },
+  {
+    "uuid": "9a8b7c6d-0000-4000-8000-000000000p02",
+    "name": "SYNTHETIC: Example Labs API",
+    "description": "Internal API for the fictional Example Labs. TypeScript, Postgres, deployed on a managed platform.",
+    "is_private": true,
+    "is_starter_project": false,
+    "prompt_template": "Always answer in British English and prefer functional TypeScript.",
+    "created_at": "2025-02-01T12:00:00Z",
+    "updated_at": "2025-02-02T12:00:00Z",
+    "creator": { "uuid": "acc-SYNTHETIC", "full_name": "Synthetic User" },
+    "docs": [{ "uuid": "doc-1", "filename": "README.md", "content": "# Synthetic readme", "created_at": "2025-02-01T12:00:00Z" }]
+  },
+  { "uuid": "9a8b7c6d-0000-4000-8000-000000000p03", "name": "", "description": "", "prompt_template": "", "is_starter_project": false },
+  { "name": "no uuid" },
+  "stray"
+]
