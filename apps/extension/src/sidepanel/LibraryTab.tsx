@@ -27,7 +27,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { EyeOff, Library, RotateCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AGGREGATOR_URL, API_ROUTES, FERRY_API_ORIGIN, SITE_BY_ORIGIN } from '../lib/config';
-import type { LibraryItem, LibraryPage } from '../worker/ports';
+import type { LibraryItem, LibraryPage } from '@ferry/core';
 import { call } from './client';
 
 const TYPE_LABEL: Record<FactType, string> = {

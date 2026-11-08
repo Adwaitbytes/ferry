@@ -64,9 +64,10 @@ export function classifyInternal(sender: SenderLike, extensionId: string): Sende
   return FORBIDDEN;
 }
 
-/** Messages from `runtime.onMessageExternal`: only the exact Ferry web origin. */
-export function classifyExternal(sender: SenderLike, webOrigin: string): SenderClass {
-  if (typeof sender.origin !== 'string' || sender.origin !== webOrigin) return FORBIDDEN;
-  if (sender.url !== undefined && originOf(sender.url) !== webOrigin) return FORBIDDEN;
+/** Messages from `runtime.onMessageExternal`: only an exact Ferry web origin from the build. */
+export function classifyExternal(sender: SenderLike, webOrigins: readonly string[]): SenderClass {
+  const origin = sender.origin;
+  if (typeof origin !== 'string' || !webOrigins.includes(origin)) return FORBIDDEN;
+  if (sender.url !== undefined && originOf(sender.url) !== origin) return FORBIDDEN;
   return { kind: 'web_app' };
 }

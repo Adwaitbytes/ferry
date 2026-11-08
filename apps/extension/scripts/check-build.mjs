@@ -12,6 +12,8 @@ import {
   FONT_RESOURCE,
   PERMISSIONS,
   CHAT_HOSTS,
+  EXTENSION_PUBLIC_KEY,
+  connectableMatches,
   hostPermissions,
   resolveOrigins,
 } from '../manifest.config.ts';
@@ -41,8 +43,10 @@ for (const p of manifest.host_permissions ?? [])
     fail(`wildcard host permission ${p}`);
 if (manifest.content_security_policy?.extension_pages !== EXTENSION_PAGES_CSP)
   fail(`CSP is ${JSON.stringify(manifest.content_security_policy)}`);
-if (!sameSet(manifest.externally_connectable?.matches ?? [], [`${origins.web}/*`]))
-  fail('externally_connectable.matches must be exactly the Ferry web origin');
+if (!sameSet(manifest.externally_connectable?.matches ?? [], connectableMatches(origins)))
+  fail('externally_connectable.matches must be exactly the Ferry web origins');
+if (manifest.key !== EXTENSION_PUBLIC_KEY)
+  fail('manifest key must be the pinned public key, or the extension id changes');
 if (manifest.externally_connectable?.ids !== undefined)
   fail('externally_connectable.ids must not be set');
 const war = manifest.web_accessible_resources ?? [];

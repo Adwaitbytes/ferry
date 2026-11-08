@@ -2,7 +2,10 @@
  * Public configuration. `NEXT_PUBLIC_*` values are inlined at build time, so each is read with a
  * literal property access. Nothing secret lives here.
  */
-const extensionId = process.env.NEXT_PUBLIC_FERRY_EXTENSION_ID ?? '';
+/** Fixed by the `key` in apps/extension/manifest.config.ts; override only for a fork with its own key. */
+export const DEFAULT_EXTENSION_ID = 'opikbjojfgmdadhaljejplogjppfkhoh';
+const configuredExtensionId = process.env.NEXT_PUBLIC_FERRY_EXTENSION_ID ?? '';
+const extensionId = configuredExtensionId === '' ? DEFAULT_EXTENSION_ID : configuredExtensionId;
 const gateUrl = process.env.NEXT_PUBLIC_GATE_URL ?? '';
 
 export const publicEnv = {

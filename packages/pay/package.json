@@ -21,6 +21,14 @@
     "./migrations": {
       "types": "./src/migrations-fs.ts",
       "default": "./src/migrations-fs.ts"
+    },
+    "./siws": {
+      "types": "./src/siws.ts",
+      "default": "./src/siws.ts"
+    },
+    "./neon": {
+      "types": "./src/neon.ts",
+      "default": "./src/neon.ts"
     }
   },
   "scripts": {

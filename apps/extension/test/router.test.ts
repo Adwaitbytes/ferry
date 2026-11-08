@@ -76,12 +76,12 @@ describe('sender classification', () => {
   });
 
   it('accepts external messages only from the exact web origin', () => {
-    expect(classifyExternal(webSender, FERRY_WEB_ORIGIN).kind).toBe('web_app');
-    expect(classifyExternal({ url: `${FERRY_WEB_ORIGIN}/pair` }, FERRY_WEB_ORIGIN).kind).toBe(
+    expect(classifyExternal(webSender, [FERRY_WEB_ORIGIN]).kind).toBe('web_app');
+    expect(classifyExternal({ url: `${FERRY_WEB_ORIGIN}/pair` }, [FERRY_WEB_ORIGIN]).kind).toBe(
       'forbidden',
     );
     expect(
-      classifyExternal({ origin: FERRY_WEB_ORIGIN, url: 'https://evil.example/' }, FERRY_WEB_ORIGIN)
+      classifyExternal({ origin: FERRY_WEB_ORIGIN, url: 'https://evil.example/' }, [FERRY_WEB_ORIGIN])
         .kind,
     ).toBe('forbidden');
   });

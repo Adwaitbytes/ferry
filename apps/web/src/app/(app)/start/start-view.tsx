@@ -1,7 +1,7 @@
 'use client';
 
 import { buildAddDelegateKeyTx, buildCreateAccountTx } from '@ferry/chain/tx';
-import type { AccountView } from '@ferry/core';
+import { keyFingerprint, type AccountView } from '@ferry/core';
 import { Button, cn, IndeterminateProgress, MonoId, Notice, VerifyCheck } from '@ferry/ui';
 import { useCurrentAccount, useDAppKit } from '@mysten/dapp-kit-react';
 import { ArrowUpRight, Check, KeyRound, LifeBuoy, RotateCw, TextCursorInput, type LucideIcon } from 'lucide-react';
@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useExtension } from '@/components/extension-context';
 import { NotInstalled } from '@/components/extension-gate';
-import { ConnectedWallet, WalletPicker, hexToBytes, keyFingerprint } from '@/components/wallet';
+import { ConnectedWallet, WalletPicker, hexToBytes } from '@/components/wallet';
 import { getAccountByOwner } from '@/lib/api';
 import { BridgeError, bridge, type PairingOffer } from '@/lib/bridge';
 import { browserName, formatDate } from '@/lib/format';
@@ -175,7 +175,7 @@ function PairStep({ account, onPaired }: { account: AccountView; onPaired: () =>
     setState({ kind: 'preparing' });
     try {
       const offer = await bridge({ type: 'pairing.begin' });
-      const local = keyFingerprint(offer.publicKey);
+      const local = keyFingerprint(offer.publicKeyHex);
       setState({ kind: 'ready', offer, mismatch: local !== offer.fingerprint.toLowerCase() });
     } catch (error) {
       setState({ kind: 'error', message: error instanceof Error ? error.message : 'Ferry did not answer.' });
@@ -209,7 +209,7 @@ function PairStep({ account, onPaired }: { account: AccountView; onPaired: () =>
   const pair = async (offer: PairingOffer) => {
     setState({ kind: 'signing', offer });
     try {
-      const tx = buildAddDelegateKeyTx({ accountId: account.accountId, publicKey32: hexToBytes(offer.publicKey), label });
+      const tx = buildAddDelegateKeyTx({ accountId: account.accountId, publicKey32: hexToBytes(offer.publicKeyHex), label });
       const result = await dAppKit.signAndExecuteTransaction({ transaction: tx });
       if (result.FailedTransaction) {
         setState({ kind: 'error', message: `Sui rejected the key: ${result.FailedTransaction.status.error?.message ?? 'no reason given'}.` });

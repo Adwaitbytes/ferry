@@ -78,14 +78,15 @@ const vendorDot: Record<Vendor, string> = {
 export function SourceBadge({ vendor, className }: { vendor: Vendor; className?: string | undefined }) {
   return (
     <span
-      aria-label={`Source: ${VENDOR_LABEL[vendor]}`}
       className={cn(
         'inline-flex h-5 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-surface-3 px-2 text-micro font-medium text-text-secondary',
         className,
       )}
     >
       <span aria-hidden="true" className="size-1.5 rounded-full" style={{ backgroundColor: vendorDot[vendor] }} />
-      <span aria-hidden="true">{VENDOR_LABEL[vendor]}</span>
+      {/* aria-label is not allowed on a plain span (axe aria-prohibited-attr), so the spoken prefix is text. */}
+      <span className="sr-only">Source: </span>
+      <span>{VENDOR_LABEL[vendor]}</span>
     </span>
   );
 }

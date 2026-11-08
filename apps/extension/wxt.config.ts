@@ -17,7 +17,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
     define: {
       __FERRY_API_ORIGIN__: JSON.stringify(origins.api),
-      __FERRY_WEB_ORIGIN__: JSON.stringify(origins.web),
+      __FERRY_WEB_ORIGINS__: JSON.stringify(origins.web),
     },
     build: { sourcemap: false },
   }),

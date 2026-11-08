@@ -78,7 +78,10 @@ describe('capture', () => {
       contentSender('chatgpt'),
       'internal',
     );
-    expect(saved).toEqual({ ok: true, data: { kind: 'written', ref: 'blob-new000001' } });
+    expect(saved).toEqual({
+      ok: true,
+      data: { factId: proposal.fact.id, status: 'written', ref: 'blob-new000001' },
+    });
     expect(h.engine.saveFact.mock.calls[0]?.[0]).toMatchObject({
       text: 'Vegetarian, allergic to cashews',
       type: 'constraint',

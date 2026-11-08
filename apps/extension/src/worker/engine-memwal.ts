@@ -1,4 +1,13 @@
-import type { CandidateFact, ImportProgress, MemoryStatus } from '@ferry/core';
+import {
+  SensitiveCategory,
+  type CandidateFact,
+  type GovernorStatus,
+  type ImportProgress,
+  type LibraryConflict,
+  type LibraryItem,
+  type MemoryStatus,
+  type SaveResult,
+} from '@ferry/core';
 import {
   FerryMemory,
   ImportQueue,
@@ -10,15 +19,7 @@ import {
   zeroize,
 } from '@ferry/memwal';
 import { RELAYER_URL } from '../lib/config';
-import type {
-  EngineFactory,
-  FerryApi,
-  ImportQueuePort,
-  LibraryItem,
-  MemoryPort,
-  VaultCrypto,
-  WriteOutcome,
-} from './ports';
+import type { EngineFactory, FerryApi, ImportQueuePort, MemoryPort, VaultCrypto } from './ports';
 
 const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 20;
@@ -43,24 +44,58 @@ class MemwalPort implements MemoryPort {
     return this.memory.recallForDraft(draft, k);
   }
 
-  async saveFact(fact: CandidateFact): Promise<WriteOutcome> {
+  async saveFact(fact: CandidateFact): Promise<SaveResult> {
+    const factId = fact.id;
     const outcome = await this.memory.reconcile(fact, (request) => this.api.judge(request));
     if (outcome.kind === 'conflict')
-      return { kind: 'conflict', conflictId: outcome.conflictId, verdict: outcome.verdict };
-    if (outcome.kind === 'merged') return { kind: 'merged', ref: outcome.ref };
+      return {
+        factId,
+        status: 'conflict',
+        conflictId: outcome.conflictId,
+        verdict: outcome.verdict,
+      };
+    if (outcome.kind === 'merged') return { factId, status: 'merged', ref: outcome.ref };
     const r = outcome.result;
     switch (r.status) {
       case 'written':
-        return { kind: 'written', ref: r.ref };
+        return { factId, status: 'written', ref: r.ref };
       case 'pending':
-        return { kind: 'pending' };
+        return { factId, status: 'pending' };
       case 'quarantined':
-        return { kind: 'quarantined' };
+        return { factId, status: 'quarantined' };
       case 'blocked':
-        return { kind: 'blocked', categories: r.categories };
+        return {
+          factId,
+          status: 'blocked',
+          categories: r.categories.filter(
+            (c): c is SensitiveCategory => SensitiveCategory.safeParse(c).success,
+          ),
+        };
       case 'failed':
-        return { kind: 'failed' };
+        return { factId, status: 'failed' };
     }
+  }
+
+  governor(): GovernorStatus {
+    return this.memory.governor.state;
+  }
+
+  /** Open conflicts keyed by the stored memory they dispute, so Library rows can carry them. */
+  private async conflictsByRef(): Promise<Map<string, LibraryConflict>> {
+    const byRef = new Map<string, LibraryConflict>();
+    for (const c of await this.memory.openConflicts()) {
+      const first = c.newFact.receipts[0];
+      if (first === undefined) continue;
+      byRef.set(c.existingRef, {
+        conflictId: c.id,
+        otherRef: c.newFact.id,
+        otherText: c.newFact.text,
+        otherSources: [...new Set(c.newFact.receipts.map((r) => r.vendor))],
+        otherHeardAt: first.messageAt.slice(0, 10),
+        verdict: c.verdict,
+      });
+    }
+    return byRef;
   }
 
   async list(filter: { status?: MemoryStatus; query?: string; cursor?: string }) {
@@ -84,13 +119,18 @@ class MemwalPort implements MemoryPort {
       });
     }
     const page = memories.slice(0, PAGE_SIZE);
+    const conflicts = page.some((m) => m.status === 'conflict')
+      ? await this.conflictsByRef()
+      : new Map<string, LibraryConflict>();
     const items: LibraryItem[] = [];
     for (const memory of page) {
       const record = await this.memory.index.get(memory.ref);
+      const conflict = memory.status === 'conflict' ? conflicts.get(memory.ref) : undefined;
       items.push({
         memory,
         endEpoch: memory.endEpoch ?? record?.endEpoch ?? null,
         blobId: memory.ref,
+        ...(conflict !== undefined ? { conflict } : {}),
       });
     }
     const hasMore = filter.query === undefined && memories.length > PAGE_SIZE;

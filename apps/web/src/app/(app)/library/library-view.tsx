@@ -429,14 +429,14 @@ function ConflictInbox({ items, onResolved }: { items: readonly LibraryItem[]; o
   const resolve = async (item: LibraryItem, choice: ConflictChoice) => {
     const conflict = item.conflict;
     if (!conflict) return;
-    const older = item.memory.writtenAt <= conflict.other.writtenAt ? item.memory : conflict.other;
+    // The stored memory is always the older side: the incoming fact is held until this choice.
     const resolution =
       choice.kind === 'keep_new'
-        ? { kind: 'keep_new' as const, supersede: older.ref }
+        ? { kind: 'keep_new' as const, supersede: item.memory.ref }
         : choice.kind === 'keep_old'
           ? { kind: 'keep_old' as const }
           : choice.kind === 'merge'
-            ? { kind: 'merge' as const, text: choice.text, supersede: older.ref }
+            ? { kind: 'merge' as const, text: choice.text, supersede: item.memory.ref }
             : { kind: 'keep_both' as const, context: choice.context };
     setBusy(item.memory.ref);
     try {
@@ -453,15 +453,15 @@ function ConflictInbox({ items, onResolved }: { items: readonly LibraryItem[]; o
   return (
     <div className="flex flex-col gap-4">
       {conflicts.map((item) => {
-        const other = item.conflict?.other;
+        const other = item.conflict;
         if (!other) return null;
-        const [older, newer] = item.memory.writtenAt <= other.writtenAt ? [item.memory, other] : [other, item.memory];
+        const older = item.memory;
         return (
           <ConflictCard
             key={item.memory.ref}
             older={{ text: older.text, sources: sourcesOf(older), date: formatMonth(older.header.at) }}
-            newer={{ text: newer.text, sources: sourcesOf(newer), date: formatMonth(newer.header.at) }}
-            mergeSuggestion={newer.text}
+            newer={{ text: other.otherText, sources: other.otherSources, date: formatMonth(other.otherHeardAt) }}
+            mergeSuggestion={other.otherText}
             maxLength={MAX_FACT_CHARS}
             resolving={busy === item.memory.ref}
             error={errors[item.memory.ref] ?? null}

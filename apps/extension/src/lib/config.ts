@@ -1,7 +1,9 @@
 import type { Site } from '@ferry/core';
 
 export const FERRY_API_ORIGIN: string = __FERRY_API_ORIGIN__;
-export const FERRY_WEB_ORIGIN: string = __FERRY_WEB_ORIGIN__;
+/** Exact origins whose pages may message the worker; the first is the one the panel links to. */
+export const FERRY_WEB_ORIGINS: readonly string[] = Object.freeze([...__FERRY_WEB_ORIGINS__]);
+export const FERRY_WEB_ORIGIN: string = FERRY_WEB_ORIGINS[0] ?? FERRY_API_ORIGIN;
 
 export const RELAYER_URL = 'https://relayer.memory.walrus.xyz';
 export const AGGREGATOR_URL = 'https://aggregator.walrus-mainnet.walrus.space';

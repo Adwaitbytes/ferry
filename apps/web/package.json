@@ -18,6 +18,7 @@
     "@ferry/core": "workspace:*",
     "@ferry/distill": "workspace:*",
     "@ferry/importers": "workspace:*",
+    "@ferry/pay": "workspace:*",
     "@ferry/ui": "workspace:*",
     "@mysten/dapp-kit-core": "1.6.43",
     "@mysten/dapp-kit-react": "2.1.45",

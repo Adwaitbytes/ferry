@@ -1,9 +1,15 @@
-import { ALWAYS_BLOCKED, SENSITIVE_CATEGORIES, Site, type SensitiveCategory } from '@ferry/core';
+import {
+  ALWAYS_BLOCKED,
+  SENSITIVE_CATEGORIES,
+  Site,
+  type ExportBundle,
+  type ExtensionStatus,
+  type SensitiveCategory,
+} from '@ferry/core';
 import { Button, Dialog, Input, LoadingText, Notice, Toggle, useToast } from '@ferry/ui';
 import { Download, Lock, LockKeyhole, Server, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AUTO_LOCK_CHOICES, SITE_LABEL } from '../lib/config';
-import type { ExportData, StatusData } from '../lib/protocol';
 import { call } from './client';
 import { forgetCopy } from './LibraryTab';
 import { useSettings } from './useSettings';
@@ -51,7 +57,7 @@ export function SettingsTab({
   onChanged,
 }: {
   site: Site | null;
-  status: StatusData;
+  status: ExtensionStatus;
   onChanged: () => Promise<void>;
 }) {
   const toast = useToast();
@@ -76,7 +82,7 @@ export function SettingsTab({
 
   const runExport = async (kind: 'json' | 'md') => {
     setExporting(kind);
-    const res = await call<ExportData>({ type: 'data.export' });
+    const res = await call<ExportBundle>({ type: 'data.export' });
     setExporting(null);
     if (!res.ok) {
       toast.show({ message: res.message, tone: 'error' });
@@ -84,7 +90,7 @@ export function SettingsTab({
     }
     const stamp = new Date().toISOString().slice(0, 10);
     if (kind === 'json')
-      download(`ferry-memory-${stamp}.pam.json`, 'application/json', res.data.json);
+      download(`ferry-memory-${stamp}.pam.json`, 'application/json', res.data.pam);
     else download(`ferry-memory-${stamp}.md`, 'text/markdown', res.data.markdown);
     toast.show({ message: `Exported ${res.data.count} facts`, tone: 'success' });
   };

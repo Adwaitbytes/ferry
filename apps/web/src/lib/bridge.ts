@@ -1,86 +1,25 @@
-import { ImportProgress, MemoryRef, StoredMemory, Suggestion, WorkerError, type WebAppRequest } from '@ferry/core';
+import { WebAppResponse, WorkerError, type WebAppRequest } from '@ferry/core';
 import { z } from 'zod';
 import { publicEnv } from './env';
 
 /*
  * The web app reaches memory only through the Ferry extension (RESEARCH 1.7: the relayer sends no
  * CORS header, and no Ferry server may see memory traffic). Requests are core `WebAppRequest`s sent
- * with `chrome.runtime.sendMessage(extensionId, ...)`; every response is zod-validated here and
- * never trusted partially.
+ * with `chrome.runtime.sendMessage(extensionId, ...)`; every response is validated against the
+ * frozen core `WebAppResponse` schema the worker itself parses with, and never trusted partially.
  */
 
-/* ---------------------------------------------------------------- */
-/* Response shapes. Mirrors apps/extension/src/worker/ports.ts.       */
-/* ---------------------------------------------------------------- */
+export type {
+  ExportBundle,
+  ExtensionStatus,
+  LibraryConflict,
+  LibraryItem,
+  LibraryPage,
+  PairingOffer,
+  SaveResult,
+} from '@ferry/core';
 
-const Hex64 = z.string().regex(/^(0x)?[0-9a-fA-F]{64}$/);
-
-export const ExtensionStatus = z.looseObject({
-  version: z.string().max(40).optional(),
-  /** A passphrase vault exists in this browser. */
-  hasVault: z.boolean().optional(),
-  locked: z.boolean(),
-  paired: z.boolean(),
-  accountId: z.string().regex(/^0x[0-9a-f]{64}$/).nullable().optional(),
-  publicKey: Hex64.nullable().optional(),
-});
-export type ExtensionStatus = z.infer<typeof ExtensionStatus>;
-
-export const PairingOffer = z.looseObject({
-  publicKey: Hex64,
-  fingerprint: z.string().max(40),
-});
-export type PairingOffer = z.infer<typeof PairingOffer>;
-
-export const LibraryItem = z.looseObject({
-  memory: StoredMemory,
-  endEpoch: z.number().int().nullable(),
-  blobId: z.string().max(128),
-  /** Present on items whose status is `conflict`: the record to resolve and the other side. */
-  conflict: z
-    .object({ conflictId: z.uuid(), other: StoredMemory })
-    .optional(),
-});
-export type LibraryItem = z.infer<typeof LibraryItem>;
-
-export const LibraryPage = z.looseObject({
-  items: z.array(LibraryItem),
-  nextCursor: z.string().max(200).nullable(),
-});
-export type LibraryPage = z.infer<typeof LibraryPage>;
-
-/** The worker returns a bare array today; a wrapped `{ items }` is accepted too. */
-const RecallResult = z.union([z.array(Suggestion), z.looseObject({ items: z.array(Suggestion) }).transform((r) => r.items)]);
-
-const WriteOutcome = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('written'), ref: MemoryRef }),
-  z.object({ kind: z.literal('pending') }),
-  z.object({ kind: z.literal('conflict'), conflictId: z.string(), verdict: z.enum(['contradicts', 'refines']) }),
-  z.object({ kind: z.literal('merged'), ref: MemoryRef }),
-  z.object({ kind: z.literal('quarantined') }),
-  z.object({ kind: z.literal('blocked'), categories: z.array(z.string()) }),
-  z.object({ kind: z.literal('failed') }),
-]);
-export type WriteOutcome = z.infer<typeof WriteOutcome>;
-
-const Void = z.unknown().transform(() => undefined);
-
-const responseSchemas = {
-  'status.get': ExtensionStatus,
-  'pairing.begin': PairingOffer,
-  'pairing.confirm': Void,
-  'import.enqueue': z.looseObject({ queued: z.number().int().nonnegative() }),
-  'import.progress': ImportProgress,
-  'memory.list': LibraryPage,
-  'memory.recall': RecallResult,
-  'memory.save': WriteOutcome,
-  'memory.hide': Void,
-  'memory.resolve': Void,
-  'data.export': z.union([z.array(StoredMemory), z.looseObject({ memories: z.array(StoredMemory) }).transform((r) => r.memories)]),
-} as const satisfies Record<WebAppRequest['type'], z.ZodType>;
-
-type ResponseSchemas = typeof responseSchemas;
-export type BridgeResponse<T extends WebAppRequest['type']> = z.output<ResponseSchemas[T]>;
+export type BridgeResponse<T extends WebAppRequest['type']> = WebAppResponse<T>;
 
 /* ---------------------------------------------------------------- */
 /* Errors                                                            */
@@ -200,7 +139,7 @@ export async function bridge<T extends WebAppRequest['type']>(
   const envelope = SuccessEnvelope.safeParse(raw);
   if (!envelope.success) throw new BridgeError('invalid_response');
   // TypeScript cannot correlate `message.type` with the indexed schema, so the link is asserted once here.
-  const schema = responseSchemas[message.type] as unknown as z.ZodType<BridgeResponse<T>>;
+  const schema = WebAppResponse[message.type] as unknown as z.ZodType<BridgeResponse<T>>;
   const data = schema.safeParse(envelope.data.data);
   if (!data.success) throw new BridgeError('invalid_response');
   return data.data;

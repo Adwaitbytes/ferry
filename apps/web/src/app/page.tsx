@@ -105,7 +105,11 @@ function CarryVisual() {
         </span>
         <DemoLabel />
       </div>
-      <pre className="overflow-x-auto rounded-md bg-surface-3 p-4 font-mono text-[0.8125rem] leading-5 text-text-primary">
+      {/* Focusable so keyboard users can scroll it when the block is wider than the card. */}
+      <pre
+        tabIndex={0}
+        className="overflow-x-auto rounded-md bg-surface-3 p-4 font-mono text-[0.8125rem] leading-5 text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-ring"
+      >
         {`${CONTEXT_HEADER}\n- Allergic to cashews\n- Vegetarian since 2019`}
       </pre>
       <p className="text-small text-text-tertiary">You see the exact block before it goes into the chat. Nothing is inserted without a click.</p>

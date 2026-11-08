@@ -1,12 +1,14 @@
 import { setAdapterErrorReporter, type SiteAdapter } from '@ferry/adapters';
-import type { CandidateFact, ContentRequest, Site, Suggestion, WorkerResult } from '@ferry/core';
-import { SITE_LABEL } from '../lib/config';
 import type {
-  CaptureProposalData,
-  ComposeData,
-  SaveOutcomeData,
-  SuggestData,
-} from '../lib/protocol';
+  CandidateFact,
+  ContentRequest,
+  SaveResult,
+  Site,
+  Suggestion,
+  WorkerResult,
+} from '@ferry/core';
+import { SITE_LABEL } from '../lib/config';
+import type { CaptureProposalData, ComposeData, SuggestData } from '../lib/protocol';
 import { clear, el } from './dom';
 import { injectFontFace, mountHost, type FerryHost } from './host';
 import {
@@ -316,8 +318,8 @@ export function startFerry(deps: ContentDeps): FerryContent {
       );
       return;
     }
-    const outcome = res.data as SaveOutcomeData;
-    switch (outcome.kind) {
+    const outcome = res.data as SaveResult;
+    switch (outcome.status) {
       case 'written':
       case 'pending':
         status('ok', 'Saved to Ferry. It is on its way to Walrus.');

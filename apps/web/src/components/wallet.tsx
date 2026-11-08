@@ -3,11 +3,23 @@
 import { Button, MonoId } from '@ferry/ui';
 import { useCurrentAccount, useDAppKit, useWalletConnection, useWallets } from '@mysten/dapp-kit-react';
 import { Wallet } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { explorer } from '@/lib/links';
+
+const subscribeNothing = () => () => undefined;
+
+/**
+ * False on the server and during hydration, true after. Wallet extensions register before React
+ * hydrates, so rendering the live list on the first client pass would not match the server HTML,
+ * and under Trusted Types React cannot recover from that mismatch: the page goes blank.
+ */
+function useHydrated(): boolean {
+  return useSyncExternalStore(subscribeNothing, () => true, () => false);
+}
 
 /** Slush first, then every other wallet the browser announces (DESIGN 8.2 step 1). */
 export function WalletPicker({ onConnected }: { onConnected?: (address: string) => void }) {
+  const hydrated = useHydrated();
   const wallets = useWallets();
   const dAppKit = useDAppKit();
   const connection = useWalletConnection();
@@ -32,6 +44,7 @@ export function WalletPicker({ onConnected }: { onConnected?: (address: string) 
     }
   };
 
+  if (!hydrated) return <p className="text-small text-text-secondary">Looking for Sui wallets in this browser</p>;
   if (connection.isReconnecting) return <p className="text-small text-text-secondary">Reconnecting your wallet</p>;
 
   return (
@@ -94,10 +107,4 @@ export function hexToBytes(hex: string): Uint8Array {
   const out = new Uint8Array(clean.length / 2);
   for (let i = 0; i < out.length; i++) out[i] = Number.parseInt(clean.slice(i * 2, i * 2 + 2), 16);
   return out;
-}
-
-/** Same format as the extension's fingerprint (apps/extension/src/lib/fingerprint.ts). */
-export function keyFingerprint(publicKeyHex: string): string {
-  const hex = publicKeyHex.toLowerCase().replace(/^0x/, '');
-  return [hex.slice(0, 4), hex.slice(4, 8), hex.slice(56, 60), hex.slice(60, 64)].join(' ');
 }

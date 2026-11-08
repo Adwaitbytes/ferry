@@ -267,6 +267,42 @@ describe('Library queries', () => {
   });
 });
 
+describe('countListed', () => {
+  it('counts one namespace from metadata only and spends no recall', async () => {
+    const { memory, relayer } = setup();
+    await memory.writeFacts([fact({ text: 'Vegetarian' }), fact({ text: 'Lives in Lisbon', type: 'identity' })]);
+    await relayer.seed('A published fact', 'ferry-public');
+    const recalls = relayer.calls.recall;
+    expect(await memory.countListed()).toBe(2);
+    expect(await memory.countListed('ferry-public')).toBe(1);
+    expect(relayer.calls.recall).toBe(recalls);
+  });
+
+  it('follows pages, drops deleted memories and restarts once on must_resync', async () => {
+    const { memory, relayer } = setup();
+    const row = (id: string) => ({
+      memory_id: id,
+      namespace_id: 'ferry-core',
+      blob_id: `blob-${id}`,
+      created_at: '2026-11-01T00:00:00Z',
+      updated_at: '2026-11-01T00:00:00Z',
+      size: 10,
+      agent_id: null,
+      package_id: null,
+      status: 'active',
+      end_epoch: 1400,
+      expires_at: null,
+      importance: null,
+    });
+    const page = (ids: string[], more: boolean, extra: Partial<{ deleted: { memory_id: string; namespace_id: string }[]; must_resync: boolean }> = {}) =>
+      ({ memories: ids.map(row), next_cursor: `c-${ids.join('')}`, has_more: more, snapshot_version: 1, deleted: [], must_resync: false, ...extra }) as never;
+    relayer.pages.push(page([], false, { must_resync: true }), page(['a', 'b'], true), page(['c'], false, { deleted: [{ memory_id: 'a', namespace_id: 'ferry-core' }] }));
+    expect(await memory.countListed()).toBe(2);
+    relayer.pages.push(page([], false, { must_resync: true }), page([], false, { must_resync: true }));
+    await expect(memory.countListed()).rejects.toThrow(/resync twice/);
+  });
+});
+
 describe('syncFromWalrus', () => {
   it('rebuilds a fresh device index, including tombstones, supersede chains and epochs', async () => {
     const clock = new TestClock();

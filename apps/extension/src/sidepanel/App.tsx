@@ -1,10 +1,9 @@
-import type { Site } from '@ferry/core';
+import type { ExtensionStatus, Site } from '@ferry/core';
 import { IconButton, LoadingText, MonoId, Notice, TabPanel, Tabs, Waterline } from '@ferry/ui';
 import { Settings2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { SITE_BY_ORIGIN } from '../lib/config';
-import type { StatusData } from '../lib/protocol';
 import { call } from './client';
 import { LibraryTab } from './LibraryTab';
 import { LockScreen, PairScreen, SetupScreen } from './LockScreens';
@@ -54,13 +53,13 @@ function siteOf(url: string | undefined): Site | null {
 }
 
 export function App() {
-  const [status, setStatus] = useState<StatusData | null>(null);
+  const [status, setStatus] = useState<ExtensionStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabValue>('now');
   const site = useCurrentSite();
 
   const refresh = useCallback(async () => {
-    const res = await call<StatusData>({ type: 'status.get' });
+    const res = await call<ExtensionStatus>({ type: 'status.get' });
     if (res.ok) {
       setStatus(res.data);
       setError(null);
