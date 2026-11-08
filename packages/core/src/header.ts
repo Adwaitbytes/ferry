@@ -15,12 +15,14 @@ export interface EncodedMemory {
 }
 
 /**
- * Builds `<fact sentence>\n⟦ferry:v1 k=v ...⟧`. The sentence is normalized first, which removes
- * any header brackets, so a fact can never smuggle a second header past `decodeMemory`.
+ * Builds `<fact sentence>\n⟦ferry:v1 k=v ...⟧`. The sentence is normalized, and a fact containing
+ * header brackets is refused, so no fact can smuggle a second header past `decodeMemory`.
  */
 export function encodeMemory(fact: string, header: FerryHeader): EncodedMemory {
   const parsed = FerryHeader.parse(header);
-  const { text } = normalizeFactText(fact);
+  const { text, hadHeaderBrackets } = normalizeFactText(fact);
+  // Screening quarantines these upstream; refusing here too means no code path can write one.
+  if (hadHeaderBrackets) throw new Error('encodeMemory: HEADER_FORGERY');
   if (text.length === 0) throw new Error('encodeMemory: empty fact after normalization');
   const fields = [
     `t=${parsed.type}`,
