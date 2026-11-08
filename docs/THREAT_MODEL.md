@@ -19,7 +19,7 @@ We model each surface with STRIDE (Spoofing, Tampering, Repudiation, Information
 | T7 | Gate abuse: replay, underpayment, wrong coin, races, card enumeration, scraping |
 | T8 | Over-collection of sensitive data from imports |
 | T9 | Server logs leaking memory text |
-| T10 | Lost device with an unlocked extension |
+| T10 | Lost device with the extension left open (not locked) |
 
 Controls reference PRD 6.2 groups: **C-EXT** (Extension), **C-INJ** (Poisoning and injection defense), **C-WEB** (Web app), **C-SRV** (Server), **C-GATE** (Gate), **C-SUP** (Supply chain), **C-MIN** (Data minimization). Controls added by this document, which the PRD does not spell out, carry the prefix **X-** and are listed together in section 16.
 
@@ -123,9 +123,9 @@ Trust boundary crossings that need a check, in order of risk:
 | I | Passphrase fallback key stored with weak KDF | T6, T10 | X-KEY-2 Argon2id (m=64 MiB, t=3, p=1) preferred; PBKDF2-SHA256 with at least 600,000 iterations if WASM is unavailable; random 16 byte salt; AES-GCM wrap |
 | D | Content script floods `recall`, triggering the undocumented relayer burst limit and a multi-minute 401 lockout (issue #1157) | T1 | Paced queue in `packages/memwal`; X-MSG-4 per-tab token bucket in the worker (recall at most 1 per 600 ms per tab) |
 | E | A compromised content script asks the worker to perform a privileged action (remove delegate, export all, change settings) | T3, T6 | X-MSG-2 content scripts may send only `recallForComposer`, `offerCapture`, `adapterHealth`; privileged actions accepted only from the side panel or extension pages (`sender.url` starts with `chrome-extension://<id>/`) |
-| I | Idle unlocked browser on a lost device | T10 | Auto-lock after configurable idle (default 30 min) using `chrome.idle` plus `alarms`; on lock drop the unwrapped key handle and session token from memory; X-KEY-3 lock on `chrome.runtime.onSuspend` is not relied on, lock state is checked on every privileged message |
+| I | Idle browser on a lost device with the extension not locked | T10 | Auto-lock after configurable idle (default 30 min) using `chrome.idle` plus `alarms`; on lock drop the unwrapped key handle and session token from memory; X-KEY-3 lock on `chrome.runtime.onSuspend` is not relied on, lock state is checked on every privileged message |
 
-**Residual risk:** an attacker with code execution in the user's Chrome profile (malware, a malicious extension with `debugger` permission) can use the key while it is unlocked. A non-extractable key prevents copying it out but not using it in place. Because delegate keys are account-wide, one stolen device equals full memory access until the owner calls `remove_delegate_key` from Devices. Rated **medium**: documented in the Devices UI and README.
+**Residual risk:** an attacker with code execution in the user's Chrome profile (malware, a malicious extension with `debugger` permission) can use the key while the extension is not locked. A non-extractable key prevents copying it out but not using it in place. Because delegate keys are account-wide, one stolen device equals full memory access until the owner calls `remove_delegate_key` from Devices. Rated **medium**: documented in the Devices UI and README.
 
 ## 5. Surface: Content scripts and site adapters
 
@@ -342,7 +342,7 @@ Implementation engineers must follow these. They are not stated explicitly in th
 
 | Risk | Rating | Why we accept it |
 |---|---|---|
-| Account-wide delegate key used in place by malware on an unlocked device | Medium | Platform limit. Mitigated by auto-lock, Devices revocation, and plain disclosure. |
+| Account-wide delegate key used in place by malware while the extension is not locked | Medium | Platform limit. Mitigated by auto-lock, Devices revocation, and plain disclosure. |
 | Relayer sees plaintext in Standard mode | Medium | Platform design. Vault mode exists and the UI says so. Never claim end-to-end encryption in Standard mode. |
 | Data written to Walrus cannot be deleted before epoch end | Medium | Platform design. All blocking happens before write; "forget" is described honestly with the epoch shown. |
 | LLM provider sees chunk text in Distill and Desk | Medium | Disclosed; BYOK available. |
