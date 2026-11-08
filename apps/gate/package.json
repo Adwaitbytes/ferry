@@ -6,12 +6,11 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev --listen 3001",
-    "build": "tsup",
+    "build": "node scripts/bundle.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "bundle": "node scripts/bundle.mjs"
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@ferry/chain": "workspace:*",
@@ -28,7 +27,6 @@
     "@electric-sql/pglite": "0.5.15",
     "@suimpp/mpp": "0.9.0",
     "esbuild": "0.28.2",
-    "mppx": "0.4.12",
-    "tsup": "9.0.0"
+    "mppx": "0.4.12"
   }
 }

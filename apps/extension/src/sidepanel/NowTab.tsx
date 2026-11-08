@@ -1,10 +1,10 @@
-import type { ImportProgress, Site } from '@ferry/core';
+import type { ExtensionStatus, ImportProgress, RecentCapture, Site } from '@ferry/core';
 import { Badge, Button, EmptyState, LoadingText, Notice, Progress, Toggle } from '@ferry/ui';
 import { CircleSlash, Clock, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { SITE_HOST, SITE_LABEL } from '../lib/config';
-import { IMPORT_PORT, type RecentCapture, type StatusData } from '../lib/protocol';
+import { IMPORT_PORT } from '../lib/protocol';
 import { call } from './client';
 import { useSettings } from './useSettings';
 
@@ -66,14 +66,14 @@ export function NowTab({
   site,
   onChanged,
 }: {
-  status: StatusData;
+  status: ExtensionStatus;
   site: Site | null;
   onChanged: () => Promise<void>;
 }) {
   const { settings, update } = useSettings();
   const [locking, setLocking] = useState(false);
-  const coolingFor = secondsUntil(status.coolingDownUntil);
-  const health = site !== null ? status.adapters[site] : undefined;
+  const coolingFor = secondsUntil(status.governor.kind === 'cooling_down' ? status.governor.resumeAt : null);
+  const health = site !== null ? status.adapters?.[site] : undefined;
 
   return (
     <div className="flex flex-col gap-6">
@@ -129,13 +129,13 @@ export function NowTab({
         </Notice>
       ) : null}
 
-      <ImportCard initial={status.import} />
+      <ImportCard initial={status.importProgress} />
 
       <section aria-labelledby="ferry-recent" className="flex flex-col gap-3">
         <h2 id="ferry-recent" className="text-body font-medium text-text-secondary">
           Recent captures
         </h2>
-        {status.recentCaptures.length === 0 ? (
+        {(status.recentCaptures ?? []).length === 0 ? (
           <p className="text-body text-text-tertiary">
             Nothing yet. When you tell {site !== null ? SITE_LABEL[site] : 'a chat app'} something
             durable about yourself, Ferry offers to save it. Ferry only saves your own messages, and
@@ -143,7 +143,7 @@ export function NowTab({
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-border-hairline rounded-md border border-border-hairline bg-surface-1">
-            {status.recentCaptures.map((c) => (
+            {(status.recentCaptures ?? []).map((c) => (
               <li key={c.id} className="flex items-start justify-between gap-3 px-4 py-3">
                 <span className="min-w-0 text-body text-text-primary [overflow-wrap:anywhere]">
                   {c.text}

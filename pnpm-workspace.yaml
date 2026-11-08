@@ -2,6 +2,7 @@ packages:
   - apps/*
   - packages/*
   - examples/*
+  - e2e
 allowBuilds:
   protobufjs: false
   esbuild: false

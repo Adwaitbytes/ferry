@@ -61,17 +61,24 @@ describe('device and key hygiene', () => {
   }, 30_000);
 
   it('RT-79 manifest and CSP policy (source of truth)', () => {
-    const m = buildManifest(resolveOrigins({ FERRY_API_ORIGIN: 'https://ferry.example' }));
+    const m = buildManifest(resolveOrigins({ FERRY_WEB_ORIGIN_PROD: 'https://ferry.example' }));
     expect(m.content_security_policy.extension_pages).toBe("script-src 'self'; object-src 'none'");
     expect(m.host_permissions).not.toContain('<all_urls>');
     expect(
       m.host_permissions.every(
         (p) =>
           !p.includes('*://') &&
-          [...FIXED_HOST_PERMISSIONS, 'https://ferry.example/*'].includes(p as never),
+          [
+            ...FIXED_HOST_PERMISSIONS,
+            'https://ferry.example/*',
+            'http://localhost:3000/*',
+          ].includes(p as never),
       ),
     ).toBe(true);
-    expect(m.externally_connectable.matches).toEqual(['https://ferry.example/*']);
+    expect(m.externally_connectable.matches).toEqual([
+      'https://ferry.example/*',
+      'http://localhost:3000/*',
+    ]);
     expect(
       m.permissions.every((p) =>
         ['storage', 'sidePanel', 'alarms', 'idle', 'scripting'].includes(p),
@@ -84,6 +91,8 @@ describe('device and key hygiene', () => {
       },
     ]);
     expect(() => resolveOrigins({ FERRY_API_ORIGIN: 'http://ferry.example' })).toThrow();
+    expect(() => resolveOrigins({ FERRY_WEB_ORIGIN_PROD: 'http://ferry.example' })).toThrow();
+    expect(() => resolveOrigins({ FERRY_WEB_ORIGIN_PROD: 'http://localhost:4000' })).toThrow();
     expect(() => resolveOrigins({ FERRY_API_ORIGIN: 'https://ferry.example/path' })).toThrow();
   });
 

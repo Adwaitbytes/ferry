@@ -2,7 +2,7 @@ import { Button, Input, MonoId, Notice } from '@ferry/ui';
 import { KeyRound, Lock, Wallet } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { FERRY_WEB_ORIGIN } from '../lib/config';
-import type { StatusData } from '../lib/protocol';
+import type { ExtensionStatus } from '@ferry/core';
 import { openFerry } from './client';
 
 const MIN_PASSPHRASE = 8;
@@ -29,7 +29,7 @@ export function SetupScreen({ onDone }: { onDone: () => Promise<void> }) {
     if (passphrase.length < MIN_PASSPHRASE || confirm !== passphrase) return;
     setBusy(true);
     setError(null);
-    const res = await openFerry<StatusData>(passphrase);
+    const res = await openFerry<ExtensionStatus>(passphrase);
     setBusy(false);
     if (!res.ok) {
       setError(res.message);
@@ -101,7 +101,7 @@ export function LockScreen({
     if (passphrase.length === 0) return;
     setBusy(true);
     setError(null);
-    const res = await openFerry<StatusData>(passphrase);
+    const res = await openFerry<ExtensionStatus>(passphrase);
     setBusy(false);
     if (!res.ok) {
       setError(res.message);
@@ -144,11 +144,11 @@ export function PairScreen({
   status,
   onRefresh,
 }: {
-  status: StatusData;
+  status: ExtensionStatus;
   onRefresh: () => Promise<void>;
 }) {
   const [checking, setChecking] = useState(false);
-  const pairUrl = `${FERRY_WEB_ORIGIN}/pair`;
+  const pairUrl = `${FERRY_WEB_ORIGIN}/start`;
 
   return (
     <div className="mt-6 flex flex-col gap-5">

@@ -8,6 +8,7 @@ import {
   getChainService,
   type ChainService,
 } from '@ferry/chain';
+import { DEFAULT_EXTENSION_ID } from '../../../../lib/env';
 
 /**
  * Chain proxy plumbing shared by every /api/chain route (threat model section 10, X-CHP-1).
@@ -23,12 +24,13 @@ const perIp = new KeyedRateLimiter({ ratePerSec: 0.5, capacity: 20, maxKeys: 10_
 
 const EXTENSION_ID = /^[a-p]{32}$/;
 
+/** The pinned release id (manifest `key`) is always allowed; FERRY_EXTENSION_IDS adds forks. */
 function allowedExtensionOrigins(): Set<string> {
   const ids = (process.env['FERRY_EXTENSION_IDS'] ?? '')
     .split(',')
     .map((id) => id.trim())
     .filter((id) => EXTENSION_ID.test(id));
-  return new Set(ids.map((id) => `chrome-extension://${id}`));
+  return new Set([DEFAULT_EXTENSION_ID, ...ids].map((id) => `chrome-extension://${id}`));
 }
 
 /** Exact-match origin check (X-MSG-1 style): same origin, or a listed extension id. */

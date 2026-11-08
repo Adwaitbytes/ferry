@@ -2,7 +2,7 @@ import { toMarkdown, toPam } from '@ferry/importers';
 import { browser, type Browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
 import { z } from 'zod';
-import { FERRY_API_ORIGIN, FERRY_WEB_ORIGIN } from '../lib/config';
+import { FERRY_API_ORIGIN, FERRY_WEB_ORIGINS } from '../lib/config';
 import { IMPORT_PORT, type WorkerToContent } from '../lib/protocol';
 import { createFerryApi } from '../worker/api';
 import { chromeArea, wipeIndexedDb } from '../worker/chrome-storage';
@@ -32,7 +32,7 @@ export default defineBackground({
     const api = createFerryApi(FERRY_API_ORIGIN);
     const worker = new FerryWorker({
       extensionId: browser.runtime.id,
-      webOrigin: FERRY_WEB_ORIGIN,
+      webOrigins: FERRY_WEB_ORIGINS,
       local: chromeArea(browser.storage.local),
       session: chromeArea(browser.storage.session),
       crypto: memwalCrypto,

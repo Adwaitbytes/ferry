@@ -3,6 +3,7 @@ import type {
   CandidateFact,
   DistilledFact,
   ImportProgress,
+  SaveResult,
   StoredMemory,
   Suggestion,
 } from '@ferry/core';
@@ -14,7 +15,6 @@ import type {
   MemoryPort,
   StorageArea,
   VaultCrypto,
-  WriteOutcome,
 } from '../src/worker/ports';
 import { FerryWorker, type WorkerDeps } from '../src/worker/service';
 
@@ -65,7 +65,7 @@ export function suggestion(ref: string, text: string): Suggestion {
 
 export interface FakeEngine extends MemoryPort {
   recallForDraft: ReturnType<typeof vi.fn<(draft: string, k: number) => Promise<Suggestion[]>>>;
-  saveFact: ReturnType<typeof vi.fn<(fact: CandidateFact) => Promise<WriteOutcome>>>;
+  saveFact: ReturnType<typeof vi.fn<(fact: CandidateFact) => Promise<SaveResult>>>;
   hide: ReturnType<typeof vi.fn<(ref: string) => Promise<void>>>;
   destroyed: boolean;
 }
@@ -79,11 +79,18 @@ export function fakeEngine(
   const engine: FakeEngine = {
     destroyed: false,
     recallForDraft: vi.fn(async () => suggestions),
-    saveFact: vi.fn(async () => ({ kind: 'written', ref: 'blob-new000001' }) as WriteOutcome),
+    saveFact: vi.fn(
+      async (fact: CandidateFact): Promise<SaveResult> => ({
+        factId: fact.id,
+        status: 'written',
+        ref: 'blob-new000001',
+      }),
+    ),
     list: vi.fn(async () => ({ items: [], nextCursor: null })),
     hide: vi.fn(async () => undefined),
     resolveConflict: vi.fn(async () => undefined),
     exportAll: vi.fn(async (): Promise<StoredMemory[]> => []),
+    governor: () => ({ kind: 'ready' }),
     destroy() {
       engine.destroyed = true;
     },
@@ -174,7 +181,7 @@ export function harness(overrides: Partial<WorkerDeps> = {}, engine = fakeEngine
   let n = 0;
   const worker = new FerryWorker({
     extensionId: EXT_ID,
-    webOrigin: FERRY_WEB_ORIGIN,
+    webOrigins: [FERRY_WEB_ORIGIN],
     local,
     session,
     crypto: fakeCrypto,

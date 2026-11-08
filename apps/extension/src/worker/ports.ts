@@ -4,10 +4,13 @@ import type {
   CandidateFact,
   ConflictResolution,
   DistilledFact,
+  GovernorStatus,
   ImportProgress,
   JudgeRequest,
   JudgeResponse,
+  LibraryPage,
   MemoryStatus,
+  SaveResult,
   Site,
   StoredMemory,
   Suggestion,
@@ -39,35 +42,16 @@ export interface VaultCrypto {
   suiAddress(seed: Uint8Array): Promise<string>;
 }
 
-export type WriteOutcome =
-  | { kind: 'written'; ref: string }
-  | { kind: 'pending' }
-  | { kind: 'conflict'; conflictId: string; verdict: 'contradicts' | 'refines' }
-  | { kind: 'merged'; ref: string }
-  | { kind: 'quarantined' }
-  | { kind: 'blocked'; categories: string[] }
-  | { kind: 'failed' };
-
-export interface LibraryItem {
-  memory: StoredMemory;
-  endEpoch: number | null;
-  blobId: string;
-}
-
-export interface LibraryPage {
-  items: LibraryItem[];
-  nextCursor: string | null;
-}
-
 /** The memory engine (packages/memwal FerryMemory), one long-lived instance per open session. */
 export interface MemoryPort {
   recallForDraft(draft: string, k: number): Promise<Suggestion[]>;
   /** Writes one fact after a neighbor check; contradictions become conflict records (F5). */
-  saveFact(fact: CandidateFact): Promise<WriteOutcome>;
+  saveFact(fact: CandidateFact): Promise<SaveResult>;
   list(filter: { status?: MemoryStatus; query?: string; cursor?: string }): Promise<LibraryPage>;
   hide(ref: string): Promise<void>;
   resolveConflict(conflictId: string, resolution: ConflictResolution): Promise<void>;
   exportAll(): Promise<StoredMemory[]>;
+  governor(): GovernorStatus;
   destroy(): void;
 }
 

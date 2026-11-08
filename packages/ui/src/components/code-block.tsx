@@ -71,7 +71,11 @@ export function CodeBlock({ code, title, highlight = true, className, footer }: 
           <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 font-mono text-[0.8125rem] leading-5 text-text-primary">
+      {/* Focusable so keyboard users can scroll long lines (axe scrollable-region-focusable). */}
+      <pre
+        tabIndex={0}
+        className="overflow-x-auto p-4 font-mono text-[0.8125rem] leading-5 text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-ring"
+      >
         <code>
           {highlight
             ? tokenize(code).map((token, index) => (

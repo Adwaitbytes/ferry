@@ -1,6 +1,5 @@
 'use client';
 
-import { toMarkdown, toPam } from '@ferry/importers';
 import { Button, useToast } from '@ferry/ui';
 import { Download } from 'lucide-react';
 import { useState } from 'react';
@@ -25,11 +24,11 @@ export function ExportActions() {
     setBusy(kind);
     setError(null);
     try {
-      const memories = await bridge({ type: 'data.export' }, { timeoutMs: 60_000 });
+      const bundle = await bridge({ type: 'data.export' }, { timeoutMs: 60_000 });
       const stamp = new Date().toISOString().slice(0, 10);
-      if (kind === 'json') download(`ferry-memory-${stamp}.json`, 'application/json', JSON.stringify(await toPam(memories), null, 2));
-      else download(`ferry-memory-${stamp}.md`, 'text/markdown', toMarkdown(memories));
-      toast.show({ message: `Exported ${memories.length.toLocaleString('en-US')} facts.` });
+      if (kind === 'json') download(`ferry-memory-${stamp}.json`, 'application/json', bundle.pam);
+      else download(`ferry-memory-${stamp}.md`, 'text/markdown', bundle.markdown);
+      toast.show({ message: `Exported ${bundle.count.toLocaleString('en-US')} facts.` });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Export failed.');
     } finally {

@@ -475,6 +475,35 @@ export class MemoryEngine implements FerryMemoryApi {
     return report;
   }
 
+  /**
+   * Counts memories stored in a namespace from `listMemories` metadata alone: no text is read and
+   * no recall budget is spent, so a public counter can never leak a fact. Tombstones are memories
+   * too, so this is a count of stored records, not of active facts.
+   */
+  async countListed(namespace: Namespace = CORE, opts: { signal?: AbortSignal } = {}): Promise<number> {
+    const run: RunOptions = opts.signal ? { signal: opts.signal } : {};
+    const live = new Set<string>();
+    let cursor: string | undefined;
+    let resynced = false;
+    for (;;) {
+      const pending = this.transport.list(cursor === undefined ? { limit: 500 } : { cursor, limit: 500 }, run);
+      if (pending === null) throw new UnsupportedInModeError('countListed', this.transport.mode);
+      const page = await pending;
+      if (page.must_resync) {
+        if (resynced) throw new Error('countListed: relayer asked to resync twice in one walk');
+        resynced = true;
+        cursor = undefined;
+        live.clear();
+        continue;
+      }
+      for (const m of page.memories) if (m.namespace_id === namespace) live.add(m.memory_id);
+      for (const d of page.deleted) if (d.namespace_id === namespace) live.delete(d.memory_id);
+      cursor = page.next_cursor ?? cursor;
+      if (!page.has_more) break;
+    }
+    return live.size;
+  }
+
   private async hydrate(run: RunOptions): Promise<number> {
     const missing = new Set(await this.db.memories.where('kind').equals('unhydrated').primaryKeys());
     // Every Ferry memory ends in a header naming its type, so these queries reach all of them.

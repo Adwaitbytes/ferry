@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { keyFingerprint } from '../src/lib/fingerprint';
+import { keyFingerprint } from '@ferry/core';
 import {
   ACCOUNT_ID,
   PASSPHRASE,

@@ -2,5 +2,8 @@
 useDefault = true
 
 [allowlist]
-description = "Vendored third-party schema: its did:key example is public documentation, not a credential."
-paths = ['''packages/importers/fixtures/pam/portable-ai-memory\.schema\.json''']
+description = "Vendored PAM schema (its did:key example is public documentation) and the extension signing key, which is gitignored and never leaves the developer machine."
+paths = [
+  '''packages/importers/fixtures/pam/portable-ai-memory\.schema\.json''',
+  '''apps/extension/\.extension-key\.pem''',
+]

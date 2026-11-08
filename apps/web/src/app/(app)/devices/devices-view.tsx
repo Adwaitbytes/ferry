@@ -206,7 +206,7 @@ export function DevicesView() {
   const wallet = useCurrentAccount();
   const status = state.kind === 'ready' ? state.status : null;
   const accountId = status?.accountId ?? null;
-  const thisKey = status?.publicKey ? normalizeHex(status.publicKey) : null;
+  const thisKey = status?.publicKeyHex ? normalizeHex(status.publicKeyHex) : null;
   const account = useResource(
     accountId ? () => getAccount(accountId) : wallet ? () => getAccountByOwner(wallet.address) : null,
     accountId ?? wallet?.address ?? 'none',

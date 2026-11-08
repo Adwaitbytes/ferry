@@ -2,5 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @ferry/gate bundle"
+  "buildCommand": "pnpm --filter @ferry/gate build"
 }

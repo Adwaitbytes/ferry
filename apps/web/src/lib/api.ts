@@ -1,6 +1,5 @@
 import { AccountView, BlobView } from '@ferry/core';
 import { z } from 'zod';
-import { publicEnv } from './env';
 
 /**
  * Typed fetchers for Ferry's own HTTP APIs. Chain reads go through the Tatum proxy under
@@ -101,47 +100,4 @@ export type Stats = z.infer<typeof Stats>;
 
 export function getStats(): Promise<Stats> {
   return getJson('/api/stats', Stats, 'Ferry', { cache: 'no-store' });
-}
-
-/* Ferry Gate earnings (packages/pay `Earnings`, bigints serialized as strings). */
-
-const Micros = z.union([z.string().regex(/^\d+$/), z.number().int().nonnegative()]).transform((v) => BigInt(v));
-
-export const Earnings = z.looseObject({
-  payments: z.array(
-    z.looseObject({
-      receiptId: z.string(),
-      cardId: z.string(),
-      cardName: z.string(),
-      payer: z.string(),
-      querySha256: z.string(),
-      amountMicros: Micros,
-      digest: z.string(),
-      createdAtMs: z.number(),
-    }),
-  ),
-  totalMicros: Micros,
-  todayMicros: Micros,
-  count: z.number().int().nonnegative(),
-  /** USD per USDC from Tatum price data, with its timestamp. */
-  usdRate: z.looseObject({ value: z.number().positive(), asOf: z.string() }).optional(),
-});
-export type Earnings = z.infer<typeof Earnings>;
-
-export function gateConfigured(): boolean {
-  return publicEnv.gateUrl !== null;
-}
-
-export function getEarnings(owner: string): Promise<Earnings> {
-  if (!publicEnv.gateUrl) return Promise.reject(new ApiError(0, 'Ferry Gate is not configured for this deployment.'));
-  return getJson(`${publicEnv.gateUrl}/v1/earnings?owner=${encodeURIComponent(owner)}`, Earnings, 'Ferry Gate', {
-    credentials: 'include',
-    cache: 'no-store',
-  });
-}
-
-export function formatUsdc(micros: bigint): string {
-  const whole = micros / 1_000_000n;
-  const frac = (micros % 1_000_000n).toString().padStart(6, '0').replace(/0+$/, '').padEnd(2, '0');
-  return `${whole.toString()}.${frac}`;
 }

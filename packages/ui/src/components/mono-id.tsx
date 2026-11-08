@@ -51,12 +51,13 @@ export function MonoId({ value, kind, href, hrefLabel = 'Open in Sui explorer', 
         <span aria-hidden="true">{full ? value : truncateId(value)}</span>
         <span className="sr-only">{`${kind} ${value}`}</span>
       </span>
+      {/* The root type size is 14px, so size-6 alone renders 21px; WCAG 2.5.8 needs 24px targets. */}
       {copy ? (
         <button
           type="button"
           onClick={() => void onCopy()}
           aria-label={`Copy ${kind.toLowerCase()}`}
-          className="inline-flex size-6 shrink-0 items-center justify-center rounded-xs text-text-tertiary hover:bg-surface-3 hover:text-text-primary"
+          className="inline-flex size-6 min-h-[24px] min-w-[24px] shrink-0 items-center justify-center rounded-xs text-text-tertiary hover:bg-surface-3 hover:text-text-primary"
         >
           <CopyIcon size={14} strokeWidth={1.75} aria-hidden="true" className={copied ? 'text-success' : undefined} />
         </button>
@@ -67,7 +68,7 @@ export function MonoId({ value, kind, href, hrefLabel = 'Open in Sui explorer', 
           target="_blank"
           rel="noreferrer noopener"
           aria-label={hrefLabel}
-          className="inline-flex size-6 shrink-0 items-center justify-center rounded-xs text-text-tertiary hover:bg-surface-3 hover:text-text-primary"
+          className="inline-flex size-6 min-h-[24px] min-w-[24px] shrink-0 items-center justify-center rounded-xs text-text-tertiary hover:bg-surface-3 hover:text-text-primary"
         >
           <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" />
         </a>

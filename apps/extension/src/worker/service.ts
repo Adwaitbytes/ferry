@@ -1,29 +1,29 @@
 import {
   ALWAYS_BLOCKED,
+  PanelResponse,
   formatContextBlock,
+  keyFingerprint,
+  type AdapterHealth,
   type CandidateFact,
   type ContentRequest,
+  type ExportBundle,
+  type ExtensionStatus,
+  type GovernorStatus,
+  type ImportEnqueued,
   type ImportProgress,
+  type PairingConfirmation,
+  type PairingOffer,
   type PanelRequest,
+  type RecentCapture,
+  type SaveResult,
   type Site,
   type WebAppRequest,
   type WorkerResult,
 } from '@ferry/core';
 import { screenCandidate } from '@ferry/distill';
 import { z } from 'zod';
-import { keyFingerprint, normalizeKeyHex } from '../lib/fingerprint';
-import type {
-  AdapterHealth,
-  CaptureProposalData,
-  ComposeData,
-  ExportData,
-  PairingBeginData,
-  PairingConfirmData,
-  RecentCapture,
-  SaveOutcomeData,
-  StatusData,
-  SuggestData,
-} from '../lib/protocol';
+import { normalizeKeyHex } from '../lib/fingerprint';
+import type { CaptureProposalData, ComposeData, SuggestData } from '../lib/protocol';
 import { proposeCapture, screenEdited } from './capture';
 import { MESSAGES, WorkerFailure, toWorkerError } from './errors';
 import type {
@@ -63,7 +63,7 @@ export interface ExportFormatter {
 
 export interface WorkerDeps {
   extensionId: string;
-  webOrigin: string;
+  webOrigins: readonly string[];
   local: StorageArea;
   session: StorageArea;
   crypto: VaultCrypto;
@@ -120,7 +120,7 @@ export class FerryWorker {
   async route(raw: unknown, sender: SenderLike, channel: Channel): Promise<WorkerResult<unknown>> {
     const cls: SenderClass =
       channel === 'external'
-        ? classifyExternal(sender, this.deps.webOrigin)
+        ? classifyExternal(sender, this.deps.webOrigins)
         : classifyInternal(sender, this.deps.extensionId);
     if (cls.kind === 'forbidden')
       return { ok: false, code: 'forbidden_sender', message: MESSAGES.forbidden };
@@ -141,9 +141,9 @@ export class FerryWorker {
         }
         data = await this.handleContent(parsed.message, cls.tabId, cls.site);
       } else if (parsed.origin === 'extension_page') {
-        data = await this.handlePanel(parsed.message);
+        data = conform(parsed.message.type, await this.handlePanel(parsed.message));
       } else if (parsed.origin === 'web_app') {
-        data = await this.handleWebApp(parsed.message);
+        data = conform(parsed.message.type, await this.handleWebApp(parsed.message));
       } else {
         return { ok: false, code: 'forbidden_sender', message: MESSAGES.forbidden };
       }
@@ -161,7 +161,7 @@ export class FerryWorker {
   mayWatchImports(sender: SenderLike, channel: Channel): boolean {
     const cls =
       channel === 'external'
-        ? classifyExternal(sender, this.deps.webOrigin)
+        ? classifyExternal(sender, this.deps.webOrigins)
         : classifyInternal(sender, this.deps.extensionId);
     return cls.kind === 'extension_page' || cls.kind === 'web_app';
   }
@@ -222,6 +222,7 @@ export class FerryWorker {
   }
 
   private async handleWebApp(msg: WebAppRequest): Promise<unknown> {
+    if (msg.type === 'status.get') return this.status('web_app');
     return this.handleShared(msg);
   }
 
@@ -249,7 +250,8 @@ export class FerryWorker {
           (f) => !f.sensitive.some((c) => ALWAYS_BLOCKED.includes(c)),
         );
         const { queued } = await imports.enqueue(allowed);
-        return { queued, dropped: msg.facts.length - allowed.length };
+        const result: ImportEnqueued = { queued, dropped: msg.facts.length - allowed.length };
+        return result;
       }
       case 'memory.list': {
         const { engine } = await this.requireEngine();
@@ -261,7 +263,7 @@ export class FerryWorker {
       }
       case 'memory.recall': {
         const { engine } = await this.requireEngine();
-        return { suggestions: await engine.recallForDraft(msg.query, msg.limit) };
+        return engine.recallForDraft(msg.query, msg.limit);
       }
       case 'memory.save':
         return this.saveFact(msg.fact);
@@ -340,7 +342,9 @@ export class FerryWorker {
     if (proposal.autoSave) {
       const outcome = await this.saveFact(proposal.fact);
       const saved =
-        outcome.kind === 'written' || outcome.kind === 'pending' || outcome.kind === 'merged';
+        outcome.status === 'written' ||
+        outcome.status === 'pending' ||
+        outcome.status === 'merged';
       this.remember({
         id: proposal.fact.id,
         site,
@@ -365,7 +369,7 @@ export class FerryWorker {
    * A content script may only save a fact the worker offered to that same tab. Type, receipts and
    * flags come from the worker's copy; only the text may change, and the edit is screened again.
    */
-  private async saveCapture(tabId: number, submitted: CandidateFact): Promise<SaveOutcomeData> {
+  private async saveCapture(tabId: number, submitted: CandidateFact): Promise<SaveResult> {
     const offered = this.pending.get(submitted.id);
     if (offered === undefined || offered.tabId !== tabId)
       throw new WorkerFailure('invalid_message', MESSAGES.invalid);
@@ -375,14 +379,16 @@ export class FerryWorker {
         : screenEdited(offered.fact, submitted.text);
     if (fact === null) {
       this.pending.delete(submitted.id);
-      return { kind: 'quarantined' };
+      return { factId: submitted.id, status: 'quarantined' };
     }
     const outcome = await this.saveFact(fact);
     this.pending.delete(submitted.id);
     const state: RecentCapture['state'] =
-      outcome.kind === 'conflict'
+      outcome.status === 'conflict'
         ? 'conflict'
-        : outcome.kind === 'failed' || outcome.kind === 'blocked' || outcome.kind === 'quarantined'
+        : outcome.status === 'failed' ||
+            outcome.status === 'blocked' ||
+            outcome.status === 'quarantined'
           ? 'failed'
           : 'saved';
     this.remember({
@@ -395,9 +401,10 @@ export class FerryWorker {
     return outcome;
   }
 
-  private async saveFact(fact: CandidateFact): Promise<SaveOutcomeData> {
+  private async saveFact(fact: CandidateFact): Promise<SaveResult> {
     const screen = screenCandidate(fact.text);
-    if (screen.verdict === 'blocked') return { kind: 'blocked', categories: screen.sensitive };
+    if (screen.verdict === 'blocked')
+      return { factId: fact.id, status: 'blocked', categories: screen.sensitive };
     const { engine } = await this.requireEngine();
     const flags = [...new Set([...fact.flags, ...screen.flags])];
     const outcome = await engine.saveFact({ ...fact, flags });
@@ -405,7 +412,7 @@ export class FerryWorker {
     return outcome;
   }
 
-  private async pairingBegin(): Promise<PairingBeginData> {
+  private async pairingBegin(): Promise<PairingOffer> {
     const record = await this.vault.record();
     if (record === null) throw new WorkerFailure('locked', MESSAGES.noVault);
     const account = await this.account();
@@ -419,7 +426,7 @@ export class FerryWorker {
   }
 
   /** Saves the account only after the chain proxy shows our key registered on it and active. */
-  private async pairingConfirm(accountId: string): Promise<PairingConfirmData> {
+  private async pairingConfirm(accountId: string): Promise<PairingConfirmation> {
     const record = await this.vault.record();
     if (record === null) throw new WorkerFailure('locked', MESSAGES.noVault);
     const view = await this.deps.api.getAccount(accountId);
@@ -455,17 +462,17 @@ export class FerryWorker {
     return { accountId, owner: view.owner };
   }
 
-  private async exportData(): Promise<ExportData> {
+  private async exportData(): Promise<ExportBundle> {
     const { engine } = await this.requireEngine();
     const memories = await engine.exportAll();
     return {
-      json: await this.deps.exporter.toJson(memories),
+      pam: await this.deps.exporter.toJson(memories),
       markdown: this.deps.exporter.toMarkdown(memories),
       count: memories.length,
     };
   }
 
-  private async wipe(): Promise<StatusData> {
+  private async wipe(): Promise<ExtensionStatus> {
     await this.vault.lock();
     this.stopEngine();
     await this.deps.wipeIndexedDb();
@@ -479,16 +486,19 @@ export class FerryWorker {
     return this.status();
   }
 
-  async status(): Promise<StatusData> {
+  /** The web app gets the same status minus adapter health and unsaved capture text. */
+  async status(audience: 'panel' | 'web_app' = 'panel'): Promise<ExtensionStatus> {
     const [lock, record, account, settings] = await Promise.all([
       this.vault.state(),
       this.vault.record(),
       this.account(),
       this.settings.get(),
     ]);
-    const now = this.deps.clock.now();
-    return {
+    const status: ExtensionStatus = {
       lock,
+      locked: lock !== 'open',
+      paired: account !== null,
+      accountId: account?.accountId ?? null,
       publicKeyHex: record?.publicKeyHex ?? null,
       fingerprint: record ? keyFingerprint(record.publicKeyHex) : null,
       suiAddress: record?.suiAddress ?? null,
@@ -497,11 +507,21 @@ export class FerryWorker {
         : null,
       autoLockMinutes: settings.autoLockMinutes,
       msUntilAutoLock: await this.vault.msUntilAutoLock(),
-      import: this.imports?.progress() ?? IDLE_PROGRESS,
-      coolingDownUntil: this.coolingDownUntil > now ? this.coolingDownUntil : null,
-      adapters: { ...this.adapters },
-      recentCaptures: [...this.recent],
+      governor: this.governor(),
+      importProgress: this.imports?.progress() ?? IDLE_PROGRESS,
     };
+    if (audience === 'web_app') return status;
+    return { ...status, adapters: { ...this.adapters }, recentCaptures: [...this.recent] };
+  }
+
+  /** The engine's governor when one runs; otherwise the last cooldown the worker observed. */
+  private governor(): GovernorStatus {
+    const engineState = this.engine?.governor();
+    if (engineState !== undefined && engineState.kind !== 'ready') return engineState;
+    const now = this.deps.clock.now();
+    if (this.coolingDownUntil > now)
+      return { kind: 'cooling_down', reason: 'rate_limited', resumeAt: this.coolingDownUntil };
+    return { kind: 'ready' };
   }
 
   /* ------------------------------ engine lifecycle ------------------------------ */
@@ -584,4 +604,15 @@ export function decodeKey(value: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Every panel and web app response is parsed with its frozen core schema before it leaves the
+ * worker, so a drifted shape fails here as an internal error instead of confusing a caller.
+ */
+function conform(type: PanelRequest['type'] | WebAppRequest['type'], data: unknown): unknown {
+  if (type === 'settings.get' || type === 'settings.set') return data;
+  const parsed = PanelResponse[type].safeParse(data);
+  if (!parsed.success) throw new WorkerFailure('internal', MESSAGES.internal);
+  return parsed.data;
 }

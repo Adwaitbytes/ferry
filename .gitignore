@@ -17,3 +17,11 @@ release/
 private-data/
 *.tsbuildinfo
 .playwright-mcp/
+.vercel
+.env*
+.next-e2e/
+e2e/.cache/
+lighthouse-report/
+
+# Extension signing key (private half). The public half is pinned in apps/extension/manifest.config.ts.
+.extension-key.pem
