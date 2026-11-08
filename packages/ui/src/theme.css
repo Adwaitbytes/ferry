@@ -1,0 +1,157 @@
+/*
+ * Tailwind v4 wiring for Ferry (DESIGN 13). Import AFTER `@import "tailwindcss"` in the app's
+ * global stylesheet, and add `@source` for this package so its class names are generated.
+ */
+@import "./tokens.css";
+@import "./fonts.css";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-bg: var(--ferry-bg);
+  --color-surface-1: var(--ferry-surface-1);
+  --color-surface-2: var(--ferry-surface-2);
+  --color-surface-3: var(--ferry-surface-3);
+  --color-border-hairline: var(--ferry-border-hairline);
+  --color-border-strong: var(--ferry-border-strong);
+  --color-border-control: var(--ferry-border-control);
+  --color-text-primary: var(--ferry-text-primary);
+  --color-text-secondary: var(--ferry-text-secondary);
+  --color-text-tertiary: var(--ferry-text-tertiary);
+  --color-text-disabled: var(--ferry-text-disabled);
+  --color-accent: var(--ferry-accent);
+  --color-accent-hover: var(--ferry-accent-hover);
+  --color-accent-press: var(--ferry-accent-press);
+  --color-accent-fg: var(--ferry-accent-fg);
+  --color-accent-subtle: var(--ferry-accent-subtle);
+  --color-success: var(--ferry-success);
+  --color-success-subtle: var(--ferry-success-subtle);
+  --color-warning: var(--ferry-warning);
+  --color-warning-subtle: var(--ferry-warning-subtle);
+  --color-danger: var(--ferry-danger);
+  --color-danger-subtle: var(--ferry-danger-subtle);
+  --color-info: var(--ferry-info);
+  --color-info-subtle: var(--ferry-info-subtle);
+  --color-focus-ring: var(--ferry-focus-ring);
+  --color-overlay: var(--ferry-overlay);
+
+  --font-display: var(--ferry-font-display);
+  --font-sans: var(--ferry-font-sans);
+  --font-mono: var(--ferry-font-mono);
+
+  --shadow-1: var(--ferry-shadow-1);
+  --shadow-2: var(--ferry-shadow-2);
+  --shadow-3: var(--ferry-shadow-3);
+  --shadow-4: var(--ferry-shadow-4);
+
+  --ease-out: var(--ferry-ease-out);
+  --ease-in: var(--ferry-ease-in);
+  --ease-in-out: var(--ferry-ease-in-out);
+}
+
+@theme {
+  --spacing: 0.25rem;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  --text-display-xl: 4rem;     --text-display-xl--line-height: 1;      --text-display-xl--letter-spacing: -0.025em;
+  --text-display-lg: 2.75rem;  --text-display-lg--line-height: 1.0909; --text-display-lg--letter-spacing: -0.03em;
+  --text-display-md: 1.875rem; --text-display-md--line-height: 1.2;    --text-display-md--letter-spacing: -0.02em;
+  --text-title: 1.25rem;       --text-title--line-height: 1.4;         --text-title--letter-spacing: -0.012em;
+  --text-body-lg: 1rem;        --text-body-lg--line-height: 1.625;     --text-body-lg--letter-spacing: -0.005em;
+  --text-body: 0.875rem;       --text-body--line-height: 1.5714;       --text-body--letter-spacing: 0;
+  --text-small: 0.8125rem;     --text-small--line-height: 1.3846;      --text-small--letter-spacing: 0.003em;
+  --text-micro: 0.6875rem;     --text-micro--line-height: 1.4545;      --text-micro--letter-spacing: 0.02em;
+
+  --animate-ferry-draw: ferry-draw 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@layer base {
+  html { background-color: var(--ferry-bg); }
+  body { min-height: 100dvh; }
+  /* Mobile display sizes from the type scale (DESIGN 2.3). */
+  @media (width < 640px) {
+    :root { --text-display-xl: 2.75rem; --text-display-lg: 2.125rem; }
+  }
+}
+
+@utility ferry-display {
+  font-family: var(--ferry-font-display);
+  font-weight: 600;
+  font-stretch: 92%;
+  font-variation-settings: 'opsz' 96, 'wdth' 92;
+  text-wrap: balance;
+}
+
+@utility ferry-display-md {
+  font-family: var(--ferry-font-display);
+  font-weight: 600;
+  font-variation-settings: 'opsz' 48, 'wdth' 94;
+  text-wrap: balance;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The waterline: the only decorative rule, always dividing "where it came from" from "what you own". */
+@utility ferry-waterline {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(to right, var(--ferry-accent) 0 32px, var(--ferry-border-strong) 32px 100%);
+}
+
+/* Ticket perforation (DESIGN 4.4). The side notches are drawn by the Perforation component. */
+@utility ferry-perforation {
+  border-top: 1px dashed var(--ferry-border-strong);
+}
+
+/* Verify stamp (DESIGN 5.3 D). */
+.ferry-verify-ring,
+.ferry-verify-check {
+  fill: none;
+  stroke: var(--ferry-success);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-state='verified'] .ferry-verify-ring { animation: ferry-draw 240ms var(--ferry-ease-out) forwards; }
+[data-state='verified'] .ferry-verify-check { animation: ferry-draw 180ms var(--ferry-ease-out) 200ms forwards; }
+[data-state='static'] .ferry-verify-ring,
+[data-state='static'] .ferry-verify-check { stroke-dashoffset: 0; }
+
+@keyframes ferry-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.ferry-skeleton { animation: ferry-pulse 1.6s linear infinite; }
+
+@keyframes ferry-spin { to { transform: rotate(360deg); } }
+.ferry-spin { animation: ferry-spin 0.9s linear infinite; }
+
+@keyframes ferry-indeterminate { from { transform: translateX(-100%); } to { transform: translateX(333%); } }
+.ferry-indeterminate { animation: ferry-indeterminate 1.4s linear infinite; }
+
+/* Blackout brownout: one flicker only (DESIGN 5.3 C). */
+@keyframes ferry-brownout {
+  0% { opacity: 1; filter: saturate(1); }
+  40% { opacity: 0.55; }
+  60% { opacity: 0.8; }
+  100% { opacity: 0.35; filter: saturate(0); }
+}
+.ferry-brownout { animation: ferry-brownout 280ms linear forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ferry-skeleton, .ferry-indeterminate { animation: none; }
+  [data-state='verified'] .ferry-verify-ring,
+  [data-state='verified'] .ferry-verify-check { animation: none; stroke-dashoffset: 0; }
+}
+
+@keyframes ferry-fade-in { from { opacity: 0; } }
+@keyframes ferry-dialog-in { from { opacity: 0; transform: scale(0.98); } }
