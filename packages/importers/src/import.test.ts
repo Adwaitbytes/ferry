@@ -92,12 +92,12 @@ describe('importZip: ChatGPT', () => {
     expect(result).toEqual({ ok: false, error: { kind: 'too_many_entries', limit: 2 } });
   });
 
-  it('rejects a zip bomb disguised as conversations.json', async () => {
+  it('RT-56 rejects a zip bomb disguised as conversations.json', async () => {
     const result = await importZip(zipOf({ 'conversations.json': new Uint8Array(8 * 1024 * 1024).fill(32) }));
     expect(result).toMatchObject({ ok: false, error: { kind: 'zip_bomb' } });
   });
 
-  it('rejects path traversal anywhere in the archive', async () => {
+  it('RT-59 rejects path traversal anywhere in the archive', async () => {
     const result = await importZip(zipOf({ 'conversations.json': '[]', '../../etc/passwd': 'root:x:0:0' }));
     expect(result).toEqual({ ok: false, error: { kind: 'unsafe_entry_name', name: '../../etc/passwd' } });
   });

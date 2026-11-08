@@ -107,6 +107,12 @@ describe('device and key hygiene', () => {
     expect(m.host_permissions).not.toContain('<all_urls>');
     expect(m.host_permissions.some((p) => p.startsWith('*://'))).toBe(false);
     expect([...m.permissions].sort()).toEqual([...PERMISSIONS].sort());
-    expect(m.externally_connectable.matches).toHaveLength(1);
+    // Exact Ferry web origins only: no wildcard hosts, https everywhere except a dev localhost.
+    expect(m.externally_connectable.matches.length).toBeGreaterThanOrEqual(1);
+    expect(m.externally_connectable.matches.length).toBeLessThanOrEqual(2);
+    for (const match of m.externally_connectable.matches) {
+      expect(match).toMatch(/^(https:\/\/[a-z0-9.-]+|http:\/\/localhost:3000)\/\*$/);
+      expect(match).not.toContain('*.');
+    }
   });
 });

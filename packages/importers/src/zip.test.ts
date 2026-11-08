@@ -72,13 +72,13 @@ describe('red team: archive structure', () => {
     expect(isUnsafeEntryName('')).toBe(true);
   });
 
-  it('rejects more than 20,000 entries', () => {
+  it('RT-58 rejects more than 20,000 entries', () => {
     const files: Record<string, string> = {};
     for (let i = 0; i <= ZIP_LIMITS.maxEntries; i += 1) files[`f${i}`] = '';
     expect(listZipEntries(zipOf(files, 0))).toEqual({ ok: false, error: { kind: 'too_many_entries', limit: 20_000 } });
   });
 
-  it('aborts a zip bomb on the inflate ratio, judged on produced bytes', async () => {
+  it('RT-56 aborts a zip bomb on the inflate ratio, judged on produced bytes', async () => {
     const zeros = new Uint8Array(4 * 1024 * 1024);
     const result = await inflateAll(zipOf({ 'conversations.json': zeros }));
     expect(result).toMatchObject({ ok: false, error: { kind: 'zip_bomb', name: 'conversations.json' } });
@@ -90,7 +90,7 @@ describe('red team: archive structure', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('enforces the per-entry and total inflated caps while streaming', async () => {
+  it('RT-57 enforces the per-entry and total inflated caps while streaming', async () => {
     const text = 'abcdefghij'.repeat(1000);
     const bytes = zipOf({ 'a.txt': text, 'b.txt': text });
     expect(await inflateAll(bytes, { ...ZIP_LIMITS, maxEntryInflatedBytes: 5000 })).toMatchObject({
