@@ -1,0 +1,450 @@
+/*
+ * In-page UI for the composer chip, insert preview, capture toast and degraded notice.
+ * Plain CSS on purpose: Tailwind v4's registered @property utilities do not initialize inside
+ * shadow roots (DESIGN 12). Tokens come from @ferry/ui tokens.css, prepended at build time.
+ */
+
+:host {
+  background: transparent !important;
+  font-family: 'Ferry Geist', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5714;
+}
+
+.ferry-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  font-family: 'Ferry Geist', system-ui, sans-serif;
+  color: var(--ferry-text-primary);
+}
+
+.ferry-layer * {
+  box-sizing: border-box;
+}
+
+.ferry-icon {
+  flex: none;
+  display: block;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  cursor: pointer;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--ferry-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Chip ---------- */
+
+.ferry-chip-well {
+  position: fixed;
+  height: 28px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ferry-chip {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ferry-space-2);
+  height: 28px;
+  max-width: 100%;
+  padding: 4px 10px 4px 6px;
+  border-radius: var(--ferry-radius-full);
+  border: 1px solid var(--ferry-border-hairline);
+  background: var(--ferry-surface-1);
+  box-shadow: var(--ferry-shadow-2);
+  color: var(--ferry-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    background-color var(--ferry-duration-fast) var(--ferry-ease-out),
+    transform var(--ferry-duration-slow) var(--ferry-ease-out),
+    opacity var(--ferry-duration-fast) var(--ferry-ease-out);
+}
+
+.ferry-chip[data-enter='true'] {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.ferry-chip:hover {
+  background: var(--ferry-surface-2);
+}
+
+.ferry-chip:active {
+  background: var(--ferry-surface-3);
+  transform: translateY(0.5px);
+}
+
+.ferry-chip .ferry-mark {
+  color: var(--ferry-accent);
+}
+
+.ferry-chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ferry-kbd {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ferry-text-tertiary);
+  border: 1px solid var(--ferry-border-hairline);
+  border-radius: var(--ferry-radius-xs);
+  padding: 0 4px;
+}
+
+.ferry-chip[data-narrow='true'] .ferry-kbd {
+  display: none;
+}
+
+.ferry-spin {
+  animation: ferry-spin 900ms linear infinite;
+}
+
+@keyframes ferry-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Insert preview ---------- */
+
+.ferry-preview {
+  pointer-events: auto;
+  position: fixed;
+  width: 360px;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--ferry-radius-lg);
+  border: 1px solid var(--ferry-border-hairline);
+  background: var(--ferry-surface-1);
+  box-shadow: var(--ferry-shadow-3);
+  color: var(--ferry-text-primary);
+  opacity: 1;
+  transition: opacity var(--ferry-duration-base) var(--ferry-ease-out);
+}
+
+.ferry-preview-head {
+  padding: var(--ferry-space-4) var(--ferry-space-4) var(--ferry-space-2);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 20px;
+}
+
+.ferry-preview-body {
+  overflow-y: auto;
+  padding: 0 var(--ferry-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ferry-space-2);
+}
+
+.ferry-fact {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--ferry-space-2);
+  align-items: start;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--ferry-border-hairline);
+}
+
+.ferry-fact input {
+  width: 16px;
+  height: 16px;
+  margin: 3px 4px;
+  accent-color: var(--ferry-accent);
+  cursor: pointer;
+}
+
+.ferry-fact-text {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ferry-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.ferry-receipt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ferry-space-1);
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ferry-text-tertiary);
+}
+
+.ferry-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: var(--ferry-radius-full);
+  background: var(--ferry-surface-3);
+  color: var(--ferry-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.ferry-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ferry-vendor-paste);
+}
+
+.ferry-dot[data-vendor='chatgpt'] {
+  background: var(--ferry-vendor-chatgpt);
+}
+.ferry-dot[data-vendor='claude'] {
+  background: var(--ferry-vendor-claude);
+}
+.ferry-dot[data-vendor='gemini'] {
+  background: var(--ferry-vendor-gemini);
+}
+.ferry-dot[data-vendor='desk'],
+.ferry-dot[data-vendor='manual'] {
+  background: var(--ferry-accent);
+}
+
+.ferry-code {
+  margin: var(--ferry-space-3) 0 0;
+  padding: var(--ferry-space-3);
+  border-radius: var(--ferry-radius-md);
+  background: var(--ferry-surface-3);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ferry-text-primary);
+}
+
+.ferry-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ferry-space-2);
+  padding: var(--ferry-space-3) var(--ferry-space-4) var(--ferry-space-4);
+}
+
+.ferry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ferry-space-2);
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--ferry-radius-sm);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  transition: background-color var(--ferry-duration-fast) var(--ferry-ease-out);
+}
+
+.ferry-btn-primary {
+  background: var(--ferry-accent);
+  color: var(--ferry-accent-fg);
+}
+
+.ferry-btn-primary:hover {
+  background: var(--ferry-accent-hover);
+}
+
+.ferry-btn-primary:active {
+  background: var(--ferry-accent-press);
+}
+
+.ferry-btn-primary[aria-disabled='true'] {
+  background: var(--ferry-surface-3);
+  color: var(--ferry-text-disabled);
+  cursor: not-allowed;
+}
+
+.ferry-btn-ghost {
+  background: transparent;
+  color: var(--ferry-text-secondary);
+}
+
+.ferry-btn-ghost:hover {
+  background: var(--ferry-surface-3);
+  color: var(--ferry-text-primary);
+}
+
+/* ---------- Capture toast ---------- */
+
+.ferry-toast {
+  pointer-events: auto;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 16px;
+  border-radius: var(--ferry-radius-md);
+  border: 1px solid var(--ferry-border-hairline);
+  background: var(--ferry-surface-2);
+  box-shadow: var(--ferry-shadow-3);
+  color: var(--ferry-text-primary);
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform var(--ferry-duration-base) var(--ferry-ease-out),
+    opacity var(--ferry-duration-base) var(--ferry-ease-out);
+}
+
+.ferry-toast[data-enter='true'] {
+  transform: translateY(8px);
+  opacity: 0;
+}
+
+.ferry-toast-title {
+  display: flex;
+  align-items: center;
+  gap: var(--ferry-space-2);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.ferry-toast-title .ferry-mark {
+  color: var(--ferry-accent);
+}
+
+.ferry-toast label {
+  display: block;
+  margin-top: var(--ferry-space-2);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ferry-text-secondary);
+}
+
+.ferry-toast textarea {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  max-height: 140px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  resize: vertical;
+  border-radius: var(--ferry-radius-sm);
+  border: 1px solid var(--ferry-border-control);
+  background: var(--ferry-surface-1);
+  color: var(--ferry-text-primary);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.ferry-toast textarea:focus-visible {
+  border-color: var(--ferry-accent);
+}
+
+.ferry-toast-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ferry-space-2);
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ferry-text-tertiary);
+}
+
+.ferry-note {
+  display: flex;
+  gap: var(--ferry-space-2);
+  align-items: flex-start;
+  margin-top: var(--ferry-space-2);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ferry-warning);
+}
+
+.ferry-toast .ferry-actions {
+  padding: var(--ferry-space-3) 0 0;
+}
+
+.ferry-toast-status {
+  display: flex;
+  align-items: center;
+  gap: var(--ferry-space-2);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.ferry-toast-status[data-tone='ok'] .ferry-icon {
+  color: var(--ferry-success);
+}
+
+.ferry-toast-status[data-tone='warn'] .ferry-icon {
+  color: var(--ferry-warning);
+}
+
+/* ---------- Degraded adapter ---------- */
+
+.ferry-degraded {
+  pointer-events: auto;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: var(--ferry-radius-full);
+  border: 1px solid var(--ferry-border-hairline);
+  background: var(--ferry-surface-1);
+  color: var(--ferry-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+.ferry-grow {
+  flex: 1;
+}
+
+.ferry-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ferry-chip,
+  .ferry-toast,
+  .ferry-preview {
+    transition: opacity var(--ferry-duration-fast) linear;
+  }
+  .ferry-chip[data-enter='true'],
+  .ferry-toast[data-enter='true'] {
+    transform: none;
+  }
+  .ferry-spin {
+    animation: none;
+  }
+}
