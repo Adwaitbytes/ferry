@@ -8,8 +8,8 @@ Built for [Total Recall](https://{{FILL: hackathon page URL}}) by Tatum x Walrus
 
 | | |
 |---|---|
-| Web app | {{FILL: live web app URL}} |
-| Ferry Gate (paid recall API) | {{FILL: Gate URL}} |
+| Web app | https://ferry-memory.vercel.app |
+| Ferry Gate (paid recall API) | https://ferry-gate.vercel.app ([health](https://ferry-gate.vercel.app/health), [public profile](https://ferry-gate.vercel.app/v1/profile)) |
 | Extension ZIP | {{FILL: GitHub release URL for ferry-extension-<version>-chrome.zip}} |
 | Demo video (under 3 min) | {{FILL: video URL}} |
 | Blog post | {{FILL: dev.to URL}} |
@@ -123,13 +123,15 @@ The extension is the memory engine for every surface. The Walrus Memory relayer 
 
 ## Mainnet proof
 
-Every number here is printed by {{FILL: path to Mainnet memory count script}} and can be checked on an explorer.
+Every number here is printed by [`scripts/count-memories.ts`](scripts/count-memories.ts) or read from the chain, and can be checked on an explorer.
 
 | What | Value | Proof |
 |---|---|---|
 | MemWalAccount (main) | {{FILL: account object id}} | {{FILL: explorer link}} |
-| MemWalAccount (Public profile) | {{FILL: public account object id}} | {{FILL: explorer link}} |
-| Owner address | {{FILL: owner Sui address}} | {{FILL: explorer link}} |
+| MemWalAccount (Public profile) | `0x3a75eca8c67b7f70a7a2de8cdc7d8fb85137e3231c6023fc555e37e3ec4cfe8f` | [object](https://suiscan.xyz/mainnet/object/0x3a75eca8c67b7f70a7a2de8cdc7d8fb85137e3231c6023fc555e37e3ec4cfe8f), [create_account tx](https://suiscan.xyz/mainnet/tx/Hih5RG5uqiyZ85dEDaHqKTAKVrpTCNPTJx9pKBNDJQjs) |
+| Public profile owner | `0x53ec2bc08e0b15040c0e6863cb175ee66428d64f9e6ac5c7480bd6efe5d3f73b` | [account](https://suiscan.xyz/mainnet/account/0x53ec2bc08e0b15040c0e6863cb175ee66428d64f9e6ac5c7480bd6efe5d3f73b) |
+| Gate delegate key | `5c1bbed45123364f5f695a8e691372cc4a336a9e1d36780abd7fa9f388f95603` | [add_delegate_key tx](https://suiscan.xyz/mainnet/tx/2Ra4iESUsJwdQBMdbqtfN3ue4r2dZv7j9ryfyejLtfZY) |
+| Main owner address | {{FILL: owner Sui address}} | {{FILL: explorer link}} |
 | Delegate key (MEMWAL_AGENT_ID) | {{FILL: 64 hex delegate public key}} | {{FILL: add_delegate_key tx link}} |
 | Memories on Mainnet | {{FILL: mainnet memory count from count script}} | {{FILL: count script output link}} |
 | Sample memory blob | {{FILL: blob id}} | {{FILL: aggregator or explorer link}} |
@@ -171,18 +173,18 @@ Full threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md). Disclosure: [SE
 
 | Category | Cases | Blocked |
 |---|---|---|
-| Poisoning | RT-01 to RT-05 | {{FILL: blocked count}} |
-| Prompt injection via import and capture | RT-06 to RT-13 | {{FILL: blocked count}} |
-| Unicode smuggling | RT-14 to RT-21 | {{FILL: blocked count}} |
-| XSS in memory text | RT-22 to RT-26 | {{FILL: blocked count}} |
-| Header forgery | RT-27 to RT-31 | {{FILL: blocked count}} |
-| Forged extension messages | RT-32 to RT-39 | {{FILL: blocked count}} |
-| Payments (replay, race, underpay, wrong coin, recipient, expiry) | RT-40 to RT-52 | {{FILL: blocked count}} |
-| Gate card enumeration | RT-53 to RT-55 | {{FILL: blocked count}} |
-| Oversized import and zip bomb | RT-56 to RT-62 | {{FILL: blocked count}} |
-| Sensitive data | RT-63 to RT-76 | {{FILL: blocked count}} |
-| Device and server hygiene | RT-77 to RT-81 | {{FILL: blocked count}} |
-| **Total** | **81** | {{FILL: total blocked, with CI run link}} |
+| Poisoning | RT-01 to RT-05 | 5 of 5 blocked |
+| Prompt injection via import and capture | RT-06 to RT-13 | 8 of 8 blocked |
+| Unicode smuggling | RT-14 to RT-21 | 8 of 8 blocked |
+| XSS in memory text | RT-22 to RT-26 | 5 of 5 blocked |
+| Header forgery | RT-27 to RT-31 | 5 of 5 blocked |
+| Forged extension messages | RT-32 to RT-39 | 8 of 8 blocked |
+| Payments (replay, race, underpay, wrong coin, recipient, expiry) | RT-40 to RT-52 | 13 of 13 blocked |
+| Gate card enumeration | RT-53 to RT-55 | 3 of 3 blocked |
+| Oversized import and zip bomb | RT-56 to RT-62 | 7 of 7 blocked |
+| Sensitive data | RT-63 to RT-76 | 14 of 14 blocked |
+| Device and server hygiene | RT-77 to RT-81 | 5 of 5 blocked |
+| **Total** | **81** | **81 of 81 ids blocked, 108 test cases, run on every push by `pnpm redteam` in [CI](https://github.com/Adwaitbytes/ferry/actions/workflows/ci.yml)** |
 
 ## Limitations, stated plainly
 
