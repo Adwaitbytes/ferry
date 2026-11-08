@@ -12,7 +12,7 @@ Every case below becomes a vitest case in the owning package. The suite runs in 
 
 **Test file location.** `<package>/test/redteam/<category>.redteam.test.ts`. Each `it()` title starts with the case id, for example `it("RT-07 imperative aimed at AI is quarantined", ...)`. The README red-team table is generated from these titles.
 
-**Harness contracts.** The names below are the proposed public contracts. The lead may rename them when freezing `packages/core` contracts, but the reason codes, actions and HTTP statuses are binding.
+**Test contracts.** The names below are the proposed public contracts. The lead may rename them when freezing `packages/core` contracts, but the reason codes, actions and HTTP statuses are binding.
 
 ```ts
 // packages/distill
