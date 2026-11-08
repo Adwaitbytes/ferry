@@ -6,6 +6,7 @@ import {
   MAINNET_USDC_TYPE,
   MAX_PRICE_MICROS,
   PAY_ERRORS,
+  PUBLIC_NAMESPACE,
   SessionRequest,
   issueNonce,
   microsToDecimal,
@@ -168,7 +169,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
     c.header('Cache-Control', 'no-store');
   });
   app.use('*', bodyLimit({ maxSize: MAX_BODY_BYTES, onError: (c) => jsonError(c, 413, 'body_too_large') }));
-  for (const path of ['/v1/auth/*', '/v1/manage/*', '/v1/earnings']) {
+  for (const path of ['/v1/auth/*', '/v1/manage/*', '/v1/earnings', '/v1/profile']) {
     app.use(path, cors({ origin: deps.webOrigin, allowMethods: ['GET', 'POST', 'PATCH'], allowHeaders: ['Authorization', 'Content-Type'], maxAge: 600 }));
   }
   // Agents call the card routes from anywhere, so they need no credentials and expose the
@@ -207,6 +208,10 @@ export function createApp(deps: GateDeps): Hono<Env> {
 
   app.get('/health', (c) => c.json({ ok: true, service: 'ferry-gate' }));
 
+  // Lets the web app say honestly who may create cards before anyone signs a message. The owner is
+  // already public as every card's payment recipient.
+  app.get('/v1/profile', (c) => c.json({ publicAccountId: deps.publicAccountId, owner: ownerAddress, namespace: PUBLIC_NAMESPACE }));
+
   app.get('/v1/cards/:cardId', async (c) => {
     const card = await cardOr(c);
     return card instanceof Response ? card : c.json(publicCard(card));
@@ -230,7 +235,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
     // Only a hash of the query is ever stored or logged (X-GATE-2).
     const querySha256 = await sha256Hex(query.data.q);
     const settled: SettleResult = await deps.payments.settle(c.req.raw, card, querySha256);
-    if (!settled.ok) return payError(c, settled.code);
+    if ('code' in settled) return payError(c, settled.code);
     c.set('receiptId', settled.receiptId);
 
     let results: GateRecallResult['results'];
