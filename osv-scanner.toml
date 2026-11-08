@@ -1,0 +1,13 @@
+# Reviewed 2026-11-08. Both advisories affect mppx's EVM/Tempo fee-payer cosigning path, where the
+# server pays gas for client transactions. Ferry uses only the Sui charge method via @suimpp/mpp;
+# the Gate never cosigns or pays gas, so the vulnerable code is unreachable. @suimpp/mpp 0.9.0 pins
+# mppx ^0.4.9, so upgrading to 0.8.2 is not possible without forking the payment method.
+[[IgnoredVulns]]
+id = "GHSA-727h-3vm5-qwq6"
+ignoreUntil = 2026-12-31
+reason = "EVM fee-payer path only; Ferry uses the Sui method and never pays gas for clients."
+
+[[IgnoredVulns]]
+id = "GHSA-vc9j-9wph-qghj"
+ignoreUntil = 2026-12-31
+reason = "EVM fee-payer path only; Ferry uses the Sui method and never pays gas for clients."
