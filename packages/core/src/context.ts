@@ -9,7 +9,8 @@ export const CONTEXT_FOOTER = '[End of Ferry context]';
 export function formatContextBlock(facts: readonly string[]): string {
   const lines = facts
     .map((f) => normalizeFactText(f).text.replace(/^[-*\s]+/, ''))
-    .filter((f) => f.length > 0)
+    // A fact that quotes the delimiters could close the block early and smuggle instructions after it.
+    .filter((f) => f.length > 0 && !f.includes('[Context from my Ferry memory') && !f.includes(CONTEXT_FOOTER))
     .map((f) => `- ${f}`);
   if (lines.length === 0) return '';
   return `${CONTEXT_HEADER}\n${lines.join('\n')}\n${CONTEXT_FOOTER}\n\n`;
