@@ -16,3 +16,4 @@ release/
 .DS_Store
 private-data/
 *.tsbuildinfo
+.playwright-mcp/
