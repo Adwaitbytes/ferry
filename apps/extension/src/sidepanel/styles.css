@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+@import '@ferry/ui/theme.css';
+
+@source '../../../../packages/ui/src';
+
+html,
+body {
+  min-width: 320px;
+}
+
+body {
+  background-color: var(--ferry-bg);
+  color: var(--ferry-text-primary);
+}

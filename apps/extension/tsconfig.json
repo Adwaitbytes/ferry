@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["vite/client"]
+  },
+  "include": [
+    ".wxt/wxt.d.ts",
+    "src",
+    "test",
+    "manifest.config.ts",
+    "wxt.config.ts",
+    "vitest.config.ts"
+  ]
+}
