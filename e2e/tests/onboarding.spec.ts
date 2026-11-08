@@ -19,8 +19,8 @@ test.describe('Onboarding and pairing (CI mock wallet)', () => {
     await expect(page.getByText(keyFingerprint(seed.publicKeyHex), { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Pair this browser' }).click();
 
-    // After pairing.confirm the status refresh already reports paired, so the page moves straight to
-    // the first move step (the "Paired." line is skipped; logged in STATUS.md as a UX nit).
+    await expect(page.getByText('Paired. This browser can read and write your memory.')).toBeVisible();
+    await page.getByRole('button', { name: 'Continue' }).click();
     await expect(page.getByRole('heading', { name: 'What first?' })).toBeVisible();
     await expect(page.getByRole('listitem').filter({ hasText: 'Pair this browser' })).toContainText('done');
     await page.getByRole('button', { name: 'Continue' }).click();

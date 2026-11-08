@@ -394,6 +394,9 @@ export function StartView() {
   const owner = wallet?.address ?? null;
   const account = useOwnerAccount(owner);
   const [pairedNow, setPairedNow] = useState(false);
+  // Once pairing starts on this page, stay on the pair step until the user continues, so the
+  // "Paired." confirmation is seen instead of being replaced by the already-paired branch.
+  const [pairingHere, setPairingHere] = useState(false);
 
   const alreadyPaired = ext.kind === 'ready' && ext.status.paired && !ext.status.locked;
   const found = account.state.kind === 'found' ? account.state.account : null;
@@ -415,7 +418,7 @@ export function StartView() {
   } else if (!found) {
     step = 1;
     body = <AccountStep owner={owner} account={account} />;
-  } else if (alreadyPaired && ext.kind === 'ready' && ext.status.accountId === found.accountId) {
+  } else if (!pairingHere && alreadyPaired && ext.kind === 'ready' && ext.status.accountId === found.accountId) {
     step = 3;
     body = (
       <>
@@ -429,6 +432,10 @@ export function StartView() {
     step = 2;
     body = <PairStep account={found} onPaired={() => setPairedNow(true)} />;
   }
+  const onPairStep = step === 2;
+  useEffect(() => {
+    if (onPairStep) setPairingHere(true);
+  }, [onPairStep]);
 
   return (
     <div className="mx-auto max-w-[560px]">
