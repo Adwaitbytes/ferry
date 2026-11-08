@@ -30,6 +30,8 @@
     "dexie": "4.4.7"
   },
   "devDependencies": {
-    "fake-indexeddb": "6.2.5"
+    "@ferry/chain": "workspace:*",
+    "fake-indexeddb": "6.2.5",
+    "tsx": "4.23.15"
   }
 }
