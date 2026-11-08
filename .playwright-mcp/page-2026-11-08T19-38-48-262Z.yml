@@ -1,0 +1,64 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - link "Skip to content" [ref=f3e3] [cursor=pointer]:
+      - /url: "#main"
+    - complementary [ref=f3e4]:
+      - link "Ferry home" [ref=f3e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f3e6]: Ferry
+      - navigation "Ferry" [ref=f3e10]:
+        - list [ref=f3e11]:
+          - listitem [ref=f3e12]:
+            - link "Rescue" [ref=f3e13] [cursor=pointer]:
+              - /url: /rescue
+          - listitem [ref=f3e21]:
+            - link "Library" [ref=f3e22] [cursor=pointer]:
+              - /url: /library
+          - listitem [ref=f3e25]:
+            - link "Desk" [ref=f3e26] [cursor=pointer]:
+              - /url: /desk
+          - listitem [ref=f3e30]:
+            - link "Devices" [ref=f3e31] [cursor=pointer]:
+              - /url: /devices
+          - listitem [ref=f3e35]:
+            - link "Share and Earn" [ref=f3e36] [cursor=pointer]:
+              - /url: /share
+          - listitem [ref=f3e43]:
+            - link "Proofs" [ref=f3e44] [cursor=pointer]:
+              - /url: /proofs
+          - listitem [ref=f3e48]:
+            - link "Settings" [ref=f3e49] [cursor=pointer]:
+              - /url: /settings
+      - generic [ref=f3e53]:
+        - link "Wallet and pairing" [ref=f3e54] [cursor=pointer]:
+          - /url: /start
+        - link "Extension not found" [ref=f3e58] [cursor=pointer]:
+          - /url: /start
+        - radiogroup "Theme" [ref=f3e60]:
+          - radio "Match system" [checked] [ref=f3e61]
+          - radio "Light" [ref=f3e64]
+          - radio "Dark" [ref=f3e71]
+    - main [ref=f3e74]:
+      - generic [ref=f3e75]:
+        - generic [ref=f3e77]:
+          - heading "Proofs" [level=1] [ref=f3e78]
+          - generic [ref=f3e79]: "Every number Ferry shows links to something you can check yourself: an object, a blob or a transaction on Sui Mainnet."
+        - generic [ref=f3e80]:
+          - region [ref=f3e81]:
+            - heading "Mainnet counts" [level=2] [ref=f3e82]
+            - status [ref=f3e83]:
+              - generic [ref=f3e86]: Reading Mainnet through Tatum
+          - region [ref=f3e87]:
+            - heading "Account object" [level=2] [ref=f3e88]
+            - paragraph [ref=f3e89]: Pair this browser or connect your wallet to see your memory account object on Sui.
+          - region [ref=f3e90]:
+            - heading "Recent blobs" [level=2] [ref=f3e91]
+            - paragraph [ref=f3e92]: Your recent Walrus blobs appear here once this browser is paired and Ferry is open.
+          - region [ref=f3e94]:
+            - heading "Tatum credit meter" [level=2] [ref=f3e95]
+            - generic [ref=f3e96]:
+              - generic [ref=f3e97]: Reading the Tatum credit meter
+              - status [ref=f3e100]:
+                - generic [ref=f3e103]: Reading Mainnet through Tatum
+        - paragraph [ref=f3e104]: Chain reads run on the server through Tatum Sui gRPC, so the Tatum key never reaches your browser.
+  - alert [ref=f3e108]
