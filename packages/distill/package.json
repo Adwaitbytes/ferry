@@ -1,0 +1,22 @@
+{
+  "name": "@ferry/distill",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@ferry/core": "workspace:*",
+    "@scure/bip39": "2.4.0",
+    "zod": "4.6.7"
+  }
+}

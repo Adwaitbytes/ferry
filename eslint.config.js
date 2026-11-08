@@ -57,4 +57,25 @@ export default tseslint.config(
     files: ['**/scripts/**', '**/examples/**', '**/*.test.ts', '**/*.spec.ts', '**/e2e/**'],
     rules: { 'no-console': 'off' },
   },
+  // DESIGN 6: no "AI magic" iconography anywhere in the UI.
+  {
+    files: ['packages/ui/**/*.{ts,tsx}', 'apps/web/**/*.{ts,tsx}', 'apps/extension/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'lucide-react',
+              importNames: [
+                'Sparkles', 'Sparkle', 'WandSparkles', 'Wand', 'Wand2', 'Brain', 'BrainCircuit', 'BrainCog',
+                'Bot', 'BotMessageSquare', 'BotOff', 'Stars', 'Zap',
+              ],
+              message: 'Banned icon (DESIGN 6). Ferry never uses sparkle, wand, brain, bot or star icons.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

@@ -10,7 +10,10 @@ export function formatContextBlock(facts: readonly string[]): string {
   const lines = facts
     .map((f) => normalizeFactText(f).text.replace(/^[-*\s]+/, ''))
     // A fact that quotes the delimiters could close the block early and smuggle instructions after it.
-    .filter((f) => f.length > 0 && !f.includes('[Context from my Ferry memory') && !f.includes(CONTEXT_FOOTER))
+    .filter((f) => {
+      const lower = f.toLowerCase();
+      return f.length > 0 && !lower.includes('context from my ferry memory') && !lower.includes(CONTEXT_FOOTER.toLowerCase());
+    })
     .map((f) => `- ${f}`);
   if (lines.length === 0) return '';
   return `${CONTEXT_HEADER}\n${lines.join('\n')}\n${CONTEXT_FOOTER}\n\n`;
