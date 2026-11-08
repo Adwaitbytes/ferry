@@ -11,7 +11,7 @@
     "typecheck": "wxt prepare && tsc --noEmit",
     "lint": "eslint src test scripts manifest.config.ts",
     "test": "vitest run",
-    "release": "FERRY_RELEASE=1 FERRY_WEB_ORIGIN_PROD=https://ferry-memory.vercel.app wxt zip && node scripts/check-build.mjs"
+    "release": "FERRY_RELEASE=1 FERRY_WEB_ORIGIN_PROD=https://ferry-memory.vercel.app wxt zip && FERRY_RELEASE=1 FERRY_WEB_ORIGIN_PROD=https://ferry-memory.vercel.app node scripts/check-build.mjs"
   },
   "dependencies": {
     "@ferry/adapters": "workspace:*",
