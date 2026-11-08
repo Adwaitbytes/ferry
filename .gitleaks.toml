@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Vendored third-party schema: its did:key example is public documentation, not a credential."
+paths = ['''packages/importers/fixtures/pam/portable-ai-memory\.schema\.json''']
