@@ -1,0 +1,25 @@
+{
+  "name": "@ferry/chain",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
+    "./tx": { "types": "./src/tx/index.ts", "default": "./src/tx/index.ts" }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@ferry/core": "workspace:*",
+    "@grpc/grpc-js": "1.14.7",
+    "@mysten/sui": "2.39.1",
+    "@protobuf-ts/grpc-transport": "2.11.1",
+    "zod": "4.6.7"
+  }
+}

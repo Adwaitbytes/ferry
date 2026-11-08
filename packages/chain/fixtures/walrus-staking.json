@@ -1,0 +1,15 @@
+{
+  "objectId": "0x10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a3904",
+  "version": "1077250269",
+  "digest": "A9dz1drXeznk19iPRZi4ML8U3fnapN5jdxmAqRKqcstE",
+  "content": {
+    "$bytes": "10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a39040400000000000000a9ac4281c72b0ed3277c08e821ab77eccea7b187f2b402ffa3b33f548d4bbf1e00"
+  },
+  "owner": {
+    "$kind": "Shared",
+    "Shared": {
+      "initialSharedVersion": "317862159"
+    }
+  },
+  "type": "0xfdc88f7d7cf30afab2f82e8380d11ee8f70efb90e863d1de8616fae1bb09ea77::staking::Staking"
+}

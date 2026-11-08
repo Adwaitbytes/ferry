@@ -1,0 +1,28 @@
+{
+  "objectId": "0xa16ff652a8e38de8cab5d7393f449c6faeaf3f90467d2bab7c4bfafbb90436b0",
+  "version": "1076811534",
+  "digest": "G7tMxLafpd5GMYYSnqd23QbeBwk3GUW5xnx4Mbo8D3uD",
+  "content": {
+    "$bytes": "a16ff652a8e38de8cab5d7393f449c6faeaf3f90467d2bab7c4bfafbb90436b02b000000143d31126c22d5d9bd363028da8303262c7be2df0d65bded96140cbb48f3d8a6130a00000000000001012b000000709f70e3641c1d2b1ff741add567acda006c8d90fee9fe7b1424b845f62a481f2b0000003a0000005099ef030000000001"
+  },
+  "owner": {
+    "AddressOwner": "0x1d54265966ddb047ba664ad592a9c55c8007d7eff0dd67d12f64d0ebbdc4149d",
+    "$kind": "AddressOwner"
+  },
+  "type": "0xfdc88f7d7cf30afab2f82e8380d11ee8f70efb90e863d1de8616fae1bb09ea77::blob::Blob",
+  "json": {
+    "blob_id": "75467250915991149768855881235279857345930657237367385347776622280481042414868",
+    "certified_epoch": 43,
+    "deletable": true,
+    "encoding_type": 1,
+    "id": "0xa16ff652a8e38de8cab5d7393f449c6faeaf3f90467d2bab7c4bfafbb90436b0",
+    "registered_epoch": 43,
+    "size": "2579",
+    "storage": {
+      "end_epoch": 58,
+      "id": "0x709f70e3641c1d2b1ff741add567acda006c8d90fee9fe7b1424b845f62a481f",
+      "start_epoch": 43,
+      "storage_size": "66034000"
+    }
+  }
+}
