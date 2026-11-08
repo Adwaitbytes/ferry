@@ -830,7 +830,9 @@ As specified in 7.11. Chip copy: "Ferry has 4 things Claude should know" (singul
 - No em dashes or en dashes anywhere, including number ranges. Write "150 to 280ms", "Mar to Oct". Lint: CI greps `apps/**` and `docs/**` for U+2014 and U+2013 and fails.
 - No emojis.
 - Sentence case for everything except DEMO.
+<!-- copycheck:off -->
 - Banned words and phrases: seamless, leverage, unlock, empower, revolutionize, game changer, cutting edge, delve, robust, elevate, harness, supercharge, next generation, journey, in today's world, "it's not just X, it's Y", "let's dive in". Note "unlock" is banned, so the lock screen button says "Open Ferry".
+<!-- copycheck:on -->
 - Every claim links to proof: a transaction, an object, a blob or a commit.
 - No "AI magic" vocabulary: not "smart", "magically", "intelligent memory".
 
