@@ -31,9 +31,11 @@ describe('extension message contracts', () => {
     expect(ContentRequest.safeParse({ type: 'capture.propose', site: 'chatgpt', userText: 'x', conversationUrl: ['javascript', ':alert(1)'].join('') }).success).toBe(false);
   });
 
-  it('only lets the web app pair and import', () => {
+  it('never lets the web app wipe local data or change settings', () => {
     expect(WebAppRequest.safeParse({ type: 'pairing.begin' }).success).toBe(true);
-    expect(WebAppRequest.safeParse({ type: 'memory.hide', ref: '0xabcdef1234' }).success).toBe(false);
+    expect(WebAppRequest.safeParse({ type: 'memory.recall', query: 'food', limit: 5 }).success).toBe(true);
+    expect(WebAppRequest.safeParse({ type: 'data.wipe', confirm: 'DELETE MY FERRY DATA' }).success).toBe(false);
+    expect(WebAppRequest.safeParse({ type: 'settings.set', patch: {} }).success).toBe(false);
   });
 
   it('requires the typed wipe confirmation', () => {

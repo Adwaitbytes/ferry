@@ -63,8 +63,10 @@ export const PanelRequest = z.discriminatedUnion('type', [
     query: z.string().max(500).optional(),
     cursor: z.string().max(200).optional(),
   }),
+  z.object({ type: z.literal('memory.recall'), query: z.string().min(1).max(2000), limit: z.number().int().min(1).max(20) }),
+  z.object({ type: z.literal('memory.save'), fact: CandidateFact }),
   z.object({ type: z.literal('memory.hide'), ref: MemoryRef }),
-  z.object({ type: z.literal('memory.resolve'), conflictId: z.string().uuid(), resolution: ConflictResolution }),
+  z.object({ type: z.literal('memory.resolve'), conflictId: z.uuid(), resolution: ConflictResolution }),
   z.object({ type: z.literal('import.enqueue'), facts: z.array(CandidateFact).min(1).max(2000) }),
   z.object({ type: z.literal('import.progress') }),
   z.object({ type: z.literal('settings.get') }),
@@ -74,13 +76,28 @@ export const PanelRequest = z.discriminatedUnion('type', [
 ]);
 export type PanelRequest = z.infer<typeof PanelRequest>;
 
-/** The only messages the Ferry web origin may send via externally_connectable. */
+/**
+ * Messages the Ferry web origin may send via externally_connectable. The relayer has no CORS
+ * header (RESEARCH 1.7), so the web app reaches memory only through the extension, which holds
+ * the delegate key. Destructive local actions (wipe, lock settings) stay panel-only.
+ */
 export const WebAppRequest = z.discriminatedUnion('type', [
   z.object({ type: z.literal('status.get') }),
   z.object({ type: z.literal('pairing.begin') }),
   z.object({ type: z.literal('pairing.confirm'), accountId: z.string().regex(/^0x[0-9a-f]{64}$/) }),
   z.object({ type: z.literal('import.enqueue'), facts: z.array(CandidateFact).min(1).max(2000) }),
   z.object({ type: z.literal('import.progress') }),
+  z.object({
+    type: z.literal('memory.list'),
+    status: MemoryStatus.optional(),
+    query: z.string().max(500).optional(),
+    cursor: z.string().max(200).optional(),
+  }),
+  z.object({ type: z.literal('memory.recall'), query: z.string().min(1).max(2000), limit: z.number().int().min(1).max(20) }),
+  z.object({ type: z.literal('memory.save'), fact: CandidateFact }),
+  z.object({ type: z.literal('memory.hide'), ref: MemoryRef }),
+  z.object({ type: z.literal('memory.resolve'), conflictId: z.uuid(), resolution: ConflictResolution }),
+  z.object({ type: z.literal('data.export') }),
 ]);
 export type WebAppRequest = z.infer<typeof WebAppRequest>;
 
