@@ -30,7 +30,7 @@
     "@ferry/memwal": "workspace:*",
     "@ferry/pay": "workspace:*",
     "@neondatabase/serverless": "1.2.0",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",
     "eslint": "10.14.0",
     "eslint-plugin-security": "4.2.1",
