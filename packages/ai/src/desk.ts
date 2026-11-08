@@ -35,7 +35,6 @@ export function streamDesk(req: DeskRequest, model: LanguageModel, served: DeskP
     system: DESK_SYSTEM,
     messages: buildDeskMessages(req),
     maxOutputTokens: 1200,
-    temperature: 0.4,
     ...(signal ? { abortSignal: signal } : {}),
   });
   return result.toTextStreamResponse({
