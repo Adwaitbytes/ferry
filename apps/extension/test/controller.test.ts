@@ -124,6 +124,7 @@ describe('composer chip and insert', () => {
   });
 
   it('shows a quiet degraded indicator instead of throwing when the adapter breaks', () => {
+    vi.useFakeTimers();
     const adapter = textareaAdapter(document);
     adapter.health = () => ({ ok: false, detail: 'composer not found' });
     adapter.findComposer = () => {
@@ -140,6 +141,10 @@ describe('composer chip and insert', () => {
         fontUrl: 'x',
       });
     }).not.toThrow();
+    // One failure right after load is treated as hydration; the pill needs a second failure.
+    expect(shadow?.querySelector('.ferry-degraded')).toBeFalsy();
+    vi.advanceTimersByTime(3_000);
+    vi.useRealTimers();
     expect(send).toHaveBeenCalledWith({
       type: 'adapter.health',
       site: 'claude',

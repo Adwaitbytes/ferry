@@ -350,11 +350,16 @@ export function startFerry(deps: ContentDeps): FerryContent {
 
   /* -------------------------------- health -------------------------------- */
 
+  let failedChecks = 0;
   const checkHealth = (): void => {
     const health = safe(() => adapter.health(doc), {
       ok: false,
       detail: 'Adapter health check failed',
     });
+    // Chat sites hydrate after document_idle; one failed check right after load is normal, so the
+    // visible pill waits for a second consecutive failure.
+    failedChecks = health.ok ? 0 : failedChecks + 1;
+    if (!health.ok && failedChecks < 2) return;
     const key = `${health.ok}:${health.detail}`;
     if (key === lastHealth) return;
     lastHealth = key;
@@ -395,6 +400,7 @@ export function startFerry(deps: ContentDeps): FerryContent {
     });
   });
   checkHealth();
+  const recheckSoon = setTimeout(checkHealth, 3_000);
   const healthTimer = setInterval(checkHealth, HEALTH_EVERY_MS);
 
   return {
@@ -414,6 +420,7 @@ export function startFerry(deps: ContentDeps): FerryContent {
       stopObserving();
       setAdapterErrorReporter(null);
       clearInterval(healthTimer);
+      clearTimeout(recheckSoon);
       for (const t of [typingTimer, loadingTimer, hideTimer, toastTimer])
         if (t !== null) clearTimeout(t);
       ui?.destroy();
