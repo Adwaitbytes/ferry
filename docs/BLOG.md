@@ -72,7 +72,7 @@ Tatum does four real jobs in Ferry:
 3. **Payment verification.** When an agent pays Gate, we fetch the transaction through Tatum and check status, coin type, amount, recipient and finality before serving anything ([payment.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/payment.ts)).
 4. **Price data.** Earnings show in USDC and in dollars using Tatum's exchange rate endpoint, cached for 60 seconds ([price.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/price.ts)).
 
-The free plan allows 3 requests per second, so the proxy has a token bucket, a short cache and a credit meter you can see on the Proofs page. We used {{FILL: Tatum credits used during the build}} credits over the hackathon.
+The free plan allows 3 requests per second, so the proxy has a token bucket, a short cache and a credit meter you can see on the Proofs page. We used 20 of 100,000 free-plan credits by 9 Nov 2026 credits over the hackathon.
 
 ## Agent payments with MPP on Sui
 
@@ -114,7 +114,7 @@ Standard mode is not end to end encrypted, because the hosted relayer sees text 
 ## Try it
 
 - Web app: https://ferry-memory.vercel.app
-- Extension: {{FILL: GitHub release URL}} (load unpacked in Chrome)
+- Extension: https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 (load unpacked in Chrome)
 - Repo, with a 10 minute quickstart: https://github.com/Adwaitbytes/ferry
 
 Switch AIs. Keep yourself.

@@ -12,7 +12,7 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 | One-liner | One AI memory you own. It follows you across ChatGPT, Claude, Gemini and any agent, lives on Walrus Mainnet, and every fact shows where it came from. |
 | Track | Track 2: Smart Agents for Real Life |
 | Awards targeted | Best Walrus Memory; Best Use of Agent Payments |
-| Tatum dashboard Account ID | {{FILL: Tatum dashboard Account ID}} |
+| Tatum dashboard Account ID | 6af19666059c9eaaf7a6e2bd |
 | MEMWAL_AGENT_ID | aa0e1b0af8be8765d65d86876ca7034259fced902035d29c2420cdca5354e2ff |
 | Public repo | https://github.com/Adwaitbytes/ferry |
 | License | MIT |
@@ -42,7 +42,7 @@ Every chain read goes through Tatum's Sui gRPC gateway: delegate keys, blob epoc
 | Requirement | How Ferry meets it | Proof |
 |---|---|---|
 | Walrus Memory writing on Mainnet, at least 10 memories | 312 memories in the team's MemWalAccount, written by the extension through `rememberBulk` | Account: https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2. Count script output: {{FILL: link}}. Sample blob: {{FILL: blob link}}. Code: [packages/memwal/src/memory.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/memwal/src/memory.ts) |
-| Tatum RPC or Data APIs for onchain data | Sui gRPC gateway for account, delegate, blob and payment reads; Data API for prices | [packages/chain/src/tatum.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/tatum.ts), [packages/chain/src/payment.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/payment.ts), [packages/chain/src/price.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/price.ts). Credits used: {{FILL: Tatum credits used}}. Proofs page: {{FILL: Proofs page URL}} |
+| Tatum RPC or Data APIs for onchain data | Sui gRPC gateway for account, delegate, blob and payment reads; Data API for prices | [packages/chain/src/tatum.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/tatum.ts), [packages/chain/src/payment.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/payment.ts), [packages/chain/src/price.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/price.ts). Credits used: 20 of 100,000 free-plan credits. Proofs page: https://ferry-memory.vercel.app/proofs |
 | Published blog post (what it does, Tatum and Walrus use, how it learned over time) | dev.to post | {{FILL: dev.to URL}} |
 | Working demo | Live web app, Gate, extension ZIP, video under 3:00 | https://ferry-memory.vercel.app, https://ferry-gate.vercel.app, https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1, {{FILL: video URL}} |
 | Public repo | MIT, README with Mainnet proof table | https://github.com/Adwaitbytes/ferry |

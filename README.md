@@ -137,7 +137,7 @@ Every number here is printed by [`scripts/count-memories.ts`](scripts/count-memo
 | Sample memory blob | `2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o` | [aggregator](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o) (Seal ciphertext bound to the MemWal package and the owner) |
 | Supersede example | {{FILL: blob id with sup= header}} | {{FILL: link}} |
 | Paid recall | {{FILL: USDC payment tx digest}} | {{FILL: explorer link}} |
-| Tatum credits used | {{FILL: credits from Proofs page meter}} | {{FILL: Proofs page link}} |
+| Tatum credits used | 20 of 100,000 free-plan credits on 9 Nov 2026 (Tatum dashboard) | https://ferry-memory.vercel.app/proofs |
 
 ## How Ferry learned over time
 
