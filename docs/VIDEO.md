@@ -15,7 +15,7 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 
 ### 0:00 to 0:12. Problem
 
-**On screen:** Landing page hero at {{FILL: live web app URL}}. Headline "Your AI memory, finally yours." Live Mainnet counters visible.
+**On screen:** Landing page hero at https://ferry-memory.vercel.app. Headline "Your AI memory, finally yours." Live Mainnet counters visible.
 
 **Voiceover:**
 > Every AI you use remembers you. None of that memory is yours. Ferry gives you one memory you own, on Walrus, and carries it into every AI you use.
@@ -119,7 +119,7 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 
 | # | Start | URL or app | Action | Real on screen |
 |---|---|---|---|---|
-| 1 | 0:00 | `{{FILL: live web app URL}}/` | Hero, counters | Live Mainnet counters |
+| 1 | 0:00 | `https://ferry-memory.vercel.app/` | Hero, counters | Live Mainnet counters |
 | 2 | 0:12 | `/rescue` | Drop ZIP, review, approve, move | Real export, count, account |
 | 3 | 0:45 | chatgpt.com | Send fact, save toast | Live site |
 | 4 | 0:55 | claude.ai | Chip, preview, insert, send | Live reply, receipt blob id |

@@ -248,7 +248,7 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm copycheck
 
 1. Download https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 and unzip it.
 2. Open `chrome://extensions`, turn on Developer mode, click Load unpacked and pick the unzipped folder.
-3. Open {{FILL: live web app URL}}, connect your wallet and pair.
+3. Open https://ferry-memory.vercel.app, connect your wallet and pair.
 
 ## Repo map
 

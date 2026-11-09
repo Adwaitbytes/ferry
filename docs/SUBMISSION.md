@@ -16,11 +16,11 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 | MEMWAL_AGENT_ID | {{FILL: delegate public key, 64 hex characters, no 0x}} |
 | Public repo | https://github.com/Adwaitbytes/ferry |
 | License | MIT |
-| Live web app | {{FILL: live web app URL}} |
-| Ferry Gate | {{FILL: Gate URL}} |
+| Live web app | https://ferry-memory.vercel.app |
+| Ferry Gate | https://ferry-gate.vercel.app |
 | Blog post | {{FILL: dev.to URL}} |
 | Demo video | {{FILL: video URL}} |
-| Extension ZIP | {{FILL: GitHub release URL for ferry-extension-<version>-chrome.zip}} |
+| Extension ZIP | https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 |
 | Team | Adwait, Adwait Keshari |
 | X post | {{FILL: X thread URL}} |
 | LinkedIn post | {{FILL: LinkedIn post URL}} |
@@ -44,7 +44,7 @@ Every chain read goes through Tatum's Sui gRPC gateway: delegate keys, blob epoc
 | Walrus Memory writing on Mainnet, at least 10 memories | {{FILL: mainnet memory count}} memories in the team's MemWalAccount, written by the extension through `rememberBulk` | Account: {{FILL: account explorer link}}. Count script output: {{FILL: link}}. Sample blob: {{FILL: blob link}}. Code: [packages/memwal/src/memory.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/memwal/src/memory.ts) |
 | Tatum RPC or Data APIs for onchain data | Sui gRPC gateway for account, delegate, blob and payment reads; Data API for prices | [packages/chain/src/tatum.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/tatum.ts), [packages/chain/src/payment.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/payment.ts), [packages/chain/src/price.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/price.ts). Credits used: {{FILL: Tatum credits used}}. Proofs page: {{FILL: Proofs page URL}} |
 | Published blog post (what it does, Tatum and Walrus use, how it learned over time) | dev.to post | {{FILL: dev.to URL}} |
-| Working demo | Live web app, Gate, extension ZIP, video under 3:00 | {{FILL: live web app URL}}, {{FILL: Gate URL}}, {{FILL: extension ZIP URL}}, {{FILL: video URL}} |
+| Working demo | Live web app, Gate, extension ZIP, video under 3:00 | https://ferry-memory.vercel.app, https://ferry-gate.vercel.app, https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1, {{FILL: video URL}} |
 | Public repo | MIT, README with Mainnet proof table | https://github.com/Adwaitbytes/ferry |
 | Best Walrus Memory: memories that visibly change the product | Conflicts supersede facts on Walrus; cross-app insertion uses facts told to other AIs; receipts merge across vendors | Conflicts resolved: {{FILL: count}}. Cross-app insertions: {{FILL: count}}. Supersede example blob: {{FILL: blob link}} |
 | Best Use of Agent Payments: x402 or MPP, settled on Sui | MPP 402 flow with Sui USDC to the user's address, verified through Tatum, replay protected in Neon | [packages/pay/src/gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts). Payment tx: {{FILL: payment tx explorer link}}. Paid recalls: {{FILL: count}} |

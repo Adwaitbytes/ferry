@@ -41,7 +41,7 @@ How it works: {{FILL: dev.to URL}}
 Built for Total Recall by @tatum_io x @WalrusFoundation. Open source, MIT.
 
 Code: https://github.com/Adwaitbytes/ferry
-Try it: {{FILL: live web app URL}}
+Try it: https://ferry-memory.vercel.app
 
 Switch AIs. Keep yourself.
 

@@ -11,7 +11,7 @@ I use ChatGPT, Claude and Gemini every week. Each of them knows things about me:
 Ferry is our fix. It takes the memory those apps hold about you, moves it into a store you own on Walrus Mainnet, and brings it back into whichever AI you open next. Every fact carries a receipt that shows where it came from. We built it in about 36 hours for Total Recall, the Tatum x Walrus hackathon.
 
 - Repo: https://github.com/Adwaitbytes/ferry
-- Live app: {{FILL: live web app URL}}
+- Live app: https://ferry-memory.vercel.app
 - Demo video: {{FILL: video URL}}
 
 {{FILL: screenshot of the landing page with live Mainnet counters}}
@@ -113,7 +113,7 @@ Standard mode is not end to end encrypted, because the hosted relayer sees text 
 
 ## Try it
 
-- Web app: {{FILL: live web app URL}}
+- Web app: https://ferry-memory.vercel.app
 - Extension: {{FILL: GitHub release URL}} (load unpacked in Chrome)
 - Repo, with a 10 minute quickstart: https://github.com/Adwaitbytes/ferry
 
