@@ -2,6 +2,8 @@ import type { ClientWithCoreApi } from '@mysten/sui/client';
 import type { PGlite } from '@electric-sql/pglite';
 import { afterEach, describe, expect, it } from 'vitest';
 import { PaymentRefusedError, assertAcceptableChallenge, payingFetch } from '../src/client.js';
+import { USDC_TESTNET } from '@suimpp/mpp/client';
+import { MAINNET_USDC_TYPE, TESTNET_USDC_TYPE, explorerTxUrl, usdcTypeFor } from '../src/constants.js';
 import { GatePayments } from '../src/gateway.js';
 import { DIGEST, RECIPIENT, USDC, payerKey, setup } from './fixtures.js';
 
@@ -28,6 +30,24 @@ describe('client guard (X-SDK-1)', () => {
     for (const [c, reason] of reasons) {
       expect(() => assertAcceptableChallenge(c, 10_000n)).toThrow(expect.objectContaining({ reason }) as PaymentRefusedError);
     }
+  });
+});
+
+describe('client guard network', () => {
+  it('pays only in the USDC of its own network', () => {
+    const mainnet = challenge({ amount: '0.01', currency: MAINNET_USDC_TYPE, recipient: RECIPIENT });
+    const testnet = challenge({ amount: '0.01', currency: TESTNET_USDC_TYPE, recipient: RECIPIENT });
+    expect(assertAcceptableChallenge(testnet, 10_000n, 'testnet')).toBe(10_000n);
+    expect(() => assertAcceptableChallenge(mainnet, 10_000n, 'testnet')).toThrow(expect.objectContaining({ reason: 'WRONG_COIN' }) as PaymentRefusedError);
+    expect(() => assertAcceptableChallenge(testnet, 10_000n)).toThrow(expect.objectContaining({ reason: 'WRONG_COIN' }) as PaymentRefusedError);
+  });
+
+  it('maps networks to coin types and explorer links', () => {
+    expect(usdcTypeFor('mainnet')).toBe(MAINNET_USDC_TYPE);
+    expect(usdcTypeFor('testnet')).toBe('0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC');
+    expect(TESTNET_USDC_TYPE).toBe(USDC_TESTNET.type);
+    expect(explorerTxUrl('testnet', DIGEST)).toBe(`https://suiscan.xyz/testnet/tx/${DIGEST}`);
+    expect(explorerTxUrl('mainnet', DIGEST)).toBe(`https://suiscan.xyz/mainnet/tx/${DIGEST}`);
   });
 });
 

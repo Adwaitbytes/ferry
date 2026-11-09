@@ -1,5 +1,5 @@
 import type { ClientWithCoreApi } from '@mysten/sui/client';
-import { USDC, sui, type SuiServerOptions } from '@suimpp/mpp/server';
+import { USDC, USDC_TESTNET, sui, type Currency, type SuiServerOptions } from '@suimpp/mpp/server';
 import {
   X402_PAYMENT_HEADER,
   X402_PAYMENT_RESPONSE_HEADER,
@@ -14,7 +14,7 @@ import { Challenge, Credential } from 'mppx';
 import { Mppx } from 'mppx/server';
 import { z } from 'zod';
 import { microsToDecimal } from './amount.js';
-import { CHALLENGE_TTL_MS, MAINNET_USDC_TYPE } from './constants.js';
+import { CHALLENGE_TTL_MS, usdcTypeFor, type SuiNetwork } from './constants.js';
 import { BoundDigestStore, refusalOf } from './digest-store.js';
 import { payFailure, type PayFailure } from './errors.js';
 import { normalizeAddress } from './normalize.js';
@@ -23,7 +23,6 @@ import type { PaymentVerifier } from './verifier.js';
 import { checkPayment, commitPayment, type VerifiedPayment } from './verify-payment.js';
 
 export type SuiServerMethod = ReturnType<typeof sui>;
-export type SuiNetwork = 'mainnet' | 'testnet';
 
 export interface GatePaymentsConfig {
   store: PayStore;
@@ -33,6 +32,7 @@ export interface GatePaymentsConfig {
   secretKey: string;
   /** Stable realm, so a challenge issued by one Vercel instance verifies on another. */
   realm: string;
+  /** Payment network from deployment config. Selects the USDC type every check expects. */
   network?: SuiNetwork;
   /** Defaults to the real suimpp server method. Tests inject one that skips the fullnode. */
   createMethod?: (options: SuiServerOptions) => SuiServerMethod;
@@ -70,12 +70,16 @@ const CHAIN_INFO_TTL_MS = 60_000;
  */
 export class GatePayments {
   private readonly network: SuiNetwork;
+  private readonly currency: Currency;
+  private readonly coinType: string;
   private readonly createMethod: (options: SuiServerOptions) => SuiServerMethod;
   private readonly now: () => number;
   private chainInfo: { chain: string; epoch: string; fetchedAtMs: number } | null = null;
 
   constructor(private readonly config: GatePaymentsConfig) {
     this.network = config.network ?? 'mainnet';
+    this.currency = this.network === 'testnet' ? USDC_TESTNET : USDC;
+    this.coinType = usdcTypeFor(this.network);
     this.createMethod = config.createMethod ?? sui;
     this.now = config.now ?? Date.now;
   }
@@ -89,7 +93,7 @@ export class GatePayments {
 
   private mppx(card: Card, store: BoundDigestStore | null) {
     const method = this.createMethod({
-      currency: USDC,
+      currency: this.currency,
       recipient: normalizeAddress(card.ownerAddress),
       network: this.network,
       // Never consulted on the challenge path: only verify() touches the store.
@@ -124,7 +128,7 @@ export class GatePayments {
         createX402Requirements({
           challengeId: challenge.id,
           amount,
-          currency: USDC,
+          currency: this.currency,
           recipient,
           resource,
           network: this.network,
@@ -137,7 +141,7 @@ export class GatePayments {
       error: 'payment_required',
       x402Version: 1,
       accepts,
-      mpp: { challengeId: challenge.id, amountMicros: card.priceMicros.toString(), currency: MAINNET_USDC_TYPE, recipient, expires },
+      mpp: { challengeId: challenge.id, amountMicros: card.priceMicros.toString(), currency: this.coinType, recipient, expires },
     };
     const headers = new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
     const wwwAuthenticate = issued.challenge.headers.get('WWW-Authenticate');
@@ -190,7 +194,7 @@ export class GatePayments {
         querySha256,
         nowMs,
       },
-      { store: this.config.store, verifier: this.config.verifier },
+      { store: this.config.store, verifier: this.config.verifier, coinType: this.coinType },
     );
     if (!checked.ok) return checked;
 
@@ -224,7 +228,7 @@ export class GatePayments {
     const store = new BoundDigestStore(this.config.store, async (digest) => {
       const checked = await checkPayment(
         { challengeId: challenge.id, proof: { kind: 'settled', digest }, card, querySha256, nowMs },
-        { store: this.config.store, verifier: this.config.verifier },
+        { store: this.config.store, verifier: this.config.verifier, coinType: this.coinType },
       );
       return checked.ok ? commitPayment(checked, this.config.store, nowMs) : checked;
     });
@@ -236,7 +240,7 @@ export class GatePayments {
         expected: {
           challengeId: challenge.id,
           amount: microsToDecimal(challenge.priceMicros),
-          currency: USDC,
+          currency: this.currency,
           recipient: challenge.recipient,
           network: this.network,
         },

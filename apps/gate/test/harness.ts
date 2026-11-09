@@ -1,9 +1,9 @@
 import type { PGlite } from '@electric-sql/pglite';
 import type { ClientWithCoreApi } from '@mysten/sui/client';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { GateGuard, GatePayments, MAINNET_USDC_TYPE, PayStore, transactionVerifier, type NormalizedTransaction, type SuiServerMethod } from '@ferry/pay';
+import { GateGuard, GatePayments, MAINNET_USDC_TYPE, PayStore, usdcTypeFor, transactionVerifier, type NormalizedTransaction, type SuiServerMethod } from '@ferry/pay';
 import { freshDatabase } from '@ferry/pay/testing';
-import { USDC as USDC_CURRENCY, sui as suiClientMethod } from '@suimpp/mpp/client';
+import { USDC as USDC_CURRENCY, USDC_TESTNET as USDC_TESTNET_CURRENCY, sui as suiClientMethod } from '@suimpp/mpp/client';
 import { suiCharge } from '@suimpp/mpp/server';
 import { Method, Receipt } from 'mppx';
 import { Mppx as MppxClient } from 'mppx/client';
@@ -49,6 +49,7 @@ export async function harness(over: Partial<GateDeps> = {}): Promise<Harness> {
     verifier: transactionVerifier(async (digest) => (chain.tx?.digest === digest ? chain.tx : null)),
     secretKey: secret('mpp'),
     realm: 'gate.test',
+    ...(over.network ? { network: over.network } : {}),
     // Same schema and store calls as the suimpp server method, without the fullnode.
     createMethod: (options) =>
       Method.toServer(suiCharge, {
@@ -82,15 +83,18 @@ export async function harness(over: Partial<GateDeps> = {}): Promise<Harness> {
   return { app, db, store, statements: sql.statements, logs, recallCalls, chain, recallFails };
 }
 
-export function paidTx(nowMs = Date.now()): NormalizedTransaction {
-  return { digest: DIGEST, status: 'success', sender: PAYER, checkpoint: 1n, timestampMs: nowMs, balanceChanges: [{ owner: OWNER, coinType: MAINNET_USDC_TYPE, amount: 10_000n }] };
+export function paidTx(nowMs = Date.now(), coinType = MAINNET_USDC_TYPE): NormalizedTransaction {
+  return { digest: DIGEST, status: 'success', sender: PAYER, checkpoint: 1n, timestampMs: nowMs, balanceChanges: [{ owner: OWNER, coinType, amount: 10_000n }] };
 }
 
+export const TESTNET_USDC_TYPE = usdcTypeFor('testnet');
+
 /** The real suimpp client builds the credential; `execute` stands in for the chain submit. */
-export async function credentialFor(challengeResponse: Response): Promise<string> {
+export async function credentialFor(challengeResponse: Response, network: 'mainnet' | 'testnet' = 'mainnet'): Promise<string> {
+  const currency = network === 'testnet' ? USDC_TESTNET_CURRENCY : USDC_CURRENCY;
   const mppx = MppxClient.create({
     polyfill: false,
-    methods: [suiClientMethod({ client: {} as ClientWithCoreApi, signer: payerKey, currency: USDC_CURRENCY, execute: async () => ({ digest: DIGEST }) })],
+    methods: [suiClientMethod({ client: {} as ClientWithCoreApi, signer: payerKey, currency, execute: async () => ({ digest: DIGEST }) })],
   });
   return mppx.createCredential(challengeResponse);
 }

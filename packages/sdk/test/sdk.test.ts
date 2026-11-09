@@ -1,11 +1,11 @@
 import type { PGlite } from '@electric-sql/pglite';
-import { MAINNET_USDC_TYPE, PayStore, GatePayments, transactionVerifier, sha256Hex, type SuiServerMethod } from '@ferry/pay';
+import { MAINNET_USDC_TYPE, PayStore, usdcTypeFor, type SuiNetwork, GatePayments, transactionVerifier, sha256Hex, type SuiServerMethod } from '@ferry/pay';
 import { freshDatabase } from '@ferry/pay/testing';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { suiCharge } from '@suimpp/mpp/server';
 import { Method, Receipt } from 'mppx';
-import { afterEach, describe, expect, it } from 'vitest';
-import { FerryError, createFerry, ferry } from '../src/index.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { FerryError, createFerry, explorerTxUrl, ferry, type FerryNetwork } from '../src/index.js';
 
 const CARD_ID = 'q3V7mT0xR9bK2wY5pL8nAg';
 const DIGEST = '9Xq4Ttp6bVg3Jm5r2kWc8zLhN1sQe7YdFaB3uR6vPZmK';
@@ -20,16 +20,18 @@ afterEach(async () => {
 });
 
 /** A miniature Gate built from @ferry/pay so the SDK runs the real 402 round trip. */
-async function gate(price = 10_000n) {
+async function gate(price = 10_000n, networks: { gate?: SuiNetwork; client?: FerryNetwork } = {}) {
+  const coinType = usdcTypeFor(networks.gate ?? 'mainnet');
   const env = await freshDatabase();
   db = env.db;
   const store = new PayStore(env.sql);
   const card = await store.createCard({ id: CARD_ID, ownerAddress: OWNER, publicAccountId: `0x${'ee'.repeat(32)}`, name: 'Food', scopeLabel: 'Food', priceMicros: price, dailyCap: 10, allowedAgents: [] });
   const payments = new GatePayments({
     store,
-    verifier: transactionVerifier(async () => ({ digest: DIGEST, status: 'success', sender: payer.toSuiAddress(), checkpoint: 1n, timestampMs: Date.now(), balanceChanges: [{ owner: OWNER, coinType: MAINNET_USDC_TYPE, amount: price }] })),
+    verifier: transactionVerifier(async () => ({ digest: DIGEST, status: 'success', sender: payer.toSuiAddress(), checkpoint: 1n, timestampMs: Date.now(), balanceChanges: [{ owner: OWNER, coinType, amount: price }] })),
     secretKey: ['hmac', 'q'.repeat(40)].join('-'),
     realm: 'gate.test',
+    ...(networks.gate ? { network: networks.gate } : {}),
     createMethod: (o) =>
       Method.toServer(suiCharge, {
         defaults: { currency: o.currency.type, recipient: o.recipient },
@@ -60,6 +62,7 @@ async function gate(price = 10_000n) {
   const client = createFerry({
     baseUrl: BASE,
     fetch: fetch as typeof globalThis.fetch,
+    ...(networks.client ? { network: networks.client } : {}),
     execute: async () => {
       submitted.push('tx');
       return { digest: DIGEST };
@@ -110,5 +113,40 @@ describe('@ferry/sdk', () => {
     await expect(textError.card(CARD_ID).recall('food', { payer })).rejects.toMatchObject({ code: 'HTTP_503' });
     const thrown = createFerry({ baseUrl: BASE, fetch: async () => Promise.reject(new TypeError('offline')) });
     await expect(thrown.card(CARD_ID).recall('food', { payer })).rejects.toThrow(TypeError);
+  });
+});
+
+describe('@ferry/sdk payment network', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('defaults to mainnet, follows FERRY_SUI_NETWORK, and an explicit option wins', () => {
+    expect(createFerry({ baseUrl: BASE }).network).toBe('mainnet');
+    vi.stubEnv('FERRY_SUI_NETWORK', 'testnet');
+    expect(createFerry({ baseUrl: BASE }).network).toBe('testnet');
+    expect(ferry.network).toBe('testnet');
+    expect(createFerry({ baseUrl: BASE, network: 'mainnet' }).network).toBe('mainnet');
+    vi.stubEnv('FERRY_SUI_NETWORK', 'devnet');
+    expect(() => createFerry({ baseUrl: BASE })).toThrow(expect.objectContaining({ code: 'INVALID_NETWORK' }) as FerryError);
+  });
+
+  it('builds explorer links per network', () => {
+    expect(explorerTxUrl('testnet', DIGEST)).toBe(`https://suiscan.xyz/testnet/tx/${DIGEST}`);
+    expect(explorerTxUrl('mainnet', DIGEST)).toBe(`https://suiscan.xyz/mainnet/tx/${DIGEST}`);
+  });
+
+  it('pays a testnet Gate in Testnet USDC', async () => {
+    const { client, submitted } = await gate(10_000n, { gate: 'testnet', client: 'testnet' });
+    expect((await client.card(CARD_ID).recall('food', { payer })).payment.digest).toBe(DIGEST);
+    expect(submitted).toHaveLength(1);
+  });
+
+  it('refuses a Gate on the other network as WRONG_COIN before paying', async () => {
+    const mainnetGate = await gate(10_000n, { client: 'testnet' });
+    await expect(mainnetGate.client.card(CARD_ID).recall('food', { payer })).rejects.toMatchObject({ code: 'WRONG_COIN' });
+    expect(mainnetGate.submitted).toHaveLength(0);
+    await db?.close();
+    const testnetGate = await gate(10_000n, { gate: 'testnet' });
+    await expect(testnetGate.client.card(CARD_ID).recall('food', { payer })).rejects.toMatchObject({ code: 'WRONG_COIN' });
+    expect(testnetGate.submitted).toHaveLength(0);
   });
 });

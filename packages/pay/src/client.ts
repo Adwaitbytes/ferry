@@ -1,10 +1,10 @@
 import type { ClientWithCoreApi } from '@mysten/sui/client';
 import type { Signer } from '@mysten/sui/cryptography';
-import { USDC, sui, type SuiChargeOptions } from '@suimpp/mpp/client';
+import { USDC, USDC_TESTNET, sui, type SuiChargeOptions } from '@suimpp/mpp/client';
 import { Challenge } from 'mppx';
 import { Mppx } from 'mppx/client';
 import { decimalToMicros } from './amount.js';
-import { MAINNET_USDC_TYPE } from './constants.js';
+import { usdcTypeFor, type SuiNetwork } from './constants.js';
 import { tryNormalizeAddress } from './normalize.js';
 
 /** Codes after which re-sending the same credential (not paying again) can still succeed. */
@@ -25,6 +25,8 @@ export interface PayingFetchOptions {
   suiClient: ClientWithCoreApi;
   /** X-SDK-1: refuse any challenge above this. Required so a hostile server cannot name its price. */
   maxPriceMicros: bigint;
+  /** Network the payer pays on. Must match `suiClient`. Defaults to mainnet. */
+  network?: SuiNetwork;
   fetch?: typeof globalThis.fetch;
   /** Overrides transaction submission, for example to route through a gas station. */
   execute?: SuiChargeOptions['execute'];
@@ -40,11 +42,11 @@ export interface PaidResponse {
   paid: boolean;
 }
 
-/** Validates a 402 before any money moves: Sui charge, Mainnet USDC, price under the cap. */
-export function assertAcceptableChallenge(challenge: Challenge.Challenge, maxPriceMicros: bigint): bigint {
+/** Validates a 402 before any money moves: Sui charge, USDC on our network, price under the cap. */
+export function assertAcceptableChallenge(challenge: Challenge.Challenge, maxPriceMicros: bigint, network: SuiNetwork = 'mainnet'): bigint {
   if (challenge.method !== 'sui' || challenge.intent !== 'charge') throw new PaymentRefusedError('NOT_SUI_CHARGE', 'challenge is not a Sui charge');
   const { amount, currency, recipient } = challenge.request;
-  if (currency !== MAINNET_USDC_TYPE) throw new PaymentRefusedError('WRONG_COIN', 'challenge currency is not Mainnet USDC');
+  if (currency !== usdcTypeFor(network)) throw new PaymentRefusedError('WRONG_COIN', `challenge currency is not ${network} USDC`);
   if (typeof recipient !== 'string' || tryNormalizeAddress(recipient) === null) {
     throw new PaymentRefusedError('BAD_RECIPIENT', 'challenge recipient is not a Sui address');
   }
@@ -82,7 +84,8 @@ export async function payingFetch(url: string, init: RequestInit, options: Payin
   } catch {
     throw new PaymentRefusedError('BAD_CHALLENGE', '402 without a Payment challenge');
   }
-  assertAcceptableChallenge(challenge, options.maxPriceMicros);
+  const network = options.network ?? 'mainnet';
+  assertAcceptableChallenge(challenge, options.maxPriceMicros, network);
 
   // polyfill: false, or mppx replaces globalThis.fetch for the whole process.
   const mppx = Mppx.create({
@@ -90,7 +93,7 @@ export async function payingFetch(url: string, init: RequestInit, options: Payin
       sui({
         client: options.suiClient,
         signer: options.signer,
-        currency: USDC,
+        currency: network === 'testnet' ? USDC_TESTNET : USDC,
         ...(options.execute ? { execute: options.execute } : {}),
       }),
     ],

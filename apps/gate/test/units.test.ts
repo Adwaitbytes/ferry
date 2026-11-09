@@ -34,7 +34,24 @@ const validEnv = {
 
 describe('loadGateConfig (X-GATE-1)', () => {
   it('parses a valid environment with defaults', () => {
-    expect(loadGateConfig(validEnv)).toMatchObject({ GATE_REALM: 'ferry-gate', MEMWAL_RELAYER_URL: 'https://relayer.memory.walrus.xyz' });
+    expect(loadGateConfig(validEnv)).toMatchObject({
+      GATE_REALM: 'ferry-gate',
+      MEMWAL_RELAYER_URL: 'https://relayer.memory.walrus.xyz',
+      GATE_SUI_NETWORK: 'mainnet',
+      SUI_FULLNODE_URL: 'https://fullnode.mainnet.sui.io:443',
+    });
+  });
+  it('GATE_SUI_NETWORK=testnet switches the default fullnode; an explicit one wins; junk is refused', () => {
+    expect(loadGateConfig({ ...validEnv, GATE_SUI_NETWORK: 'testnet' })).toMatchObject({ GATE_SUI_NETWORK: 'testnet', SUI_FULLNODE_URL: 'https://fullnode.testnet.sui.io:443' });
+    expect(loadGateConfig({ ...validEnv, GATE_SUI_NETWORK: 'testnet', SUI_FULLNODE_URL: 'https://node.example' }).SUI_FULLNODE_URL).toBe('https://node.example');
+    expect(() => loadGateConfig({ ...validEnv, GATE_SUI_NETWORK: 'devnet' })).toThrow(/GATE_SUI_NETWORK/);
+  });
+  it('refuses node URLs for the other network', () => {
+    const testnet = { ...validEnv, GATE_SUI_NETWORK: 'testnet' };
+    expect(() => loadGateConfig({ ...testnet, SUI_FULLNODE_URL: 'https://fullnode.mainnet.sui.io:443' })).toThrow(/SUI_FULLNODE_URL points at mainnet/);
+    expect(() => loadGateConfig({ ...testnet, TATUM_SUI_GRPC_URL: 'https://sui-mainnet-grpc.gateway.tatum.io' })).toThrow(/TATUM_SUI_GRPC_URL/);
+    expect(() => loadGateConfig({ ...validEnv, SUI_FULLNODE_URL: 'https://fullnode.testnet.sui.io:443' })).toThrow(/points at testnet/);
+    expect(loadGateConfig({ ...testnet, TATUM_SUI_GRPC_URL: 'https://sui-testnet-grpc.gateway.tatum.io' }).GATE_SUI_NETWORK).toBe('testnet');
   });
   it('names missing variables without echoing values', () => {
     expect(() => loadGateConfig({ ...validEnv, SESSION_SECRET: 'short-secret-value' })).toThrow(/SESSION_SECRET/);

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { GateCardList, GateEarnings, GateNonce, GateOwnerCard, GateProfile, GateRecallResult, GateSession } from '@ferry/core';
-import { siwsMessage } from '@ferry/pay';
-import { CARD_ID, OWNER, PAYER, WEB_ORIGIN, credentialFor, harness, ownerKey, paidTx, strangerKey, type Harness } from './harness.js';
+import { MAINNET_USDC_TYPE, siwsMessage } from '@ferry/pay';
+import { CARD_ID, DIGEST, OWNER, PAYER, TESTNET_USDC_TYPE, WEB_ORIGIN, credentialFor, harness, ownerKey, paidTx, strangerKey, type Harness } from './harness.js';
 
 let h: Harness | undefined;
 afterEach(async () => {
@@ -18,10 +18,10 @@ describe('Gate public routes', () => {
   it('serves health and public card metadata with security headers', async () => {
     h = await harness();
     const health = await h.app.request(get('/health'));
-    expect(await health.json()).toEqual({ ok: true, service: 'ferry-gate' });
+    expect(await health.json()).toEqual({ ok: true, service: 'ferry-gate', network: 'mainnet' });
     const res = await h.app.request(get(`/v1/cards/${CARD_ID}`));
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ id: CARD_ID, name: 'Food', price: '0.01', priceMicros: '10000', recipient: OWNER });
+    expect(await res.json()).toMatchObject({ id: CARD_ID, name: 'Food', price: '0.01', priceMicros: '10000', recipient: OWNER, network: 'mainnet', currency: MAINNET_USDC_TYPE });
     expect(res.headers.get('strict-transport-security')).toContain('max-age=');
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');
     expect(res.headers.get('cache-control')).toBe('no-store');
@@ -257,5 +257,51 @@ describe('microsToUsd', () => {
     const { token } = (await (await h.app.request(post('/v1/auth/session', { message, signature }))).json()) as { token: string };
     const res = await h.app.request(get(`/v1/earnings?owner=${OWNER}`, { Authorization: `Bearer ${token}` }));
     expect(await res.json()).toMatchObject({ totals: { usdcUsd: null, totalUsd: null } });
+  });
+});
+
+describe('Gate on the testnet payment network', () => {
+  async function testnetLogin(harnessed: Harness) {
+    const { nonce } = GateNonce.parse(await (await harnessed.app.request(post('/v1/auth/nonce', {}))).json());
+    const now = Date.now();
+    const message = siwsMessage({ domain: new URL(WEB_ORIGIN).host, address: OWNER, nonce, issuedAt: new Date(now).toISOString(), expiry: new Date(now + 3_600_000).toISOString() });
+    const { signature } = await ownerKey.signPersonalMessage(new TextEncoder().encode(message));
+    return `Bearer ${GateSession.parse(await (await harnessed.app.request(post('/v1/auth/session', { message, signature }))).json()).token}`;
+  }
+
+  it('labels health, card and 402 with testnet and Testnet USDC', async () => {
+    h = await harness({ network: 'testnet' });
+    expect(await (await h.app.request(get('/health'))).json()).toEqual({ ok: true, service: 'ferry-gate', network: 'testnet' });
+    expect(await (await h.app.request(get(`/v1/cards/${CARD_ID}`))).json()).toMatchObject({ network: 'testnet', currency: TESTNET_USDC_TYPE });
+    const challenge = await h.app.request(post(`/v1/cards/${CARD_ID}/recall`, { q: 'food' }));
+    expect(await challenge.json()).toMatchObject({ mpp: { currency: TESTNET_USDC_TYPE } });
+  });
+
+  it('serves a Testnet USDC payment and links earnings to the testnet explorer', async () => {
+    h = await harness({ network: 'testnet' });
+    const challenge = await h.app.request(post(`/v1/cards/${CARD_ID}/recall`, { q: 'food' }));
+    h.chain.tx = paidTx(Date.now(), TESTNET_USDC_TYPE);
+    const paid = await h.app.request(post(`/v1/cards/${CARD_ID}/recall`, { q: 'food' }, { Authorization: await credentialFor(challenge, 'testnet') }));
+    expect(paid.status).toBe(200);
+    const res = await h.app.request(get(`/v1/earnings?owner=${OWNER}`, { Authorization: await testnetLogin(h) }));
+    const body = GateEarnings.parse(await res.json());
+    expect(body.currency).toBe(TESTNET_USDC_TYPE);
+    expect(body.payments[0]?.explorerUrl).toBe(`https://suiscan.xyz/testnet/tx/${DIGEST}`);
+  });
+
+  it('refuses Mainnet USDC on a testnet Gate and Testnet USDC on a mainnet Gate as wrong coin', async () => {
+    for (const [network, coin] of [
+      ['testnet', MAINNET_USDC_TYPE],
+      ['mainnet', TESTNET_USDC_TYPE],
+    ] as const) {
+      await h?.db.close();
+      h = await harness({ network });
+      const challenge = await h.app.request(post(`/v1/cards/${CARD_ID}/recall`, { q: 'food' }));
+      h.chain.tx = paidTx(Date.now(), coin);
+      const res = await h.app.request(post(`/v1/cards/${CARD_ID}/recall`, { q: 'food' }, { Authorization: await credentialFor(challenge, network) }));
+      expect(res.status).toBe(402);
+      expect(await res.json()).toEqual({ error: 'payment_wrong_coin' });
+      expect(h.recallCalls).toHaveLength(0);
+    }
   });
 });

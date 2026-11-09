@@ -3,7 +3,6 @@ import {
   DEFAULT_PRICE_MICROS,
   GatePayments,
   GateGuard,
-  MAINNET_USDC_TYPE,
   MAX_PRICE_MICROS,
   PAY_ERRORS,
   PUBLIC_NAMESPACE,
@@ -16,10 +15,13 @@ import {
   tryNormalizeAddress,
   verifySession,
   verifySiws,
+  explorerTxUrl,
+  usdcTypeFor,
   type Card,
   type PayErrorCode,
   type PayStore,
   type SettleResult,
+  type SuiNetwork,
 } from '@ferry/pay';
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
@@ -40,6 +42,8 @@ export interface GateDeps {
   guard: GateGuard;
   recall: PublicRecall;
   log: GateLog;
+  /** Payment network from deployment config (GATE_SUI_NETWORK). Defaults to mainnet. */
+  network?: SuiNetwork;
   /** The only account the Gate can read, and the address allowed to publish cards over it. */
   publicAccountId: string;
   publicAccountOwner: string;
@@ -69,7 +73,6 @@ type Env = { Variables: { started: number; cardId?: string; receiptId?: string; 
 
 const RECALL_LIMIT = 5;
 const MAX_BODY_BYTES = 8 * 1024;
-const SUISCAN_TX = 'https://suiscan.xyz/mainnet/tx/';
 
 const Address = z.string().refine((value) => tryNormalizeAddress(value) !== null, 'not a Sui address');
 const isPlainLabel = (value: string) => [...value].every((ch) => ch.charCodeAt(0) >= 0x20 && ch.charCodeAt(0) !== 0x7f && ch !== '<' && ch !== '>');
@@ -111,20 +114,20 @@ function payError(c: Context<Env>, code: PayErrorCode): Response {
   return jsonError(c, PAY_ERRORS[code], code.toLowerCase());
 }
 
-function publicCard(card: Card) {
+function publicCard(card: Card, network: SuiNetwork) {
   return {
     id: card.id,
     name: card.name,
     scopeLabel: card.scopeLabel,
     priceMicros: card.priceMicros.toString(),
     price: microsToDecimal(card.priceMicros),
-    currency: MAINNET_USDC_TYPE,
+    currency: usdcTypeFor(network),
     recipient: normalizeAddress(card.ownerAddress),
   };
 }
 
-function ownerCard(card: Card) {
-  return { ...publicCard(card), dailyCap: card.dailyCap, allowedAgents: card.allowedAgents, enabled: card.enabled, killed: card.killed, createdAt: new Date(card.createdAtMs).toISOString() };
+function ownerCard(card: Card, network: SuiNetwork) {
+  return { ...publicCard(card, network), dailyCap: card.dailyCap, allowedAgents: card.allowedAgents, enabled: card.enabled, killed: card.killed, createdAt: new Date(card.createdAtMs).toISOString() };
 }
 
 async function readJson(c: Context<Env>): Promise<unknown> {
@@ -138,6 +141,7 @@ async function readJson(c: Context<Env>): Promise<unknown> {
 
 export function createApp(deps: GateDeps): Hono<Env> {
   const now = deps.now ?? Date.now;
+  const network = deps.network ?? 'mainnet';
   const domain = new URL(deps.webOrigin).host;
   const ownerAddress = normalizeAddress(deps.publicAccountOwner);
   const app = new Hono<Env>();
@@ -206,7 +210,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
     return verifySession(header.slice(7), { secret: deps.sessionSecret, domain, nowMs: now() });
   }
 
-  app.get('/health', (c) => c.json({ ok: true, service: 'ferry-gate' }));
+  app.get('/health', (c) => c.json({ ok: true, service: 'ferry-gate', network }));
 
   // Lets the web app say honestly who may create cards before anyone signs a message. The owner is
   // already public as every card's payment recipient.
@@ -214,7 +218,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
 
   app.get('/v1/cards/:cardId', async (c) => {
     const card = await cardOr(c);
-    return card instanceof Response ? card : c.json(publicCard(card));
+    return card instanceof Response ? card : c.json({ ...publicCard(card, network), network });
   });
 
   const recallRoute = async (c: Context<Env>, rawQuery: unknown): Promise<Response> => {
@@ -294,7 +298,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
     }
     return c.json({
       owner,
-      currency: MAINNET_USDC_TYPE,
+      currency: usdcTypeFor(network),
       totals: {
         count: earnings.count,
         totalMicros: earnings.totalMicros.toString(),
@@ -314,7 +318,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
         amountMicros: p.amountMicros.toString(),
         amount: microsToDecimal(p.amountMicros),
         digest: p.digest,
-        explorerUrl: `${SUISCAN_TX}${p.digest}`,
+        explorerUrl: explorerTxUrl(network, p.digest),
         createdAt: new Date(p.createdAtMs).toISOString(),
       })),
     });
@@ -323,7 +327,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
   app.get('/v1/manage/cards', async (c) => {
     const address = await session(c);
     if (!address) return jsonError(c, 401, 'unauthorized');
-    return c.json({ cards: (await deps.store.listCardsByOwner(address)).map(ownerCard) });
+    return c.json({ cards: (await deps.store.listCardsByOwner(address)).map((card) => ownerCard(card, network)) });
   });
 
   app.post('/v1/manage/cards', async (c) => {
@@ -344,7 +348,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
       allowedAgents: (parsed.data.allowedAgents ?? []).map(normalizeAddress),
     });
     c.set('cardId', card.id);
-    return c.json(ownerCard(card), 201);
+    return c.json(ownerCard(card, network), 201);
   });
 
   app.patch('/v1/manage/cards/:cardId', async (c) => {
@@ -357,7 +361,7 @@ export function createApp(deps: GateDeps): Hono<Env> {
     const { allowedAgents, ...rest } = parsed.data;
     const patch = Object.fromEntries(Object.entries(rest).filter(([, value]) => value !== undefined));
     const card = await deps.store.updateCard(id, address, { ...patch, ...(allowedAgents ? { allowedAgents: allowedAgents.map(normalizeAddress) } : {}) });
-    return card ? c.json(ownerCard(card)) : jsonError(c, 404, 'not_found');
+    return card ? c.json(ownerCard(card, network)) : jsonError(c, 404, 'not_found');
   });
 
   app.post('/v1/manage/cards/:cardId/kill', async (c) => {

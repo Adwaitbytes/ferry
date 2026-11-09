@@ -9,12 +9,15 @@ import { tatumVerifier } from './verifier.js';
 
 // Vercel zero-config entry (src/index.ts, default export of a Hono app), Node runtime.
 const config = loadGateConfig(process.env);
+const network = config.GATE_SUI_NETWORK;
+// The chain service only verifies payments and prices here, so it follows the payment network.
+const chainEnv = { ...process.env, SUI_NETWORK: network };
 const store = new PayStore(neonSqlClient(config.DATABASE_URL));
 // Lazy so the Gate still answers health checks and 402 challenges while the Tatum key is being
 // provisioned; verification then fails closed (NOT_FOUND, digest never consumed).
 const chain = {
-  verifyUsdcPayment: (...args: Parameters<ChainService['verifyUsdcPayment']>) => getChainService(process.env).verifyUsdcPayment(...args),
-  getUsdPrice: (symbol: string) => getChainService(process.env).getUsdPrice(symbol),
+  verifyUsdcPayment: (...args: Parameters<ChainService['verifyUsdcPayment']>) => getChainService(chainEnv).verifyUsdcPayment(...args),
+  getUsdPrice: (symbol: string) => getChainService(chainEnv).getUsdPrice(symbol),
 };
 
 const app = createApp({
@@ -25,9 +28,9 @@ const app = createApp({
     verifier: tatumVerifier(chain),
     secretKey: config.GATE_MPP_SECRET_KEY,
     realm: config.GATE_REALM,
-    network: 'mainnet',
+    network,
     // x402 needs a node that executes the payer-signed bytes; Tatum then re-verifies the result.
-    x402Client: new SuiGrpcClient({ network: 'mainnet', baseUrl: config.SUI_FULLNODE_URL }),
+    x402Client: new SuiGrpcClient({ network, baseUrl: config.SUI_FULLNODE_URL }),
   }),
   recall: memwalPublicRecall({
     delegateKey: config.GATE_DELEGATE_PRIVATE_KEY,
@@ -35,6 +38,7 @@ const app = createApp({
     relayerUrl: config.MEMWAL_RELAYER_URL,
   }),
   log: createGateLogger((line) => process.stdout.write(`${line}\n`)),
+  network,
   publicAccountId: config.GATE_PUBLIC_ACCOUNT_ID,
   publicAccountOwner: config.GATE_PUBLIC_ACCOUNT_OWNER,
   webOrigin: config.NEXT_PUBLIC_FERRY_WEB_ORIGIN,

@@ -12,13 +12,24 @@ export type { ExecutePayment, GateRecallResult };
 
 /** 0.01 USDC. X-SDK-1: the SDK never pays more than this unless the caller raises it. */
 export const DEFAULT_MAX_PRICE_MICROS = 10_000n;
-const MAINNET_FULLNODE = 'https://fullnode.mainnet.sui.io:443';
+/** Payment network. Memory is always on Walrus Mainnet; only the USDC payment moves. */
+export type FerryNetwork = 'mainnet' | 'testnet';
+const FULLNODES: Readonly<Record<FerryNetwork, string>> = {
+  mainnet: 'https://fullnode.mainnet.sui.io:443',
+  testnet: 'https://fullnode.testnet.sui.io:443',
+};
 
 export interface FerryOptions {
   /** Gate base URL. HTTPS required, except localhost for development. */
   baseUrl: string;
   fetch?: typeof globalThis.fetch;
-  /** Sui client used to submit the payment. Defaults to the public Mainnet fullnode. */
+  /**
+   * Network to pay on, which fixes the fullnode and the only USDC type the SDK will pay in. A Gate
+   * asking for another network's USDC is refused with WRONG_COIN. Defaults to FERRY_SUI_NETWORK,
+   * then mainnet.
+   */
+  network?: FerryNetwork;
+  /** Sui client used to submit the payment. Defaults to the public fullnode of `network`. */
   suiClient?: ClientWithCoreApi;
   /** Replaces payment submission, for example to route through a sponsored gas station. */
   execute?: ExecutePayment;
@@ -40,6 +51,8 @@ export const CardInfo = z.object({
   price: z.string(),
   currency: z.string(),
   recipient: z.string(),
+  /** Sent by Gates that know their payment network. Older Gates omit it (mainnet). */
+  network: z.enum(['mainnet', 'testnet']).optional(),
 });
 export type CardInfo = z.infer<typeof CardInfo>;
 
@@ -77,16 +90,36 @@ export interface FerryCard {
 }
 
 export interface Ferry {
+  readonly network: FerryNetwork;
   card(id: string): FerryCard;
+}
+
+function readEnv(name: string): string | undefined {
+  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+  return env?.[name];
+}
+
+function resolveNetwork(option: FerryNetwork | undefined): FerryNetwork {
+  const raw = option ?? readEnv('FERRY_SUI_NETWORK')?.trim().toLowerCase();
+  if (raw === undefined || raw === '' || raw === 'mainnet') return 'mainnet';
+  if (raw === 'testnet') return 'testnet';
+  throw new FerryError('INVALID_NETWORK', 'network must be mainnet or testnet');
+}
+
+/** Suiscan link for a payment digest on the given network. */
+export function explorerTxUrl(network: FerryNetwork, digest: string): string {
+  return `https://suiscan.xyz/${network}/tx/${encodeURIComponent(digest)}`;
 }
 
 export function createFerry(options: FerryOptions): Ferry {
   const base = assertBaseUrl(options.baseUrl);
+  const network = resolveNetwork(options.network);
   const doFetch = options.fetch ?? globalThis.fetch.bind(globalThis);
   let suiClient = options.suiClient;
-  const client = (): ClientWithCoreApi => (suiClient ??= new SuiGrpcClient({ network: 'mainnet', baseUrl: MAINNET_FULLNODE }));
+  const client = (): ClientWithCoreApi => (suiClient ??= new SuiGrpcClient({ network, baseUrl: FULLNODES[network] }));
 
   return {
+    network,
     card(id) {
       if (!CardId.safeParse(id).success) throw new FerryError('INVALID_CARD_ID', 'card id must be 22 base64url characters');
       const cardUrl = new URL(`v1/cards/${id}`, base.href.endsWith('/') ? base : new URL(`${base.href}/`));
@@ -113,6 +146,7 @@ export function createFerry(options: FerryOptions): Ferry {
               signer: recallOptions.payer,
               suiClient: client(),
               maxPriceMicros: recallOptions.maxPriceMicros ?? DEFAULT_MAX_PRICE_MICROS,
+              network,
               fetch: doFetch,
               ...(options.execute ? { execute: options.execute } : {}),
             });
@@ -134,12 +168,13 @@ export function createFerry(options: FerryOptions): Ferry {
   };
 }
 
-function envGateUrl(): string | undefined {
-  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
-  return env?.['FERRY_GATE_URL'];
-}
-
-/** Ready-made client. Reads FERRY_GATE_URL when it exists, else a local Gate (`vercel dev`). */
+/**
+ * Ready-made client. Reads FERRY_GATE_URL when it exists, else a local Gate (`vercel dev`), and
+ * FERRY_SUI_NETWORK for the payment network.
+ */
 export const ferry: Ferry = {
-  card: (id) => createFerry({ baseUrl: envGateUrl() ?? 'http://localhost:3001' }).card(id),
+  get network() {
+    return resolveNetwork(undefined);
+  },
+  card: (id) => createFerry({ baseUrl: readEnv('FERRY_GATE_URL') ?? 'http://localhost:3001' }).card(id),
 };

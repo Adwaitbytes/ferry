@@ -18,7 +18,7 @@ export {
   type PaymentTransaction,
   type TatumSuiOptions,
 } from './rpc.js';
-export { createTatumGrpcClient, tatumApiKeyFromEnv, tatumGrpcHost, MissingApiKeyError } from './tatum.js';
+export { createTatumGrpcClient, tatumApiKeyFromEnv, tatumApiKeyOrNull, tatumGrpcHost, suiNetworkFromEnv, MissingApiKeyError } from './tatum.js';
 export {
   ChainReaders,
   decodeAccount,

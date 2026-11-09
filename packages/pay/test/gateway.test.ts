@@ -1,11 +1,12 @@
 import type { PGlite } from '@electric-sql/pglite';
 import type { ClientWithCoreApi } from '@mysten/sui/client';
-import { USDC as USDC_CURRENCY, sui as suiClientMethod } from '@suimpp/mpp/client';
+import { USDC as USDC_CURRENCY, USDC_TESTNET as USDC_TESTNET_CURRENCY, sui as suiClientMethod } from '@suimpp/mpp/client';
 import { suiCharge, type SuiServerOptions } from '@suimpp/mpp/server';
 import { X402_PAYMENT_RESPONSE_HEADER, buildX402SignedPayment, type X402Requirements } from '@suimpp/mpp/x402';
 import { Method, Receipt } from 'mppx';
 import { Mppx as MppxClient } from 'mppx/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import { MAINNET_USDC_TYPE, TESTNET_USDC_TYPE, type SuiNetwork } from '../src/constants.js';
 import { GatePayments, type PaymentRequiredBody, type SuiServerMethod } from '../src/gateway.js';
 import type { NormalizedTransaction } from '../src/verifier.js';
 import { DIGEST, PAYER, Q_SHA, RECIPIENT, USDC, attackerKey, payerKey, setup } from './fixtures.js';
@@ -54,7 +55,9 @@ function fakeSuiClient(executed: { digest: string; amount: string; success?: boo
   } as unknown as ClientWithCoreApi;
 }
 
-async function gate(options: { chainOk?: () => boolean; tx?: (now: number) => NormalizedTransaction; x402?: ClientWithCoreApi } = {}) {
+async function gate(
+  options: { chainOk?: () => boolean; tx?: (now: number) => NormalizedTransaction; x402?: ClientWithCoreApi; network?: SuiNetwork } = {},
+) {
   const env = await setup();
   db = env.db;
   const now = Date.now();
@@ -66,15 +69,20 @@ async function gate(options: { chainOk?: () => boolean; tx?: (now: number) => No
     realm: 'gate.test',
     createMethod: (o) => offlineMethod(o, options.chainOk ?? (() => true)),
     ...(options.x402 ? { x402Client: options.x402 } : {}),
+    ...(options.network ? { network: options.network } : {}),
   });
   return { ...env, payments };
 }
 
 /** Real suimpp client method; `execute` replaces the chain submit so no funds move. */
-async function mppCredential(challengeResponse: Response, key = payerKey): Promise<string> {
+async function mppCredential(
+  challengeResponse: Response,
+  key = payerKey,
+  currency: typeof USDC_CURRENCY | typeof USDC_TESTNET_CURRENCY = USDC_CURRENCY,
+): Promise<string> {
   const mppx = MppxClient.create({
     polyfill: false,
-    methods: [suiClientMethod({ client: {} as ClientWithCoreApi, signer: key, currency: USDC_CURRENCY, execute: async () => ({ digest: DIGEST }) })],
+    methods: [suiClientMethod({ client: {} as ClientWithCoreApi, signer: key, currency, execute: async () => ({ digest: DIGEST }) })],
   });
   return mppx.createCredential(challengeResponse);
 }
@@ -157,6 +165,50 @@ describe('GatePayments MPP', () => {
     expect(GatePayments.dialectOf(new Request(RESOURCE, { headers: { 'X-PAYMENT': 'x' } }))).toBe('x402');
     expect(GatePayments.dialectOf(new Request(RESOURCE, { headers: { Authorization: 'Bearer abc' } }))).toBeNull();
     expect(GatePayments.dialectOf(new Request(RESOURCE))).toBeNull();
+  });
+});
+
+describe('GatePayments payment network', () => {
+  const paidIn = (coinType: string) => (now: number): NormalizedTransaction => ({
+    digest: DIGEST,
+    status: 'success',
+    sender: PAYER,
+    checkpoint: 1n,
+    timestampMs: now,
+    balanceChanges: [{ owner: RECIPIENT, coinType, amount: 10_000n }],
+  });
+
+  it('a testnet Gate asks for Testnet USDC in both dialects', async () => {
+    const g = await gate({ network: 'testnet', x402: fakeSuiClient({ digest: DIGEST, amount: '10000' }) });
+    const issued = await g.payments.paymentRequired(g.card, RESOURCE);
+    const body = (await issued.response.json()) as PaymentRequiredBody;
+    expect(body.mpp.currency).toBe(TESTNET_USDC_TYPE);
+    expect(body.accepts[0]).toMatchObject({ network: 'sui:testnet', asset: TESTNET_USDC_TYPE });
+  });
+
+  it('a testnet Gate settles a Testnet USDC payment', async () => {
+    const g = await gate({ network: 'testnet', tx: paidIn(TESTNET_USDC_TYPE) });
+    const credential = await mppCredential((await g.payments.paymentRequired(g.card, RESOURCE)).response, payerKey, USDC_TESTNET_CURRENCY);
+    expect(await g.payments.settle(new Request(RESOURCE, { headers: { Authorization: credential } }), g.card, Q_SHA)).toMatchObject({ ok: true, digest: DIGEST });
+  });
+
+  it('a testnet Gate refuses Mainnet USDC as WRONG_COIN', async () => {
+    const g = await gate({ network: 'testnet', tx: paidIn(MAINNET_USDC_TYPE) });
+    const credential = await mppCredential((await g.payments.paymentRequired(g.card, RESOURCE)).response, payerKey, USDC_TESTNET_CURRENCY);
+    expect(await g.payments.settle(new Request(RESOURCE, { headers: { Authorization: credential } }), g.card, Q_SHA)).toMatchObject({
+      ok: false,
+      code: 'PAYMENT_WRONG_COIN',
+    });
+    expect(await g.store.isDigestUsed(DIGEST)).toBe(false);
+  });
+
+  it('a mainnet Gate refuses Testnet USDC as WRONG_COIN', async () => {
+    const g = await gate({ tx: paidIn(TESTNET_USDC_TYPE) });
+    const credential = await mppCredential((await g.payments.paymentRequired(g.card, RESOURCE)).response);
+    expect(await g.payments.settle(new Request(RESOURCE, { headers: { Authorization: credential } }), g.card, Q_SHA)).toMatchObject({
+      ok: false,
+      code: 'PAYMENT_WRONG_COIN',
+    });
   });
 });
 

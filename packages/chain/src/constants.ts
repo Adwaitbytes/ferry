@@ -29,4 +29,21 @@ export const WALRUS_TYPE_PACKAGE_ID = '0xfdc88f7d7cf30afab2f82e8380d11ee8f70efb9
 export const WALRUS_BLOB_TYPE = `${WALRUS_TYPE_PACKAGE_ID}::blob::Blob`;
 
 export const TATUM_SUI_GRPC_HOST = 'sui-mainnet-grpc.gateway.tatum.io:443';
+
+/**
+ * Payment networks the chain service can verify on. Walrus memory reads only make sense on
+ * mainnet; testnet exists so a paid recall can be shown without real USDC.
+ */
+export const PAYMENT_NETWORKS = ['mainnet', 'testnet'] as const;
+export type PaymentNetwork = (typeof PAYMENT_NETWORKS)[number];
+
+/** Circle USDC on Sui Testnet (developers.circle.com/stablecoins/usdc-contract-addresses). */
+export const TESTNET_USDC_COIN_TYPE = '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC';
+export const USDC_COIN_TYPES: Readonly<Record<PaymentNetwork, string>> = { mainnet: USDC_COIN_TYPE, testnet: TESTNET_USDC_COIN_TYPE };
+
+/** Tatum's Sui gRPC gateways (docs.tatum.io/changelog/sui-grpc-available-tatum). */
+export const TATUM_SUI_GRPC_HOSTS: Readonly<Record<PaymentNetwork, string>> = {
+  mainnet: TATUM_SUI_GRPC_HOST,
+  testnet: 'sui-testnet-grpc.gateway.tatum.io:443',
+};
 export const TATUM_API_BASE = 'https://api.tatum.io';
