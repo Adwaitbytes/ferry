@@ -1,4 +1,4 @@
-import { availableDeskProviders, chooseProvider, deskModel, streamDesk } from '@ferry/ai';
+import { availableDeskProviders, chooseProvider, deskModel, deskViaInteractions, streamDesk, usesInteractionsKey } from '@ferry/ai';
 import { DeskRequest } from '@ferry/core';
 import { clientIp, json, log, readCapped, takeToken } from '@/server/guard';
 
@@ -25,5 +25,13 @@ export async function POST(req: Request): Promise<Response> {
   const provider = chooseProvider(parsed.data, availableDeskProviders(process.env));
   if (!provider) return fail(503, 'NO_PROVIDER');
   log({ route: 'desk', status: 200, durationMs: Date.now() - started, code: provider });
+  const googleKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (provider === 'gemini' && googleKey && usesInteractionsKey(googleKey)) {
+    try {
+      return await deskViaInteractions(parsed.data, { apiKey: googleKey, served: provider, signal: req.signal });
+    } catch {
+      return fail(502, 'PROVIDER_FAILED');
+    }
+  }
   return streamDesk(parsed.data, deskModel(provider, process.env), provider, req.signal);
 }

@@ -6,7 +6,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const SKIP_DIRS = new Set(['node_modules', '.git', '.next', '.next-e2e', '.output', '.wxt', 'dist', 'coverage', '.turbo', 'fixtures', 'test-results', 'playwright-report', 'lighthouse-report', '.cache', '.vercel', 'private-data']);
+const SKIP_DIRS = new Set(['media', 'node_modules', '.git', '.next', '.next-e2e', '.output', '.wxt', 'dist', 'coverage', '.turbo', 'fixtures', 'test-results', 'playwright-report', 'lighthouse-report', '.cache', '.vercel', 'private-data']);
 const SKIP_FILES = new Set(['docs/PRD.md', 'scripts/copycheck.mjs', 'pnpm-lock.yaml']);
 const COPY_EXT = new Set(['.md', '.mdx', '.tsx', '.html', '.txt']);
 const DASH_EXT = new Set([...COPY_EXT, '.ts', '.mjs', '.js', '.json', '.css', '.yml', '.yaml']);
