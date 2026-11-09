@@ -11,7 +11,7 @@ Every AI you use remembers you. None of that memory is yours.
 
 I built Ferry: one memory you own, stored on @WalrusProtocol, carried across ChatGPT, Claude and Gemini. Every fact shows where it came from.
 
-{{FILL: video URL}}
+https://youtu.be/GNxrTnCBfXA
 
 **2/8**
 Rescue: drop your ChatGPT, Claude or Gemini export. Ferry parses it on your device, pulls out the facts you actually said, and shows each with its quote.
@@ -64,7 +64,7 @@ Under the hood: Walrus Memory for storage with receipts, Seal for the encrypted 
 
 I was careful about what I claim. Standard mode is not end to end encrypted, and forget means hidden, not deleted, because Walrus has no delete. Both are spelled out in the README.
 
-Demo: {{FILL: video URL}}
+Demo: https://youtu.be/GNxrTnCBfXA
 Write up: https://dev.to/adwaitkeshari/ferry-one-ai-memory-you-own-carried-across-chatgpt-claude-and-gemini-on-walrus-3f67
 Code (MIT): https://github.com/Adwaitbytes/ferry
 

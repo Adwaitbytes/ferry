@@ -10,7 +10,7 @@ Ferry is my fix. It takes the memory those apps hold about you, moves it into a 
 
 - Repo: https://github.com/Adwaitbytes/ferry
 - Live app: https://ferry-memory.vercel.app
-- Demo video: {{FILL: video URL}}
+- Demo video: https://youtu.be/GNxrTnCBfXA
 
 ![Ferry offering 6 facts inside Gemini](https://raw.githubusercontent.com/Adwaitbytes/ferry/main/docs/media/real-gemini-chip.jpg)
 

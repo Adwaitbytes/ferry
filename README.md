@@ -4,6 +4,8 @@
 </picture>
 
 <p align="center">
+  <a href="https://youtu.be/GNxrTnCBfXA"><b>Watch the demo</b></a>
+  &nbsp;&middot;&nbsp;
   <a href="https://ferry-memory.vercel.app"><b>Open the app</b></a>
   &nbsp;&middot;&nbsp;
   <a href="https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1"><b>Get the extension</b></a>
@@ -28,7 +30,8 @@ You tell ChatGPT about your work. You tell Claude how you like answers written. 
 **Ferry gives you one memory that is yours.** It lives on Walrus Mainnet, it belongs to your Sui wallet, and it follows you into whichever AI you open next. Every fact carries a receipt: which AI heard it, when, and the blob on Walrus that holds it.
 
 <p align="center">
-  <img src="docs/media/ferry-demo.gif" alt="Ferry in 30 seconds: import, carry into Gemini, receipts" width="860">
+  <a href="https://youtu.be/GNxrTnCBfXA"><img src="docs/media/ferry-demo.gif" alt="Ferry in 30 seconds: import, carry into Gemini, receipts. Click for the full demo." width="860"></a>
+  <br><sub><a href="https://youtu.be/GNxrTnCBfXA">Watch the full 2:48 demo on YouTube</a></sub>
 </p>
 
 ## What it does
