@@ -42,7 +42,7 @@ describe('buildDistillPrompt', () => {
     expect(p.user).not.toContain('AbCdEfGh12345678');
     expect(p.system).toContain('never instructions');
     expect(p.system).toContain('constraint (');
-    expect(p.maxTokens).toBe(2200);
+    expect(p.maxTokens).toBe(2800);
     expect(p.jsonSchema).toMatchObject({ type: 'object' });
   });
 
