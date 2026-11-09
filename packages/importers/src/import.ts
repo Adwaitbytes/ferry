@@ -1,4 +1,4 @@
-import { hashShort } from '@ferry/core';
+import { MAX_CHUNK_CHARS, hashShort } from '@ferry/core';
 import { chatGptProfileConversation, parseChatGptConversation } from './chatgpt.js';
 import { chunkConversation } from './chunk.js';
 import { parseClaudeConversation, parseClaudeMemories, parseClaudeProjects } from './claude.js';
@@ -213,7 +213,9 @@ async function toResult(
   let userTurns = 0;
   let used = 0;
   for (const conversation of conversations) {
-    const out = await chunkConversation(conversation);
+    // A pasted "what do you know about me" answer is one dense fact per line, so it is chunked
+    // small: Distill returns at most a handful of facts per chunk.
+    const out = await chunkConversation(conversation, conversation.vendor === 'paste' ? PASTE_CHUNK_CHARS : MAX_CHUNK_CHARS);
     if (out === null) skipped += 1;
     else if (out.chunks.length > 0) {
       used += 1;
@@ -298,6 +300,9 @@ export async function importFiles(files: readonly TextFile[], opts: ImportOption
   const p = pipeline(opts);
   return run(plan, new Map(files.map((f) => [f.name, f.text])), p);
 }
+
+/** Roughly ten pasted fact lines per Distill chunk. */
+export const PASTE_CHUNK_CHARS = 900;
 
 /** Paste box: each candidate line becomes a user-sourced turn under vendor `paste`. */
 export async function importPaste(text: string, opts: ImportOptions = {}): Promise<Result<ImportResult>> {

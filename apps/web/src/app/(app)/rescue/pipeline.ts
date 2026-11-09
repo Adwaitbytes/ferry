@@ -105,9 +105,12 @@ export async function distillBatch(chunks: readonly DistillChunk[], signal: Abor
   return parsed.data.facts;
 }
 
+/** Four chunks per Distill call keeps each model response well inside the server timeout. */
+export const RESCUE_BATCH = Math.min(4, MAX_DISTILL_CHUNKS);
+
 export function batches<T>(items: readonly T[]): T[][] {
   const out: T[][] = [];
-  for (let i = 0; i < items.length; i += MAX_DISTILL_CHUNKS) out.push(items.slice(i, i + MAX_DISTILL_CHUNKS));
+  for (let i = 0; i < items.length; i += RESCUE_BATCH) out.push(items.slice(i, i + RESCUE_BATCH));
   return out;
 }
 

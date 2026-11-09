@@ -110,7 +110,7 @@ export function buildDistillPrompt(chunks: readonly DistillChunk[]): LlmJsonRequ
     user: promptChunks(chunks),
     schemaName: 'ferry_distill',
     jsonSchema: DISTILL_JSON_SCHEMA,
-    maxTokens: Math.min(4000, 400 + 300 * chunks.length),
+    maxTokens: Math.min(8000, 400 + 900 * chunks.length),
   };
 }
 

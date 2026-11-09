@@ -39,6 +39,7 @@ function piecesOf(conversation: NormalizedConversation): Piece[] {
  */
 export async function chunkConversation(
   conversation: NormalizedConversation,
+  maxChars: number = MAX_CHUNK_CHARS,
 ): Promise<{ chunks: DistillChunk[]; sources: ChunkSource[] } | null> {
   if (conversation.id.length === 0 || conversation.id.length > MAX_CONVERSATION_ID) return null;
   const pieces = piecesOf(conversation);
@@ -80,7 +81,7 @@ export async function chunkConversation(
 
   for (const piece of pieces) {
     const added = (group.length > 0 ? SEPARATOR.length : 0) + piece.text.length;
-    if (length + added > MAX_CHUNK_CHARS) flush();
+    if (length + added > maxChars) flush();
     length += (group.length > 0 ? SEPARATOR.length : 0) + piece.text.length;
     group.push(piece);
   }
