@@ -79,6 +79,12 @@ function useLibrary() {
     void load();
   }, [load]);
 
+  // The list is read from the extension's local index, so pages are cheap: keep loading until
+  // every fact is here, so counts and filters always cover the whole library.
+  useEffect(() => {
+    if (cursor && state.kind === 'ready' && !loadingMore) void load(cursor);
+  }, [cursor, state.kind, loadingMore, load]);
+
   return { items, setItems, cursor, state, loadingMore, reload: () => void load(), loadMore: () => cursor && void load(cursor) };
 }
 

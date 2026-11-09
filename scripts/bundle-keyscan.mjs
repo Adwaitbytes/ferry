@@ -18,7 +18,7 @@ const SHAPES = [
   ['sui private key', /suiprivkey1[0-9a-z]{50,}/],
   ['postgres url', /postgres(ql)?:\/\/[^\s"']+:[^\s"']+@/],
   ['pem private key', /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
-  ['tatum key', /\bt-[0-9a-f]{24}-[0-9a-f]{32}\b/],
+  ['tatum key', /\bt-[0-9a-f]{24}-[0-9a-f]{20,40}\b/],
 ];
 
 function loadEnvFile(path) {
