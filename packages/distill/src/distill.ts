@@ -193,13 +193,22 @@ export function parseDistillOutput(raw: unknown, chunks: readonly DistillChunk[]
 export async function distill(chunks: readonly DistillChunk[], llm: LlmJson): Promise<DistillResult> {
   const request = StrictDistillRequest.safeParse({ chunks });
   if (!request.success) throw new DistillError('INVALID_REQUEST');
-  let raw: unknown;
+  return distillChecked(request.data.chunks, llm);
+}
+
+/**
+ * A long multi-chunk answer can hit the output cap and come back as truncated JSON. Rather than
+ * failing the whole batch, a failed call is split in half and retried, down to single chunks.
+ */
+async function distillChecked(chunks: readonly DistillChunk[], llm: LlmJson): Promise<DistillResult> {
   try {
-    raw = await llm(buildDistillPrompt(request.data.chunks));
+    return parseDistillOutput(await llm(buildDistillPrompt(chunks)), chunks);
   } catch {
-    throw new DistillError('LLM_FAILED');
+    if (chunks.length < 2) throw new DistillError('LLM_FAILED');
+    const mid = Math.ceil(chunks.length / 2);
+    const [left, right] = await Promise.all([distillChecked(chunks.slice(0, mid), llm), distillChecked(chunks.slice(mid), llm)]);
+    return { facts: [...left.facts, ...right.facts], dropped: [...left.dropped, ...right.dropped] };
   }
-  return parseDistillOutput(raw, request.data.chunks);
 }
 
 /** The wire shape of a screened fact (core DistilledFact): suspicion is folded into `injectionSuspect`. */

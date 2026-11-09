@@ -158,3 +158,34 @@ describe('conversions', () => {
     await expect(toCandidateFact(screened, CHUNKS[1] as DistillChunk)).rejects.toMatchObject({ code: 'INVALID_REQUEST' });
   });
 });
+
+describe('distill batch splitting', () => {
+  it('splits a failing multi-chunk batch and keeps the facts from the halves that succeed', async () => {
+    const chunk = (id: string, text: string) => ({
+      chunkId: id,
+      vendor: 'paste' as const,
+      conversationIdHash: 'AbCdEfGh12345678',
+      messageAt: '2026-11-08T10:00:00Z',
+      userText: text,
+    });
+    const chunks = [chunk('a', 'I am vegetarian.'), chunk('b', 'I live in Pune.')];
+    let calls = 0;
+    const llm = async (req: { user: string }) => {
+      calls += 1;
+      if (req.user.includes('"a"') && req.user.includes('"b"')) throw new Error('truncated');
+      if (req.user.includes('"a"')) return { facts: [{ chunkId: 'a', text: 'Vegetarian.', type: 'identity', quote: 'I am vegetarian', confidence: 0.9, sensitive: [], injectionSuspect: false }] };
+      throw new Error('still bad');
+    };
+    await expect(distill(chunks, llm)).rejects.toThrow();
+    const ok = async (req: { user: string }) => {
+      calls += 1;
+      if (req.user.includes('"a"') && req.user.includes('"b"')) throw new Error('truncated');
+      const id = req.user.includes('"a"') ? 'a' : 'b';
+      const quote = id === 'a' ? 'I am vegetarian' : 'I live in Pune';
+      return { facts: [{ chunkId: id, text: `${quote}.`, type: 'identity', quote, confidence: 0.9, sensitive: [], injectionSuspect: false }] };
+    };
+    const result = await distill(chunks, ok);
+    expect(result.facts.map((f) => f.chunkId).sort()).toEqual(['a', 'b']);
+    expect(calls).toBeGreaterThan(3);
+  });
+});
