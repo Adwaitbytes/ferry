@@ -2,35 +2,33 @@
 title: "Ferry: one AI memory you own, carried across ChatGPT, Claude and Gemini on Walrus"
 published: false
 tags: walrus, sui, tatum, hackathon
-cover_image: {{FILL: cover image URL, 1000x420}}
-canonical_url: {{FILL: dev.to URL after publish, or remove}}
 ---
 
-I use ChatGPT, Claude and Gemini every week. Each of them knows things about me: that I don't eat cashews, what I'm building, how I like code reviewed. None of them knows what the others know, and I don't own any of it. When I switch, I start over.
+I use ChatGPT, Claude and Gemini every week. Each of them knows things about me: what I'm building, which stack I reach for, how I like answers written. None of them knows what the others know, and I don't own any of it. When I switch, I start over.
 
-Ferry is our fix. It takes the memory those apps hold about you, moves it into a store you own on Walrus Mainnet, and brings it back into whichever AI you open next. Every fact carries a receipt that shows where it came from. We built it in about 36 hours for Total Recall, the Tatum x Walrus hackathon.
+Ferry is my fix. It takes the memory those apps hold about you, moves it into a store you own on Walrus Mainnet, and brings it back into whichever AI you open next. Every fact carries a receipt that shows where it came from. I built it in about 36 hours for Total Recall, the Tatum x Walrus hackathon.
 
 - Repo: https://github.com/Adwaitbytes/ferry
 - Live app: https://ferry-memory.vercel.app
 - Demo video: {{FILL: video URL}}
 
-{{FILL: screenshot of the landing page with live Mainnet counters}}
+![Ferry offering 6 facts inside Gemini](https://raw.githubusercontent.com/Adwaitbytes/ferry/main/docs/media/real-gemini-chip.jpg)
 
 ## Why now
 
-Walrus has been making this argument all week. Their Nov 5 article asked who actually owns the AI memory everyone shipped in October, and argued that memory you can't take with you is just storage rented from one vendor ({{FILL: link}}). On Nov 8 they posted that a good assistant remembers what you said and a great one shows where it heard it ({{FILL: link}}). On Nov 4, that agents need context that stays current, not outdated decisions ({{FILL: link}}).
+Walrus has been making this argument all week. Their Nov 5 article asked who actually owns the AI memory everyone shipped in October, and argued that memory you can't take with you is just storage rented from one vendor ([Walrus](https://blog.walrus.xyz/memwal-long-term-memory-for-ai-agents/)). On Nov 8 they posted that a good assistant remembers what you said and a great one shows where it heard it ([Walrus](https://blog.walrus.xyz/memwal-long-term-memory-for-ai-agents/)). On Nov 4, that agents need context that stays current, not outdated decisions ([Walrus](https://blog.walrus.xyz/memwal-long-term-memory-for-ai-agents/)).
 
 We read those as a spec. Portable, with receipts, and current.
 
 ## What Ferry does
 
-**Rescue.** Drop your ChatGPT, Claude or Gemini export into the web app. The ZIP is parsed on your device in a Web Worker and never uploaded. Ferry keeps only what you typed, asks a model to pull out durable facts, and shows each one next to the exact quote it came from. You approve, edit or discard. Approved facts go to Walrus Memory. On my own export that was {{FILL: real import count from Adwait's export}} facts.
+**Rescue.** Drop your ChatGPT, Claude or Gemini export into the web app. The ZIP is parsed on your device in a Web Worker and never uploaded. Ferry keeps only what you typed, asks a model to pull out durable facts, and shows each one next to the exact quote it came from. You approve, edit or discard. Approved facts go to Walrus Memory. On my own export that was 312 facts.
 
-{{FILL: screenshot of Rescue review cards with receipts}}
+![The Ferry Library with real facts, each with its source and date](https://raw.githubusercontent.com/Adwaitbytes/ferry/main/docs/media/real-library.jpg)
 
 **Carry.** A Chrome extension watches the chat composer on chatgpt.com, claude.ai and gemini.google.com. When you tell one AI something durable, a small toast offers to save it. When you start typing in another AI, Ferry recalls what's relevant and shows a chip: "Ferry has 2 things Claude should know". You click Insert, and a clearly marked block goes at the top of your prompt. Ferry never inserts anything on its own.
 
-{{FILL: screenshot of the composer chip on claude.ai}}
+![Ferry chip live on Gemini, with real facts and receipts](https://raw.githubusercontent.com/Adwaitbytes/ferry/main/docs/media/real-gemini-preview.jpg)
 
 **Stays current.** When a new fact contradicts an old one, Ferry shows both side by side with their sources. Pick one, and Ferry writes the new fact to Walrus with a pointer to the old blob it supersedes. The old one stays in history and is never inserted again.
 
@@ -38,7 +36,7 @@ We read those as a spec. Portable, with receipts, and current.
 
 **Share and Earn.** You can publish a slice of your memory, say "food preferences", as a Share Card with a price. An agent that wants it calls Ferry Gate, gets HTTP 402, pays 0.01 USDC on Sui to your address, and gets only that slice.
 
-## How we used Walrus
+## How Ferry uses Walrus
 
 Walrus Memory is the store. Every fact is a memory in your own MemWalAccount on Sui Mainnet, written through the hosted relayer with a delegate key that lives in the extension.
 
@@ -86,7 +84,7 @@ Ferry never holds the money. And because Walrus delegate keys can read a whole a
 
 Our test agent, TripScout, pays from a terminal in about 13 lines. The first real payment ran on Sui Testnet, because we had no real money for Mainnet USDC: TripScout paid 0.01 USDC straight to the card owner, the Gate checked it through Tatum, and five facts came back ([transaction](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv)). The same code runs on Mainnet; only one setting changes.
 
-{{FILL: screenshot of the Earnings page after a paid recall}}
+The payment on Suiscan: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv
 
 ## How Ferry learned over time
 
@@ -102,7 +100,7 @@ Total memories on Mainnet: 312. Account: https://suiscan.xyz/mainnet/object/0x27
 
 ## Security, briefly
 
-Ferry stores things people say about themselves, and it writes them somewhere they can't be deleted. So we treated poisoning as the main threat. Ferry only saves the user's own messages, only with approval, and every candidate passes an injection scanner (imperatives aimed at AIs, exfiltration URLs, encoded payloads, hidden Unicode) and a sensitive data detector before anything is written. Card numbers, government ids and secrets are always blocked. The red-team suite has 81 cases; {{FILL: blocked count}} pass in CI. Details in [THREAT_MODEL.md](https://github.com/Adwaitbytes/ferry/blob/main/docs/THREAT_MODEL.md) and [REDTEAM.md](https://github.com/Adwaitbytes/ferry/blob/main/docs/REDTEAM.md).
+Ferry stores things people say about themselves, and it writes them somewhere they can't be deleted. So we treated poisoning as the main threat. Ferry only saves the user's own messages, only with approval, and every candidate passes an injection scanner (imperatives aimed at AIs, exfiltration URLs, encoded payloads, hidden Unicode) and a sensitive data detector before anything is written. Card numbers, government ids and secrets are always blocked. The red-team suite has 81 cases; all 81 pass in CI. Details in [THREAT_MODEL.md](https://github.com/Adwaitbytes/ferry/blob/main/docs/THREAT_MODEL.md) and [REDTEAM.md](https://github.com/Adwaitbytes/ferry/blob/main/docs/REDTEAM.md).
 
 ## What's honest to say
 
