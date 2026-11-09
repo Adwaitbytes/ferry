@@ -1,4 +1,4 @@
-import { generateText, type LanguageModel } from 'ai';
+import { generateText, Output, type LanguageModel } from 'ai';
 
 export interface LlmJsonRequest {
   system: string;
@@ -33,14 +33,24 @@ export function extractJson(text: string): unknown {
 /** Adapts an AI SDK model to the provider-agnostic interface `@ferry/distill` expects. */
 export function createLlmJson(model: LanguageModel, opts: { timeoutMs?: number } = {}): LlmJson {
   return async ({ system, user, schemaName, maxTokens }) => {
-    const { text } = await generateText({
-      model,
-      system: `${system}\n\nRespond with a single JSON value matching the ${schemaName} schema and nothing else.`,
-      prompt: user,
-      maxOutputTokens: maxTokens,
-      maxRetries: 2,
-      abortSignal: AbortSignal.timeout(opts.timeoutMs ?? 45_000),
-    });
-    return extractJson(text);
+    const call = (structured: boolean) =>
+      generateText({
+        model,
+        system: `${system}\n\nRespond with a single JSON value matching the ${schemaName} schema and nothing else.`,
+        prompt: user,
+        maxOutputTokens: maxTokens,
+        maxRetries: 2,
+        abortSignal: AbortSignal.timeout(opts.timeoutMs ?? 45_000),
+        ...(structured ? { output: Output.json({ name: schemaName }) } : {}),
+      });
+    // Native JSON mode lets the provider escape quotes inside values, which hand-written JSON
+    // from quoted user text often gets wrong. Plain text parsing stays as the fallback.
+    try {
+      const { output } = await call(true);
+      return output as unknown;
+    } catch {
+      const { text } = await call(false);
+      return extractJson(text);
+    }
   };
 }
