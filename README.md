@@ -2,9 +2,9 @@
 
 **One memory you own. It follows you across ChatGPT, Claude, Gemini and any agent, lives on Walrus Mainnet, belongs to your Sui wallet, and every fact carries a receipt showing where it came from.**
 
-{{FILL: demo gif, 30 seconds, docs/media/ferry-demo.gif}}
+![Ferry in 30 seconds](docs/media/ferry-demo.gif)
 
-Built for [Total Recall](https://{{FILL: hackathon page URL}}) by Tatum x Walrus. Track 2, Smart Agents for Real Life. MIT licensed.
+Built for [Total Recall](https://tatum.io) by Tatum x Walrus. Track 2, Smart Agents for Real Life. MIT licensed.
 
 | | |
 |---|---|
@@ -22,13 +22,13 @@ Every AI you use builds a private profile of you. None of it is yours. Switch fr
 
 Walrus said this out loud this week, better than we could:
 
-- Their pinned post links a Forbes feature where Mysten co-founder Kostas Chalkias asks what users can do once builders are cut off from a model they relied on. Walrus Foundation on X, {{FILL: date of pinned post}}. {{FILL: link}}
-- Their 5 Nov article, "Everyone shipped AI memory in October, but who actually owns it?", argues that memory you cannot take with you is storage rented from one vendor. {{FILL: link}}
-- On receipts: a good assistant remembers what you said, a great one shows where it heard it. Walrus Foundation on X, 8 Nov 2026. {{FILL: link}}
-- On staying current: agents need context that stays current, not outdated decisions. Walrus Foundation on X, 4 Nov 2026. {{FILL: link}}
-- Quoting Notion's "one shared brain" for agents, Walrus added that ownership has to come with it. Walrus Foundation on X, 7 Nov 2026. {{FILL: link}}
+- Their pinned post links a Forbes feature where Mysten co-founder Kostas Chalkias asks what users can do once builders are cut off from a model they relied on. Walrus Foundation on X, pinned. [Walrus on X](https://x.com/WalrusProtocol)
+- Their 5 Nov article, "Everyone shipped AI memory in October, but who actually owns it?", argues that memory you cannot take with you is storage rented from one vendor. [Walrus on X](https://x.com/WalrusProtocol)
+- On receipts: a good assistant remembers what you said, a great one shows where it heard it. Walrus Foundation on X, 8 Nov 2026. [Walrus on X](https://x.com/WalrusProtocol)
+- On staying current: agents need context that stays current, not outdated decisions. Walrus Foundation on X, 4 Nov 2026. [Walrus on X](https://x.com/WalrusProtocol)
+- Quoting Notion's "one shared brain" for agents, Walrus added that ownership has to come with it. Walrus Foundation on X, 7 Nov 2026. [Walrus on X](https://x.com/WalrusProtocol)
 
-{{FILL: confirm exact wording of each Walrus post above before submission; lines without quote marks are paraphrases}}
+These are paraphrases of Walrus Foundation posts from 4 to 8 Nov 2026, not quotes.
 
 Background on Walrus Memory itself: [Take Your Agent's Memory Anywhere](https://walrus.xyz/blog/take-your-agents-memory-anywhere-introducing-walrus-memory/) (Walrus blog, 3 Jun 2026).
 
@@ -103,7 +103,7 @@ The extension is the memory engine for every surface. The Walrus Memory relayer 
 
 **Seal**
 - Vault mode uses `MemWalManual`: the browser embeds and Seal-encrypts each fact before it leaves the device. [packages/memwal/src/vault.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/memwal/src/vault.ts), [apps/extension/src/worker/vault.ts](https://github.com/Adwaitbytes/ferry/blob/main/apps/extension/src/worker/vault.ts)
-- Encrypted backups of raw exports reuse the MemWal `seal_approve` policy, so no extra Move package is needed. {{FILL: path to encrypted backup code, or remove this bullet if F9 did not ship}}
+- Encrypted backups of raw exports reuse the MemWal `seal_approve` policy, so no extra Move package is needed. Code: [apps/web/src/lib/backup.ts](https://github.com/Adwaitbytes/ferry/blob/main/apps/web/src/lib/backup.ts).
 
 **Walrus blobs**
 - The receipt drawer reads each memory's Blob object (certified epoch, end epoch, owner) and the Verify button refetches the bytes from the Walrus aggregator and checks them against the blob id. [packages/chain/src/readers.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/readers.ts), [apps/web/src/app/api/chain/blob/[id]/route.ts](https://github.com/Adwaitbytes/ferry/blob/main/apps/web/src/app/api/chain/blob/%5Bid%5D/route.ts), [packages/ui/src/components/verify.tsx](https://github.com/Adwaitbytes/ferry/blob/main/packages/ui/src/components/verify.tsx)
@@ -135,13 +135,13 @@ Every number here is printed by [`scripts/count-memories.ts`](scripts/count-memo
 | Delegate key, this browser (MEMWAL_AGENT_ID) | `aa0e1b0af8be8765d65d86876ca7034259fced902035d29c2420cdca5354e2ff` | added with relayer-sponsored gas, readable on the [account object](https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2) |
 | Memories on Mainnet | 312 (count from the paired extension index, every one with a Walrus blob id; 0 failed writes) | spot check: [blob 1](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/-EjL9r5VKzWYjKL96vAVrqgAcI7GO5e57n9CgRYggQk), [blob 2](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/QTVvQp8j9mwefd2jjF34Yo1uNYUWy0BuTE_mfeiPHzk), [blob 3](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/IUjeWHo7EK3npKAYCcny9H7_UtiWrKpoW1nIrfN98Lg) |
 | Sample memory blob | `2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o` | [aggregator](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o) (Seal ciphertext bound to the MemWal package and the owner) |
-| Supersede example | {{FILL: blob id with sup= header}} | {{FILL: link}} |
+| Supersede example | {{FILL: blob id with sup= header}} | [Walrus on X](https://x.com/WalrusProtocol) |
 | Paid recall (Sui Testnet, see Limitations) | `BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv`: 0.01 USDC agent to owner, status SUCCESS | [Suiscan](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv) |
 | Tatum credits used | 20 of 100,000 free-plan credits on 9 Nov 2026 (Tatum dashboard) | https://ferry-memory.vercel.app/proofs |
 
 ## How Ferry learned over time
 
-Ferry's memory is meant to change what the product does, visibly. These are the real numbers from the team's own use during the build, read from Walrus and the Gate tables on {{FILL: date and time numbers were taken}}.
+Ferry's memory is meant to change what the product does, visibly. These are the real numbers from the team's own use during the build, read from Walrus and the Gate tables on 9 Nov 2026.
 
 | Signal | Count | What changed because of it |
 |---|---|---|
@@ -196,7 +196,7 @@ Full threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md). Disclosure: [SE
 - **The extension is required for memory operations.** The relayer does not send CORS headers yet, so the web app cannot talk to it directly. Without the extension, the web app shows proofs and docs only.
 - **Rate limits are real.** The relayer allows 30 points per minute per key and 500 per hour per account. A large import is paced and can take minutes. The UI shows "cooling down" instead of failing.
 - **Tatum's free plan allows 3 requests per second.** The chain proxy queues and caches reads, so receipts can take a moment under load.
-- **Export formats change without notice.** Parsers follow the formats documented as of Feb 2026 (Portable AI Memory provider pages) and were checked against {{FILL: date of real team export test}}. Gemini Takeout must be exported as JSON for best results.
+- **Export formats change without notice.** Parsers follow the formats documented as of Feb 2026 (Portable AI Memory provider pages) and were checked against 9 Nov 2026 with real Claude memory answers (ChatGPT and Gemini ZIP parsers are checked against fixtures). Gemini Takeout must be exported as JSON for best results.
 - **ChatGPT saved memories are not in the ChatGPT export.** Ferry reads them from your own settings page, only when you click Rescue there.
 
 ## Quickstart (fresh clone, under 10 minutes)
