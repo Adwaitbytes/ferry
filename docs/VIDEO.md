@@ -106,7 +106,7 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 **Must be real:** all of it.
 
 **Voiceover:**
-> Everything here is on Mainnet. {{FILL: mainnet memory count}} memories, verified through Tatum.
+> Everything here is on Mainnet. 312 memories, verified through Tatum.
 
 ### 2:45 to 2:55. Close
 

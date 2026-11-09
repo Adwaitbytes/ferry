@@ -101,7 +101,7 @@ The point of a memory is that the product behaves differently tomorrow because o
 
 {{FILL: one real example in two or three sentences: a fact that changed, where it was first heard, where it was used, with the blob link}}
 
-Total memories on Mainnet: {{FILL: mainnet memory count}}. Account: {{FILL: account explorer link}}.
+Total memories on Mainnet: 312. Account: https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2.
 
 ## Security, briefly
 

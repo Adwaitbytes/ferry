@@ -33,7 +33,7 @@ Share and Earn: publish a slice of your memory. An agent gets HTTP 402, pays 0.0
 Real Mainnet payment: {{FILL: payment tx explorer link}}
 
 **7/8**
-Every chain read goes through @tatum_io Sui gRPC: delegate keys, blob epochs, payment verification, prices. {{FILL: mainnet memory count}} memories on Mainnet so far.
+Every chain read goes through @tatum_io Sui gRPC: delegate keys, blob epochs, payment verification, prices. 312 memories on Mainnet so far.
 
 How it works: {{FILL: dev.to URL}}
 
@@ -60,7 +60,7 @@ What it does:
 3. Stays current. When facts conflict, you pick, and the old one is superseded on Walrus with its history intact.
 4. Share and Earn. Agents can pay you 0.01 USDC on Sui, over HTTP 402, for a slice of memory you chose to publish.
 
-Under the hood: Walrus Memory for storage with receipts, Seal for the encrypted Vault mode, Tatum's Sui gRPC gateway for every chain read and payment check, and MPP for agent payments on Sui. {{FILL: mainnet memory count}} memories on Mainnet so far.
+Under the hood: Walrus Memory for storage with receipts, Seal for the encrypted Vault mode, Tatum's Sui gRPC gateway for every chain read and payment check, and MPP for agent payments on Sui. 312 memories on Mainnet so far.
 
 We were careful about what we claim. Standard mode is not end to end encrypted, and forget means hidden, not deleted, because Walrus has no delete. Both are spelled out in the README.
 
