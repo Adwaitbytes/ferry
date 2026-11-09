@@ -6,24 +6,34 @@ import {
   type AdapterHealth,
   type CandidateFact,
   type ContentRequest,
+  type EmbeddingSetup,
   type ExportBundle,
   type ExtensionStatus,
   type GovernorStatus,
   type ImportEnqueued,
   type ImportProgress,
+  type NowInserted,
+  type NowSuggestions,
   type PairingConfirmation,
   type PairingOffer,
   type PanelRequest,
   type RecentCapture,
   type SaveResult,
   type Site,
+  type VaultStatus,
   type WebAppRequest,
   type WorkerResult,
 } from '@ferry/core';
 import { screenCandidate } from '@ferry/distill';
 import { z } from 'zod';
 import { normalizeKeyHex } from '../lib/fingerprint';
-import type { CaptureProposalData, ComposeData, SuggestData } from '../lib/protocol';
+import type {
+  CaptureProposalData,
+  ComposeData,
+  InsertReply,
+  SuggestData,
+  WorkerToContent,
+} from '../lib/protocol';
 import { proposeCapture, screenEdited } from './capture';
 import { MESSAGES, WorkerFailure, toWorkerError } from './errors';
 import type {
@@ -38,6 +48,7 @@ import type {
 import { RecallService } from './recall';
 import { classifyExternal, classifyInternal, type SenderClass, type SenderLike } from './senders';
 import { SettingsStore } from './settings';
+import { StorageModeStore } from './storage-mode';
 import { isOtherClassType, parseFor } from './strict';
 import { Vault } from './vault';
 
@@ -73,6 +84,8 @@ export interface WorkerDeps {
   exporter: ExportFormatter;
   newId(): string;
   openSidePanel(tabId: number): Promise<void>;
+  /** Delivers a worker command to the Ferry content script in that tab and returns its reply. */
+  sendToTab(tabId: number, message: WorkerToContent): Promise<unknown>;
   wipeIndexedDb(): Promise<void>;
   deviceLabel(): string;
 }
@@ -86,6 +99,7 @@ type Channel = 'internal' | 'external';
 export class FerryWorker {
   readonly vault: Vault;
   readonly settings: SettingsStore;
+  readonly storageMode: StorageModeStore;
   private readonly recall: RecallService;
   private engine: MemoryPort | null = null;
   private imports: ImportQueuePort | null = null;
@@ -103,6 +117,7 @@ export class FerryWorker {
 
   constructor(private readonly deps: WorkerDeps) {
     this.settings = new SettingsStore(deps.local);
+    this.storageMode = new StorageModeStore(deps.local, deps.crypto);
     this.recall = new RecallService(() => deps.clock.now());
     this.vault = new Vault({
       local: deps.local,
@@ -216,6 +231,16 @@ export class FerryWorker {
       }
       case 'data.wipe':
         return this.wipe();
+      case 'now.suggestions':
+        return this.nowSuggestions(msg.tabId);
+      case 'now.insert':
+        return this.nowInsert(msg.tabId, msg.refs);
+      case 'vault.status':
+        return this.storageMode.status();
+      case 'vault.enable':
+        return this.enableVault(msg.embedding);
+      case 'vault.disable':
+        return this.disableVault();
       default:
         return this.handleShared(msg);
     }
@@ -231,7 +256,19 @@ export class FerryWorker {
     msg:
       | Exclude<
           PanelRequest,
-          { type: 'lock' | 'unlock' | 'settings.get' | 'settings.set' | 'data.wipe' }
+          {
+            type:
+              | 'lock'
+              | 'unlock'
+              | 'settings.get'
+              | 'settings.set'
+              | 'data.wipe'
+              | 'now.suggestions'
+              | 'now.insert'
+              | 'vault.status'
+              | 'vault.enable'
+              | 'vault.disable';
+          }
         >
       | WebAppRequest,
   ): Promise<unknown> {
@@ -305,6 +342,75 @@ export class FerryWorker {
     if (texts === null) throw new WorkerFailure('invalid_message', MESSAGES.invalid);
     const text = formatContextBlock(texts);
     return { text, count: text.length === 0 ? 0 : texts.length };
+  }
+
+  /**
+   * The side panel mirrors what the chat tab's own `recall.suggest` last showed. Reading the cache
+   * costs no relayer points, so the panel can refresh it as often as it likes.
+   */
+  private async nowSuggestions(tabId: number): Promise<NowSuggestions> {
+    await this.vault.requireSeed();
+    const shown = this.recall.shown(tabId);
+    if (shown === null) return { site: null, suggestions: [], updatedAt: null };
+    return { site: shown.site, suggestions: shown.suggestions, updatedAt: shown.at };
+  }
+
+  /**
+   * Insert from the panel. The content script places the block itself, through the same
+   * `inject.compose` path as the chip, so the refs are checked here and again there.
+   */
+  private async nowInsert(tabId: number, refs: readonly string[]): Promise<NowInserted> {
+    await this.vault.requireSeed();
+    if (this.recall.shownTexts(tabId, refs) === null)
+      throw new WorkerFailure('invalid_message', MESSAGES.invalid);
+    let reply: unknown;
+    try {
+      reply = await this.deps.sendToTab(tabId, { type: 'ferry.insert-refs', refs: [...refs] });
+    } catch {
+      throw new WorkerFailure(
+        'upstream',
+        'That chat tab did not answer. Reload it so Ferry can reach its message box.',
+      );
+    }
+    const inserted = (reply as Partial<InsertReply> | undefined)?.inserted;
+    if (typeof inserted !== 'number' || !Number.isInteger(inserted) || inserted < 1) {
+      throw new WorkerFailure(
+        'upstream',
+        'Ferry could not find the message box in that tab. Click into it, then try again.',
+      );
+    }
+    return { inserted: Math.min(inserted, refs.length) };
+  }
+
+  /**
+   * Switches new writes to Vault mode. The engine is rebuilt at once so a wrong key or a model
+   * with the wrong vector size fails here, in Settings, instead of on the next save.
+   */
+  private async enableVault(setup: EmbeddingSetup): Promise<VaultStatus> {
+    const seed = await this.vault.requireSeed();
+    if ((await this.account()) === null) throw new WorkerFailure('not_paired', MESSAGES.notPaired);
+    const before = await this.storageMode.snapshot();
+    await this.storageMode.enable(seed, setup);
+    this.stopEngine();
+    try {
+      await this.ensureEngine();
+    } catch (error) {
+      await this.storageMode.restore(before);
+      this.stopEngine();
+      // The Vault error is the one the user must see; if Standard cannot restart either (relayer
+      // down), the next privileged call starts it again and reports that failure on its own.
+      await this.ensureEngine().catch(() => undefined);
+      throw new WorkerFailure('upstream', vaultStartMessage(error));
+    }
+    return this.storageMode.status();
+  }
+
+  private async disableVault(): Promise<VaultStatus> {
+    await this.vault.requireSeed();
+    await this.storageMode.disable();
+    this.stopEngine();
+    await this.ensureEngine();
+    return this.storageMode.status();
   }
 
   private async propose(
@@ -549,6 +655,7 @@ export class FerryWorker {
         const { engine, imports } = await this.deps.engines.create({
           seed,
           accountId: account.accountId,
+          vault: await this.storageMode.engineConfig(seed),
         });
         this.engine = engine;
         this.imports = imports;
@@ -591,6 +698,23 @@ export class FerryWorker {
   private remember(entry: RecentCapture): void {
     this.recent = [entry, ...this.recent.filter((r) => r.id !== entry.id)].slice(0, RECENT_MAX);
   }
+}
+
+/**
+ * A caller-safe reason Vault mode did not start. Only fixed strings and an HTTP status leave the
+ * worker: provider error bodies can echo the key, so they are never passed through.
+ */
+export function vaultStartMessage(error: unknown): string {
+  const name = error instanceof Error ? error.name : '';
+  const message = error instanceof Error ? error.message : '';
+  if (name === 'EmbeddingDimensionError')
+    return 'That embedding model does not return 1536 dimensions. Use text-embedding-3-small.';
+  const status = /answered (\d{3})/.exec(message)?.[1];
+  if (status === '401' || status === '403')
+    return 'The embedding provider rejected that key. Check it and try again.';
+  if (status !== undefined)
+    return `The embedding provider answered ${status}. Vault mode stays off; try again later.`;
+  return 'Could not reach the embedding provider. Vault mode stays off.';
 }
 
 /** The chain proxy may return delegate keys as hex or base64; compare as lowercase hex. */

@@ -3,6 +3,7 @@ import { LockKeyhole, Server } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { PageHeader } from '@/components/app-shell';
+import { BackupPanel } from './backup-panel';
 import { ExportActions } from './export-actions';
 
 export const metadata: Metadata = { title: 'Settings' };
@@ -37,15 +38,16 @@ export default function SettingsPage() {
             <span className="inline-flex items-center gap-2 text-body font-medium text-text-primary">
               <LockKeyhole size={16} strokeWidth={1.75} aria-hidden="true" /> Vault
             </span>
-            <span className="text-small text-text-secondary">Encrypted with Seal on this device. One wallet approval per session.</span>
+            <span className="text-small text-text-secondary">
+              Encrypted with Seal on this device. Seal sessions are signed by this browser&apos;s paired key, so there is no wallet popup.
+            </span>
           </div>
         </div>
         <p>
           Standard mode: the hosted Walrus Memory relayer encrypts and stores your facts, but it sees the text while it processes them. That is
           convenient, and it is not end to end encryption. Vault mode: your browser creates the search embeddings and encrypts each fact with
-          Seal before anything leaves this device, so the relayer never sees the text. It still sees the encrypted vectors, your account owner
-          address, the namespace and when you search. To create embeddings, the text is sent to the embedding provider you choose, which is your
-          own key by default. Vault asks your wallet for one approval per session.
+          Seal before anything leaves this device, so the relayer never sees the text. It still sees the vectors, your account owner address,
+          the namespace and when you search. To create embeddings, the text is sent to the embedding provider you choose, with your own key.
         </p>
         <p className="text-body">Switch modes in the side panel, Settings tab.</p>
       </Section>
@@ -71,6 +73,10 @@ export default function SettingsPage() {
         <Link href="/devices" className="text-body text-accent underline-offset-[3px] hover:underline">
           Open Devices
         </Link>
+      </Section>
+
+      <Section id="backup" title="Encrypted backup">
+        <BackupPanel />
       </Section>
 
       <Section id="export" title="Export and leave">

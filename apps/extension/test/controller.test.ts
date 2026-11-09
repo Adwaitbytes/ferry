@@ -166,3 +166,35 @@ describe('composer chip and insert', () => {
     expect(document.getElementById('ferry-fonts')?.textContent).toContain("'Ferry Geist'");
   });
 });
+
+describe('insert from the side panel', () => {
+  it('composes the requested refs through inject.compose and reports the count', async () => {
+    const send = fakeSend();
+    ferry = startFerry({
+      site: 'claude',
+      adapter: textareaAdapter(document),
+      doc: document,
+      send,
+      cssText: '',
+      fontUrl: 'x',
+    });
+    const area = type('plan dinner for friday');
+    await vi.advanceTimersByTimeAsync(TYPING_PAUSE_MS);
+    expect(await ferry.insertRefs(['blob-aaaaaaaa2'])).toBe(1);
+    expect(send).toHaveBeenCalledWith({
+      type: 'inject.compose',
+      site: 'claude',
+      refs: ['blob-aaaaaaaa2'],
+    });
+    expect(area.value.startsWith('[ctx]')).toBe(true);
+  });
+
+  it('reports 0 when there is no composer', async () => {
+    const adapter = textareaAdapter(document);
+    adapter.findComposer = () => null;
+    const send = fakeSend();
+    ferry = startFerry({ site: 'claude', adapter, doc: document, send, cssText: '', fontUrl: 'x' });
+    expect(await ferry.insertRefs(['blob-aaaaaaaa1'])).toBe(0);
+    expect(send).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'inject.compose' }));
+  });
+});

@@ -1,9 +1,10 @@
 /*
  * Tailwind v4 wiring for Ferry (DESIGN 13). Import AFTER `@import "tailwindcss"` in the app's
- * global stylesheet, and add `@source` for this package so its class names are generated.
+ * global stylesheet, and add `@source` for this package so its class names are generated. Fonts
+ * are imported by each app: the extension takes `fonts.css`, the web app `fonts-text.css` plus its
+ * own subset of the display face, which keeps 80 KB off the landing page's critical path.
  */
 @import "./tokens.css";
-@import "./fonts.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

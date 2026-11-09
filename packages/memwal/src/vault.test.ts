@@ -3,7 +3,8 @@ import type { WalletSigner } from '@mysten-incubation/memwal/manual';
 import { describe, expect, it, vi } from 'vitest';
 import { UnsupportedInModeError } from './engine.js';
 import { ACCOUNT, SEED, TestClock, fact, freshDb } from './test/fakes.js';
-import { EMBEDDING_DIMS, EmbeddingDimensionError, FerryVaultMemory, verifyEmbeddingDimensions, type ManualClient } from './vault.js';
+import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
+import { EMBEDDING_DIMS, EmbeddingDimensionError, FerryVaultMemory, manualSignerConfig, verifyEmbeddingDimensions, type ManualClient } from './vault.js';
 
 const KEY = ['sk', 'test', 'fragment'].join('-');
 
@@ -122,5 +123,20 @@ describe('FerryVaultMemory', () => {
       db: freshDb(),
     });
     memory.destroy();
+  });
+});
+
+describe('manualSignerConfig', () => {
+  it('prefers a wallet signer when a page provides one', () => {
+    expect(manualSignerConfig(SEED, signer)).toEqual({ walletSigner: signer });
+  });
+
+  it('otherwise signs Seal sessions with the delegate seed itself', () => {
+    const config = manualSignerConfig(SEED);
+    if (!('suiPrivateKey' in config)) throw new Error('expected a private key config');
+    const decoded = decodeSuiPrivateKey(config.suiPrivateKey);
+    expect(decoded.scheme).toBe('ED25519');
+    expect(Array.from(decoded.secretKey)).toEqual(Array.from(SEED));
+    expect(() => manualSignerConfig(new Uint8Array(4))).toThrow(/32 bytes/);
   });
 });

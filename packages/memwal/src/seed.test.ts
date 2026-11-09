@@ -1,6 +1,6 @@
 import { delegateKeyToPublicKey } from '@mysten-incubation/memwal';
 import { describe, expect, it } from 'vitest';
-import { PBKDF2_ITERATIONS, SeedError, generateSeed, openSeed, publicKeyHex, sealSeed, suiAddress, zeroize } from './seed.js';
+import { PBKDF2_ITERATIONS, SeedError, generateSeed, openSecret, openSeed, publicKeyHex, sealSecret, sealSeed, suiAddress, zeroize } from './seed.js';
 
 // Built at runtime from fragments so no secret-shaped literal sits in the repo (THREAT_MODEL X-CI-2).
 const PASS = ['correct', 'horse', 'battery'].join('-');
@@ -69,5 +69,34 @@ describe('delegate identity helpers', () => {
     expect(addr).toMatch(/^0x[0-9a-f]{64}$/);
     expect(await suiAddress(seed)).toBe(addr);
     await expect(publicKeyHex(new Uint8Array(3))).rejects.toThrow(/32 bytes/);
+  });
+});
+
+describe('secrets sealed under the seed', () => {
+  const SECRET = ['sk', 'proj', 'abcdef0123456789'].join('-');
+
+  it('round trips only with the same seed and purpose', async () => {
+    const seed = generateSeed();
+    const sealed = await sealSecret(seed, 'vault.embedding', SECRET);
+    expect(sealed).toMatchObject({ v: 1, kdf: 'HKDF-SHA256', cipher: 'AES-GCM-256', purpose: 'vault.embedding' });
+    expect(JSON.stringify(sealed)).not.toContain(SECRET);
+    expect(await openSecret(seed, 'vault.embedding', JSON.parse(JSON.stringify(sealed)))).toBe(SECRET);
+    await expect(openSecret(generateSeed(), 'vault.embedding', sealed)).rejects.toMatchObject({ code: 'wrong_passphrase' });
+    await expect(openSecret(seed, 'other.purpose', sealed)).rejects.toMatchObject({ code: 'invalid_envelope' });
+    await expect(openSecret(seed, 'other.purpose', { ...sealed, purpose: 'other.purpose' })).rejects.toMatchObject({ code: 'wrong_passphrase' });
+  });
+
+  it('rejects tampering, bad envelopes and bad inputs', async () => {
+    const seed = generateSeed();
+    const sealed = await sealSecret(seed, 'vault.embedding', SECRET);
+    const bytes = atob(sealed.ciphertext);
+    const flipped = String.fromCharCode(bytes.charCodeAt(0) ^ 1) + bytes.slice(1);
+    await expect(openSecret(seed, 'vault.embedding', { ...sealed, ciphertext: btoa(flipped) })).rejects.toMatchObject({ code: 'wrong_passphrase' });
+    await expect(openSecret(seed, 'vault.embedding', null)).rejects.toMatchObject({ code: 'invalid_envelope' });
+    await expect(openSecret(seed, 'vault.embedding', { ...sealed, iv: '%%' })).rejects.toMatchObject({ code: 'invalid_envelope' });
+    await expect(openSecret(seed, 'vault.embedding', { ...sealed, iv: btoa('short') })).rejects.toMatchObject({ code: 'invalid_envelope' });
+    await expect(sealSecret(seed, 'Bad Purpose', SECRET)).rejects.toThrow(/purpose/);
+    await expect(sealSecret(seed, 'vault.embedding', '')).rejects.toThrow(/secret/);
+    await expect(sealSecret(new Uint8Array(3), 'vault.embedding', SECRET)).rejects.toMatchObject({ code: 'invalid_seed' });
   });
 });

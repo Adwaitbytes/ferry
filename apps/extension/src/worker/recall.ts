@@ -21,7 +21,10 @@ export class RecallService {
   private readonly cache = new Map<string, { at: number; suggestions: Suggestion[] }>();
   private readonly lastByTab = new Map<number, number>();
   /** What each tab was shown. `inject.compose` may only reference these refs. */
-  private readonly shownByTab = new Map<number, Map<string, Suggestion>>();
+  private readonly shownByTab = new Map<
+    number,
+    { site: Site; at: number; byRef: Map<string, Suggestion> }
+  >();
 
   constructor(private readonly now: () => number) {}
 
@@ -55,8 +58,19 @@ export class RecallService {
         if (oldest !== undefined) this.cache.delete(oldest);
       }
     }
-    this.shownByTab.set(tabId, new Map(suggestions.map((s) => [s.ref, s])));
+    this.shownByTab.set(tabId, {
+      site,
+      at: this.now(),
+      byRef: new Map(suggestions.map((s) => [s.ref, s])),
+    });
     return suggestions;
+  }
+
+  /** The tab's last suggestions in rank order, for the side panel's Now tab. */
+  shown(tabId: number): { site: Site; at: number; suggestions: Suggestion[] } | null {
+    const shown = this.shownByTab.get(tabId);
+    if (shown === undefined) return null;
+    return { site: shown.site, at: shown.at, suggestions: [...shown.byRef.values()] };
   }
 
   /** Texts for refs this tab was actually shown, in the order requested; null if any ref is unknown. */
@@ -65,7 +79,7 @@ export class RecallService {
     if (shown === undefined) return null;
     const texts: string[] = [];
     for (const ref of refs) {
-      const s = shown.get(ref);
+      const s = shown.byRef.get(ref);
       if (s === undefined) return null;
       texts.push(s.text);
     }

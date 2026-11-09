@@ -3,7 +3,7 @@ import type { Site } from '@ferry/core';
 import tokens from '@ferry/ui/tokens.css?inline';
 import { browser } from 'wxt/browser';
 import { z } from 'zod';
-import type { WorkerToContent } from '../lib/protocol';
+import { parseWorkerCommand, type InsertReply } from '../lib/protocol';
 import contentCss from './content.css?inline';
 import { startFerry } from './controller';
 
@@ -25,9 +25,16 @@ export function runContent(site: Site): void {
   });
 
   // Only our own worker may drive the content script; pages cannot reach runtime.onMessage.
-  browser.runtime.onMessage.addListener((message: unknown, sender) => {
+  browser.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
     if (sender.id !== browser.runtime.id || sender.tab !== undefined) return;
-    const parsed = message as Partial<WorkerToContent> | null;
-    if (parsed?.type === 'ferry.insert-suggested') void ferry.insertSuggested();
+    const command = parseWorkerCommand(message);
+    if (command?.type === 'ferry.insert-suggested') void ferry.insertSuggested();
+    if (command?.type === 'ferry.insert-refs') {
+      void ferry.insertRefs(command.refs).then((inserted) => {
+        const reply: InsertReply = { inserted };
+        sendResponse(reply);
+      });
+      return true;
+    }
   });
 }

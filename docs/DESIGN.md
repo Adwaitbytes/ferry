@@ -49,8 +49,9 @@ Fallback stacks:
 
 ### 2.2 Loading rules
 
-- **Web app:** import the three CSS files once in `apps/web/app/layout.tsx` through `packages/ui/src/fonts.css`. Next bundles the woff2 files locally. Do not use `next/font/google` (it fetches at build time from Google and we want one path for web and extension). Add `<link rel="preload" as="font" type="font/woff2" crossorigin>` for the latin subset of Geist and Bricolage on the landing page only.
-- **Extension pages (side panel, options):** import the same `fonts.css`. WXT/Vite copies the woff2 into the bundle. The CSP `font-src 'self'` is satisfied. No remote fonts, ever.
+- **Web app:** `globals.css` imports `packages/ui/src/fonts-text.css` (Geist and Geist Mono, all subsets) and declares two Latin faces served from `apps/web/public/fonts/` at stable paths: a cut of Bricolage Grotesque limited to what Ferry uses (wght 600, wdth 92 to 94, opsz 24 to 96; 50 KB instead of the 129 KB Fontsource file, made with fontTools `varLib.instancer`, OFL text alongside) and Geist Latin. Both are preloaded on the landing page only (React `preload`, which emits `<link rel="preload" as="font" type="font/woff2" crossorigin>`). Do not use `next/font/google` (it fetches at build time from Google). If the display face ever needs another weight or width, cut a new file from the Fontsource source instead of importing `standard.css` on the web.
+- **Not inlined:** Next's `experimental.inlineCss` would remove the render-blocking stylesheet, but the inlined `<style>` carries no CSP nonce and the policy blocks it. Keep the linked stylesheet.
+- **Extension pages (side panel, options):** import `fonts.css` (all three families from Fontsource) after `theme.css`. WXT/Vite copies the woff2 into the bundle. The CSP `font-src 'self'` is satisfied. No remote fonts, ever.
 - **Composer chip (closed Shadow DOM on chatgpt.com, claude.ai, gemini.google.com):** `@font-face` declared inside a shadow root is ignored by Chrome. Therefore:
   1. The content script injects one `<style id="ferry-fonts">` into the page `document.head` with `@font-face` rules for the latin subset of Geist only, under a private family name `'Ferry Geist'`, with `src: url(chrome-extension://<id>/fonts/geist-latin-wght-normal.woff2)`.
   2. The woff2 is listed in `web_accessible_resources` with `matches` limited to the three chat hosts.
@@ -62,6 +63,8 @@ Fallback stacks:
 ### 2.3 Type scale (8 steps)
 
 Base UI size is 14px (side panel and app chrome). Long reading text uses `body-lg`. Values are px with rem in tokens (`1rem = 16px`).
+
+Root size decision (9 Nov): the root keeps the browser default, so `1rem = 16px` and every token renders at the size in this table. The 14px UI base is set on `body` (and on `:host` for the chip's shadow root), never on `:root`. An earlier `:root { font-size: 0.875rem }` silently made `1rem = 14px`, which shrank the whole scale and the 4px spacing grid to 87.5 percent (landing body text rendered at 14px, micro under 11px). That was not intentional density, so it was fixed at the source rather than documented. Landing prose uses `body-lg`, 16px.
 
 | Token | Size / line height | Tracking | Weight | Family | Use |
 |---|---|---|---|---|---|
@@ -815,7 +818,9 @@ Width 360 to 420. Header 48px: Ferry wordmark (Bricolage 600, 16px) left, accoun
 
 **Library:** search plus compact list, receipt drawer as full panel overlay with Back button.
 
-**Settings:** the per site toggles for the current site first, then a link "All settings" to the web app.
+**Settings:** the per site toggles for the current site first, then Privacy mode: the 9.4 paragraph, a "Vault mode" Toggle, and on turning it on an inline form (Embedding provider select: OpenAI, OpenRouter, Other OpenAI compatible; masked "API key" with helper "Stored only in this extension, sealed under your Ferry key. Never sent to Ferry or to chat pages."; the Seal session line; primary "Turn on Vault mode", loading "Checking the key"). A failed key check keeps Standard and shows the reason inline. Then a link "All settings" to the web app.
+
+**Now, facts list detail (9 Nov):** section head "For this message" with primary "Insert all N" (one fact: "Insert"). Each row: fact text (body), SourceBadges and heard date (small, tertiary), ghost "Receipt" (`ReceiptText`, toggles an inline `<dl>`: Heard in, Heard on, Walrus blob MonoId) and secondary "Insert" (`CornerDownRight`). Loading: two Skeleton rows with geometry of a row. Error: danger Notice with "Try again". Empty: the 8.10 empty copy. Offer context off: one line saying so. Insert goes through the chat tab's own `inject.compose`, so it is the same block the chip inserts; result toast "Added 2 facts".
 
 ### 8.11 Composer chip and insert preview
 
@@ -854,7 +859,11 @@ Badge text "DEMO". Tooltip and accessible description: "Simulated for the demo. 
 
 ### 9.4 Standard vs Vault (verbatim, Settings and Landing)
 
-"Standard mode: the hosted Walrus Memory relayer encrypts and stores your facts, but it sees the text while it processes them. That is convenient, and it is not end to end encryption. Vault mode: your browser creates the search embeddings and encrypts each fact with Seal before anything leaves this device, so the relayer never sees the text. It still sees the encrypted vectors, your account owner address, the namespace and when you search. To create embeddings, the text is sent to the embedding provider you choose, which is your own key by default. Vault asks your wallet for one approval per session."
+"Standard mode: the hosted Walrus Memory relayer encrypts and stores your facts, but it sees the text while it processes them. That is convenient, and it is not end to end encryption. Vault mode: your browser creates the search embeddings and encrypts each fact with Seal before anything leaves this device, so the relayer never sees the text. It still sees the vectors, your account owner address, the namespace and when you search. To create embeddings, the text is sent to the embedding provider you choose, with your own key."
+
+Seal session line, shown under the Vault toggle (9 Nov, replaces "Vault asks your wallet for one approval per session", which the extension cannot do): "Seal hands out decryption keys only to a short session key signed by an address on your account. A wallet cannot sign inside the extension, so Ferry signs that session key with this browser's key, which your wallet approved once when you paired. You approve nothing per session, and removing this browser in Devices withdraws it."
+
+The 9.4 paragraph previously said "encrypted vectors". The vectors are not encrypted; the relayer stores and searches them in clear. Never describe them as encrypted.
 
 ### 9.5 Forget (verbatim, Hide dialog and Library Hidden tab)
 
@@ -1173,14 +1182,22 @@ Usage: `bg-surface-1 text-text-primary border-border-hairline shadow-1 rounded-m
   --ferry-shadow-4: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 16px rgba(2, 6, 14, 0.45), 0 32px 64px -12px rgba(2, 6, 14, 0.7);
 }
 
+/*
+ * The root keeps the browser's 16px so 1rem is 16px and every rem token renders at its DESIGN 2.3
+ * size. The 14px UI base is set on body (and on :host, the chip's shadow host), never on :root:
+ * setting it there shrank the whole scale to 87.5 percent and put micro text under 11px.
+ */
 :root, :host {
   background-color: var(--ferry-bg);
   color: var(--ferry-text-primary);
   font-family: var(--ferry-font-sans);
-  font-size: 0.875rem;
   line-height: 1.5714;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+body, :host {
+  font-size: 0.875rem;
 }
 
 ::selection { background: var(--ferry-selection); }

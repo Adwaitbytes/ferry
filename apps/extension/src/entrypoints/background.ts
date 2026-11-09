@@ -47,6 +47,7 @@ export default defineBackground({
       openSidePanel: async (tabId) => {
         await browser.sidePanel.open({ tabId });
       },
+      sendToTab: (tabId, message) => browser.tabs.sendMessage(tabId, message),
       wipeIndexedDb,
       deviceLabel,
     });

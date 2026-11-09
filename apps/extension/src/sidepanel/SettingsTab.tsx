@@ -7,12 +7,13 @@ import {
   type SensitiveCategory,
 } from '@ferry/core';
 import { Button, Dialog, Input, LoadingText, Notice, Toggle, useToast } from '@ferry/ui';
-import { Download, Lock, LockKeyhole, Server, Trash2 } from 'lucide-react';
+import { Download, Lock, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AUTO_LOCK_CHOICES, SITE_LABEL } from '../lib/config';
 import { call } from './client';
 import { forgetCopy } from './LibraryTab';
 import { useSettings } from './useSettings';
+import { VaultSection } from './VaultSection';
 
 const WIPE_PHRASE = 'DELETE MY FERRY DATA';
 
@@ -28,10 +29,6 @@ const SENSITIVE_LABEL: Record<SensitiveCategory, string> = {
   religion: 'Religion',
   politics: 'Politics',
 };
-
-/** DESIGN 9.4, verbatim. */
-const STANDARD_VS_VAULT =
-  'Standard mode: the hosted Walrus Memory relayer encrypts and stores your facts, but it sees the text while it processes them. That is convenient, and it is not end to end encryption. Vault mode: your browser creates the search embeddings and encrypts each fact with Seal before anything leaves this device, so the relayer never sees the text. It still sees the encrypted vectors, your account owner address, the namespace and when you search. To create embeddings, the text is sent to the embedding provider you choose, which is your own key by default. Vault asks your wallet for one approval per session.';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -205,22 +202,7 @@ export function SettingsTab({
       </Section>
 
       <Section title="Privacy mode">
-        <div className="flex items-start gap-3 rounded-md border border-border-hairline bg-surface-1 p-4">
-          <Server
-            size={20}
-            strokeWidth={1.75}
-            aria-hidden="true"
-            className="mt-0.5 shrink-0 text-text-secondary"
-          />
-          <div className="flex flex-col gap-1">
-            <span className="text-body font-medium">Standard mode is on</span>
-            <p className="max-w-[56ch] text-small text-text-secondary">{STANDARD_VS_VAULT}</p>
-          </div>
-        </div>
-        <p className="inline-flex items-center gap-2 text-small text-text-tertiary">
-          <LockKeyhole size={14} strokeWidth={1.75} aria-hidden="true" />
-          Vault mode is set up from the Ferry web app.
-        </p>
+        <VaultSection paired={status.account !== null} />
       </Section>
 
       <Section title="What forget means">

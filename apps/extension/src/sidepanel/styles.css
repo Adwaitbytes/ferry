@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@ferry/ui/theme.css';
+@import '@ferry/ui/fonts.css';
 
 @source '../../../../packages/ui/src';
 

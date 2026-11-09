@@ -40,6 +40,10 @@ export interface VaultCrypto {
   openSeed(sealed: SealedSeed, passphrase: string): Promise<Uint8Array>;
   publicKeyHex(seed: Uint8Array): Promise<string>;
   suiAddress(seed: Uint8Array): Promise<string>;
+  /** Seals a small secret (the Vault embedding key) under a key derived from the open seed. */
+  sealSecret(seed: Uint8Array, purpose: string, secret: string): Promise<SealedSeed>;
+  /** Rejects when the blob was sealed under another seed or purpose, or was altered. */
+  openSecret(seed: Uint8Array, purpose: string, sealed: SealedSeed): Promise<string>;
 }
 
 /** The memory engine (packages/memwal FerryMemory), one long-lived instance per open session. */
@@ -61,10 +65,19 @@ export interface ImportQueuePort {
   subscribe(listener: (progress: ImportProgress) => void): () => void;
 }
 
+/** Vault mode (F10): the user's own embedding provider. Lives only in the worker's memory. */
+export interface VaultEngineConfig {
+  apiKey: string;
+  apiBase: string;
+  model: string;
+}
+
 export interface EngineFactory {
+  /** With `vault`, new writes go through client-side Seal encryption; reads span both modes. */
   create(input: {
     seed: Uint8Array;
     accountId: string;
+    vault: VaultEngineConfig | null;
   }): Promise<{ engine: MemoryPort; imports: ImportQueuePort }>;
 }
 

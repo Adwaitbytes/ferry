@@ -369,9 +369,15 @@ importers:
       '@mysten/dapp-kit-react':
         specifier: 2.1.45
         version: 2.1.45(@mysten/sui@2.39.1(typescript@6.0.3))(@types/react@19.3.0)(react@19.3.1)(typescript@6.0.3)
+      '@mysten/seal':
+        specifier: 1.5.4
+        version: 1.5.4(@mysten/sui@2.39.1(typescript@6.0.3))
       '@mysten/sui':
         specifier: 2.39.1
         version: 2.39.1(typescript@6.0.3)
+      '@mysten/walrus':
+        specifier: 1.2.39
+        version: 1.2.39(@mysten/sui@2.39.1(typescript@6.0.3))
       '@tanstack/react-virtual':
         specifier: 3.14.26
         version: 3.14.26(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

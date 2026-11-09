@@ -1,5 +1,6 @@
 import { MemWalManual, type RecallManualMemory, type WalletSigner } from '@mysten-incubation/memwal/manual';
 import type { MemoriesResult, RecallMemory, RememberBulkStatusItem } from '@mysten-incubation/memwal';
+import { encodeSuiPrivateKey } from '@mysten/sui/cryptography';
 import { FerryDb, dbNameForAccount, type FerryDbOptions } from './db.js';
 import { MemoryEngine, type EngineOptions } from './engine.js';
 import { RateGovernor, type GovernorConfig, type RunOptions } from './governor.js';
@@ -104,13 +105,27 @@ export class ManualTransport implements MemoryTransport {
   }
 }
 
+/**
+ * Who signs the Seal session key that releases decryption shares. `seal_approve` accepts the owner
+ * or any registered delegate (RESEARCH 1.5), so the delegate seed works wherever no wallet can be
+ * reached, such as an extension service worker: Wallet Standard wallets only inject into web pages.
+ */
+export function manualSignerConfig(seed: Uint8Array, walletSigner?: WalletSigner): { walletSigner: WalletSigner } | { suiPrivateKey: string } {
+  if (walletSigner !== undefined) return { walletSigner };
+  if (!(seed instanceof Uint8Array) || seed.length !== 32) throw new TypeError('seed must be 32 bytes');
+  return { suiPrivateKey: encodeSuiPrivateKey(seed, 'ED25519') };
+}
+
 export interface FerryVaultMemoryConfig {
   seed: Uint8Array;
   accountId: string;
   serverUrl: string;
   embedding: EmbeddingConfig;
-  /** Wallet signer from the web app or side panel; one popup per session for the SEAL key. */
-  walletSigner: WalletSigner;
+  /**
+   * Wallet signer from a web page, one popup per Seal session. Omit it to sign Seal sessions with
+   * the delegate seed instead (the extension's case, see `manualSignerConfig`).
+   */
+  walletSigner?: WalletSigner;
   clock?: Clock;
   random?: () => number;
   governor?: RateGovernor;
@@ -140,7 +155,7 @@ export class FerryVaultMemory extends MemoryEngine {
         key: config.seed,
         accountId: config.accountId,
         serverUrl: config.serverUrl,
-        walletSigner: config.walletSigner,
+        ...manualSignerConfig(config.seed, config.walletSigner),
         embeddingApiKey: embedding.apiKey,
         embeddingApiBase: embedding.apiBase,
         embeddingModel: embedding.model,

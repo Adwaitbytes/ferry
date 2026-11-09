@@ -6,6 +6,7 @@ import { browser } from 'wxt/browser';
 import { SITE_HOST, SITE_LABEL } from '../lib/config';
 import { IMPORT_PORT } from '../lib/protocol';
 import { call } from './client';
+import { NowSuggestions } from './NowSuggestions';
 import { useSettings } from './useSettings';
 
 const CAPTURE_STATE_LABEL: Record<RecentCapture['state'], string> = {
@@ -64,10 +65,12 @@ function ImportCard({ initial }: { initial: ImportProgress }) {
 export function NowTab({
   status,
   site,
+  tabId,
   onChanged,
 }: {
   status: ExtensionStatus;
   site: Site | null;
+  tabId: number | null;
   onChanged: () => Promise<void>;
 }) {
   const { settings, update } = useSettings();
@@ -122,6 +125,10 @@ export function NowTab({
           </>
         )}
       </section>
+
+      {site !== null && settings !== null ? (
+        <NowSuggestions site={site} tabId={tabId} injectOn={settings.sites[site].inject} />
+      ) : null}
 
       {coolingFor !== null ? (
         <Notice tone="warning" title="Cooling down" live>

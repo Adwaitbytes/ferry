@@ -26,6 +26,7 @@
     },
     "./tokens.css": "./src/tokens.css",
     "./fonts.css": "./src/fonts.css",
+    "./fonts-text.css": "./src/fonts-text.css",
     "./theme.css": "./src/theme.css"
   },
   "scripts": {

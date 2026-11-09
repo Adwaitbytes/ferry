@@ -12,14 +12,20 @@ export function proxy(request: NextRequest) {
   // Wallet connection talks gRPC-Web to the public fullnode and reads Slush wallet metadata; earnings come from Gate.
   const gate = process.env.NEXT_PUBLIC_GATE_URL ? new URL(process.env.NEXT_PUBLIC_GATE_URL).origin : '';
   const walletHosts = 'https://fullnode.mainnet.sui.io https://api.slush.app';
+  // F9 backup on Settings only: Seal key servers, the Walrus upload relay, and WASM for the Walrus
+  // encoder. Kept off every other route so the rest of the site keeps the stricter policy.
+  const backup = request.nextUrl.pathname === '/settings';
+  const backupHosts = backup
+    ? ' https://seal-mainnet-open.overclock.run https://open.key-server.mainnet.seal.mirai.cloud https://upload-relay.mainnet.walrus.space'
+    : '';
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${backup ? " 'wasm-unsafe-eval'" : ''}${isDev ? " 'unsafe-eval'" : ''}`,
     `style-src 'self' 'nonce-${nonce}'`,
     "style-src-attr 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "font-src 'self'",
-    `connect-src 'self' ${aggregator} ${walletHosts}${gate ? ` ${gate}` : ''}${isDev ? ' ws:' : ''}`,
+    `connect-src 'self' ${aggregator} ${walletHosts}${backupHosts}${gate ? ` ${gate}` : ''}${isDev ? ' ws:' : ''}`,
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",

@@ -16,6 +16,7 @@ import type {
   StorageArea,
   VaultCrypto,
 } from '../src/worker/ports';
+import type { WorkerToContent } from '../src/lib/protocol';
 import { FerryWorker, type WorkerDeps } from '../src/worker/service';
 
 export const EXT_ID = 'ferrytestextensionidaaaaaaaaaaaa';
@@ -57,6 +58,13 @@ export const fakeCrypto: VaultCrypto = {
   },
   publicKeyHex: async () => PUBLIC_KEY,
   suiAddress: async () => `0x${'cd'.repeat(32)}`,
+  sealSecret: async (seed, purpose, secret) => ({ seed: Array.from(seed), purpose, secret }),
+  openSecret: async (seed, purpose, sealed) => {
+    const s = sealed as { seed: number[]; purpose: string; secret: string };
+    if (s.purpose !== purpose || s.seed.join() !== Array.from(seed).join())
+      throw new Error('wrong seed or purpose');
+    return s.secret;
+  },
 };
 
 export function suggestion(ref: string, text: string): Suggestion {
@@ -159,7 +167,13 @@ export interface Harness {
   local: ReturnType<typeof memArea>;
   session: ReturnType<typeof memArea>;
   clock: { now: () => number; t: number };
-  engines: EngineFactory & { created: number };
+  engines: EngineFactory & {
+    created: number;
+    lastVault: Parameters<EngineFactory['create']>[0]['vault'];
+    failVault: Error | null;
+  };
+  tabMessages: { tabId: number; message: WorkerToContent }[];
+  tabReply: { value: unknown };
   wiped: { count: number };
 }
 
@@ -169,14 +183,20 @@ export function harness(overrides: Partial<WorkerDeps> = {}, engine = fakeEngine
   const imports = fakeImports();
   const api = fakeApi();
   const clock = { t: Date.parse('2026-11-09T12:00:00Z'), now: () => clock.t };
-  const engines = {
+  const engines: Harness['engines'] = {
     created: 0,
-    async create() {
+    lastVault: null,
+    failVault: null,
+    async create(input) {
       engines.created += 1;
+      engines.lastVault = input.vault;
+      if (input.vault !== null && engines.failVault !== null) throw engines.failVault;
       engine.destroyed = false;
       return { engine, imports };
     },
   };
+  const tabMessages: Harness['tabMessages'] = [];
+  const tabReply: Harness['tabReply'] = { value: { inserted: 1 } };
   const wiped = { count: 0 };
   let n = 0;
   const worker = new FerryWorker({
@@ -191,13 +211,30 @@ export function harness(overrides: Partial<WorkerDeps> = {}, engine = fakeEngine
     exporter: { toJson: async (m) => JSON.stringify(m), toMarkdown: (m) => `${m.length}` },
     newId: () => `00000000-0000-4000-8000-${String(++n).padStart(12, '0')}`,
     openSidePanel: async () => undefined,
+    sendToTab: async (tabId, message) => {
+      tabMessages.push({ tabId, message });
+      if (tabReply.value instanceof Error) throw tabReply.value;
+      return tabReply.value;
+    },
     wipeIndexedDb: async () => {
       wiped.count += 1;
     },
     deviceLabel: () => 'Ferry on Chrome 9 Nov 2026',
     ...overrides,
   });
-  return { worker, engine, imports, api, local, session, clock, engines, wiped };
+  return {
+    worker,
+    engine,
+    imports,
+    api,
+    local,
+    session,
+    clock,
+    engines,
+    wiped,
+    tabMessages,
+    tabReply,
+  };
 }
 
 /** A worker that is set up, open and paired. */

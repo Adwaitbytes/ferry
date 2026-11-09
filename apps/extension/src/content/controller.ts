@@ -45,6 +45,8 @@ export interface ContentDeps {
 export interface FerryContent {
   /** Alt+I from the worker: insert every current suggestion without opening the preview. */
   insertSuggested(): Promise<void>;
+  /** Insert from the side panel's Now tab. Resolves to the number of facts placed, 0 if none. */
+  insertRefs(refs: readonly string[]): Promise<number>;
   destroy(): void;
 }
 
@@ -170,21 +172,22 @@ export function startFerry(deps: ContentDeps): FerryContent {
     }
   };
 
-  const insert = async (refs: string[]): Promise<void> => {
+  const insert = async (refs: string[]): Promise<number> => {
     const c = composer();
-    if (refs.length === 0 || c === null) return;
+    if (refs.length === 0 || c === null) return 0;
     const res = await deps.send({ type: 'inject.compose', site, refs });
     if (!res.ok) {
       if (res.code === 'locked') setChip({ kind: 'locked' });
-      return;
+      return 0;
     }
     const { text, count } = res.data as ComposeData;
-    if (text.length === 0 || !safe(() => adapter.insertAtStart(c, text), false)) return;
+    if (text.length === 0 || !safe(() => adapter.insertAtStart(c, text), false)) return 0;
     inserted = true;
     closePreview();
     setChip({ kind: 'added', count });
     if (hideTimer !== null) clearTimeout(hideTimer);
     hideTimer = setTimeout(() => setChip(null), ADDED_FOR_MS);
+    return count;
   };
 
   /* -------------------------------- recall -------------------------------- */
@@ -398,6 +401,9 @@ export function startFerry(deps: ContentDeps): FerryContent {
     async insertSuggested() {
       if (chip?.kind !== 'ready' || suggestions.length === 0) return;
       await insert(suggestions.map((s) => s.ref));
+    },
+    insertRefs(refs) {
+      return insert(refs.slice(0, 20));
     },
     destroy() {
       destroyed = true;

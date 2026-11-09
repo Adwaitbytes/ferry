@@ -5,6 +5,7 @@ import { ArrowUpRight, Unplug } from 'lucide-react';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { preload } from 'react-dom';
 import { FerryMark, Wordmark } from '@/components/ferry-mark';
 import { DemoVideo } from '@/components/landing/demo-video';
 import { InstallCta } from '@/components/landing/install-cta';
@@ -160,7 +161,7 @@ function ReceiptVisual() {
         <StatusPill status="conflict" />
         <StatusPill status="hidden" />
       </div>
-      <p className="text-body text-text-secondary">
+      <p className="text-body-lg text-text-secondary">
         Each fact knows its source, its date, and whether a newer fact replaced it. Conflicts wait for you to decide. Hidden facts are never
         inserted again.
       </p>
@@ -181,7 +182,11 @@ function CounterCell({ label, value }: { label: string; value: number | null }) 
   );
 }
 
+/** Fonts the first screen paints with, fetched alongside the CSS instead of after it (DESIGN 2.2). */
+const LANDING_FONTS = ['/fonts/bricolage-display-latin.woff2', '/fonts/geist-latin.woff2'] as const;
+
 export default async function Landing() {
+  for (const href of LANDING_FONTS) preload(href, { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   const stats = await readStats();
   return (

@@ -183,6 +183,38 @@ describe('extension response contracts', () => {
   });
 });
 
+describe('side panel Now and Vault contracts', () => {
+  it('lets only the panel ask for a tab\'s suggestions and insert them', () => {
+    expect(PanelRequest.safeParse({ type: 'now.suggestions', tabId: 12 }).success).toBe(true);
+    expect(PanelRequest.safeParse({ type: 'now.suggestions', tabId: -1 }).success).toBe(false);
+    expect(PanelRequest.safeParse({ type: 'now.insert', tabId: 12, refs: ['blob-0000000001'] }).success).toBe(true);
+    expect(PanelRequest.safeParse({ type: 'now.insert', tabId: 12, refs: [] }).success).toBe(false);
+    expect(PanelRequest.safeParse({ type: 'now.insert', tabId: 12, refs: Array(21).fill('blob-0000000001') }).success).toBe(false);
+    expect(WebAppRequest.safeParse({ type: 'now.insert', tabId: 12, refs: ['blob-0000000001'] }).success).toBe(false);
+    expect(ContentRequest.safeParse({ type: 'now.suggestions', tabId: 12 }).success).toBe(false);
+  });
+
+  it('accepts a BYOK embedding setup only over https and only from the panel', () => {
+    // Built from fragments so no key-shaped literal sits in the repo (THREAT_MODEL X-CI-2).
+    const embedding = { apiKey: ['sk', 'test', '0123456789'].join('-'), apiBase: 'https://api.openai.com/v1' };
+    expect(PanelRequest.safeParse({ type: 'vault.enable', embedding }).success).toBe(true);
+    expect(PanelRequest.safeParse({ type: 'vault.enable', embedding: { ...embedding, apiBase: 'http://api.openai.com/v1' } }).success).toBe(false);
+    expect(PanelRequest.safeParse({ type: 'vault.enable', embedding: { apiKey: 'short' } }).success).toBe(false);
+    expect(WebAppRequest.safeParse({ type: 'vault.enable', embedding }).success).toBe(false);
+    expect(ContentRequest.safeParse({ type: 'vault.status' }).success).toBe(false);
+  });
+
+  it('validates Now and Vault responses', () => {
+    const suggestion = { ref: 'blob-0000000001', text: 'Vegetarian', type: 'preference', sources: ['chatgpt'], heardAt: '2026-10-12', score: 0.9 };
+    expect(PanelResponse['now.suggestions'].safeParse({ site: 'claude', suggestions: [suggestion], updatedAt: 1 }).success).toBe(true);
+    expect(PanelResponse['now.suggestions'].safeParse({ site: null, suggestions: [], updatedAt: null }).success).toBe(true);
+    expect(PanelResponse['now.insert'].safeParse({ inserted: 0 }).success).toBe(false);
+    expect(PanelResponse['vault.status'].safeParse({ mode: 'vault', embedding: { apiBase: 'https://api.openai.com/v1', model: 'text-embedding-3-small' }, sealSigner: 'delegate' }).success).toBe(true);
+    expect(PanelResponse['vault.status'].safeParse({ mode: 'vault', embedding: { apiKey: 'sk' }, sealSigner: 'delegate' }).success).toBe(false);
+    expect(PanelResponse['vault.status'].safeParse({ mode: 'private', embedding: null, sealSigner: 'delegate' }).success).toBe(false);
+  });
+});
+
 describe('publishing contracts', () => {
   const id = '6f1c1f1e-8a6c-4b6a-9d55-0d6a2f4b9b11';
 

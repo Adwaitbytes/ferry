@@ -12,16 +12,20 @@ import {
   FerryMemory,
   ImportQueue,
   generateSeed,
+  openSecret,
   openSeed,
   publicKeyHex,
+  sealSecret,
   sealSeed,
   suiAddress,
   zeroize,
+  type MemoryEngine,
 } from '@ferry/memwal';
+import { FerryVaultMemory } from '@ferry/memwal/vault';
 import { RELAYER_URL } from '../lib/config';
-import type { EngineFactory, FerryApi, ImportQueuePort, MemoryPort, VaultCrypto } from './ports';
+import type { EngineFactory, FerryApi, ImportQueuePort, VaultCrypto, VaultEngineConfig } from './ports';
+import { PAGE_SIZE, SplitPort, SplitQueuePort, offsetOf, type ListFilter, type PartPort } from './split-engine';
 
-const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 20;
 
 export const memwalCrypto: VaultCrypto = {
@@ -30,12 +34,14 @@ export const memwalCrypto: VaultCrypto = {
   openSeed: (sealed, passphrase) => openSeed(sealed, passphrase),
   publicKeyHex: (seed) => publicKeyHex(seed),
   suiAddress: (seed) => suiAddress(seed),
+  sealSecret: (seed, purpose, secret) => sealSecret(seed, purpose, secret),
+  openSecret: (seed, purpose, sealed) => openSecret(seed, purpose, sealed),
 };
 
 /** Adapts packages/memwal to the worker's ports. The judge runs on the Ferry server (F5). */
-class MemwalPort implements MemoryPort {
+class MemwalPort implements PartPort {
   constructor(
-    private readonly memory: FerryMemory,
+    private readonly memory: MemoryEngine,
     private readonly api: FerryApi,
     private readonly seed: Uint8Array,
   ) {}
@@ -98,9 +104,30 @@ class MemwalPort implements MemoryPort {
     return byRef;
   }
 
-  async list(filter: { status?: MemoryStatus; query?: string; cursor?: string }) {
-    const offset =
-      filter.cursor !== undefined && /^\d{1,6}$/.test(filter.cursor) ? Number(filter.cursor) : 0;
+  async owns(ref: string): Promise<boolean> {
+    return (await this.memory.index.get(ref)) !== undefined;
+  }
+
+  async ownsConflict(conflictId: string): Promise<boolean> {
+    return (await this.memory.openConflicts()).some((c) => c.id === conflictId);
+  }
+
+  items(filter: Omit<ListFilter, 'cursor'>, limit: number): Promise<LibraryItem[]> {
+    return this.collect(filter, 0, limit);
+  }
+
+  async list(filter: ListFilter) {
+    const offset = offsetOf(filter.cursor);
+    const memories = await this.collect(filter, offset, PAGE_SIZE + 1);
+    const hasMore = filter.query === undefined && memories.length > PAGE_SIZE;
+    return { items: memories.slice(0, PAGE_SIZE), nextCursor: hasMore ? String(offset + PAGE_SIZE) : null };
+  }
+
+  private async collect(
+    filter: { status?: MemoryStatus; query?: string },
+    offset: number,
+    limit: number,
+  ): Promise<LibraryItem[]> {
     let memories;
     if (filter.query !== undefined && filter.query.trim().length > 0) {
       const hits = await this.memory.recallForDraft(filter.query, SEARCH_LIMIT);
@@ -114,11 +141,11 @@ class MemwalPort implements MemoryPort {
     } else {
       memories = await this.memory.list({
         ...(filter.status !== undefined ? { status: filter.status } : {}),
-        limit: PAGE_SIZE + 1,
+        limit,
         offset,
       });
     }
-    const page = memories.slice(0, PAGE_SIZE);
+    const page = memories.slice(0, limit);
     const conflicts = page.some((m) => m.status === 'conflict')
       ? await this.conflictsByRef()
       : new Map<string, LibraryConflict>();
@@ -133,8 +160,7 @@ class MemwalPort implements MemoryPort {
         ...(conflict !== undefined ? { conflict } : {}),
       });
     }
-    const hasMore = filter.query === undefined && memories.length > PAGE_SIZE;
-    return { items, nextCursor: hasMore ? String(offset + PAGE_SIZE) : null };
+    return items;
   }
 
   hide(ref: string) {
@@ -143,7 +169,7 @@ class MemwalPort implements MemoryPort {
 
   async resolveConflict(
     conflictId: string,
-    resolution: Parameters<FerryMemory['resolveConflict']>[1],
+    resolution: Parameters<MemoryEngine['resolveConflict']>[1],
   ) {
     await this.memory.resolveConflict(conflictId, resolution);
   }
@@ -189,23 +215,72 @@ class QueuePort implements ImportQueuePort {
   }
 }
 
+/** Wires one engine and its import queue, so locking disposes both together. */
+function standardParts(
+  api: FerryApi,
+  seed: Uint8Array,
+  accountId: string,
+): { port: MemwalPort; imports: QueuePort; memory: FerryMemory } {
+  // The engine owns its own copy, so locking can zero both without racing each other.
+  // MemWal.create copies the key, so our copy is wiped as soon as the client exists.
+  const own = new Uint8Array(seed);
+  const memory = new FerryMemory({ seed: own, accountId, serverUrl: RELAYER_URL });
+  zeroize(own);
+  return { memory, ...withQueue(memory, new MemwalPort(memory, api, own)) };
+}
+
+function withQueue(memory: MemoryEngine, port: MemwalPort): { port: MemwalPort; imports: QueuePort } {
+  const queue = new ImportQueue(memory, memory.index.db);
+  const imports = new QueuePort(queue);
+  const destroy = port.destroy.bind(port);
+  port.destroy = () => {
+    queue.dispose();
+    destroy();
+  };
+  return { port, imports };
+}
+
+/**
+ * Vault engine. The Seal session key is signed by the delegate seed (no wallet can be reached from
+ * a service worker), and both engines share one governor because they spend one key's budget.
+ */
+async function vaultParts(
+  api: FerryApi,
+  seed: Uint8Array,
+  accountId: string,
+  standard: FerryMemory,
+  vault: VaultEngineConfig,
+): Promise<{ port: MemwalPort; imports: QueuePort }> {
+  const own = new Uint8Array(seed);
+  try {
+    const memory = await FerryVaultMemory.create({
+      seed: own,
+      accountId,
+      serverUrl: RELAYER_URL,
+      embedding: vault,
+      governor: standard.governor,
+    });
+    return withQueue(memory, new MemwalPort(memory, api, own));
+  } finally {
+    zeroize(own);
+  }
+}
+
 export function memwalEngines(api: FerryApi): EngineFactory {
   return {
-    async create({ seed, accountId }) {
-      // The engine owns its own copy, so locking can zero both without racing each other.
-      // MemWal.create copies the key, so our copy is wiped as soon as the client exists.
-      const own = new Uint8Array(seed);
-      const memory = new FerryMemory({ seed: own, accountId, serverUrl: RELAYER_URL });
-      zeroize(own);
-      const queue = new ImportQueue(memory, memory.index.db);
-      const imports = new QueuePort(queue);
-      const port = new MemwalPort(memory, api, own);
-      const destroy = port.destroy.bind(port);
-      port.destroy = () => {
-        queue.dispose();
-        destroy();
-      };
-      return { engine: port, imports };
+    async create({ seed, accountId, vault }) {
+      const standard = standardParts(api, seed, accountId);
+      if (vault === null) return { engine: standard.port, imports: standard.imports };
+      try {
+        const v = await vaultParts(api, seed, accountId, standard.memory, vault);
+        return {
+          engine: new SplitPort(standard.port, v.port),
+          imports: new SplitQueuePort(standard.imports, v.imports),
+        };
+      } catch (error) {
+        standard.port.destroy();
+        throw error;
+      }
     },
   };
 }

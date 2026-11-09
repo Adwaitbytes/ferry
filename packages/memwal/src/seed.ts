@@ -153,3 +153,89 @@ export async function publicKeyHex(seed: Uint8Array): Promise<string> {
 export function suiAddress(seed: Uint8Array): Promise<string> {
   return delegateKeyToSuiAddress(seedHex(seed));
 }
+
+/**
+ * A small secret (the Vault mode embedding key) sealed under a key derived from the delegate seed.
+ * It is readable only while Ferry is open, exactly like the seed, without asking for the
+ * passphrase a second time. `purpose` is bound into both the HKDF info and the GCM tag, so a blob
+ * sealed for one use cannot be replayed as another.
+ */
+export interface SealedSecret {
+  v: 1;
+  kdf: 'HKDF-SHA256';
+  cipher: 'AES-GCM-256';
+  purpose: string;
+  iv: string;
+  ciphertext: string;
+}
+
+const PURPOSE = /^[a-z][a-z0-9.-]{0,63}$/;
+const MAX_SECRET_CHARS = 4096;
+
+async function secretKey(seed: Uint8Array, purpose: string): Promise<CryptoKey> {
+  assertSeed(seed);
+  const raw = new Uint8Array(seed);
+  try {
+    const base = await subtle().importKey('raw', raw, 'HKDF', false, ['deriveKey']);
+    return await subtle().deriveKey(
+      { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info: new TextEncoder().encode(`ferry-secret:v1:${purpose}`) },
+      base,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt'],
+    );
+  } finally {
+    zeroize(raw);
+  }
+}
+
+export async function sealSecret(seed: Uint8Array, purpose: string, secret: string): Promise<SealedSecret> {
+  if (!PURPOSE.test(purpose)) throw new TypeError('purpose must be a short lowercase label');
+  if (secret.length === 0 || secret.length > MAX_SECRET_CHARS) throw new TypeError('secret must be 1 to 4096 characters');
+  const key = await secretKey(seed, purpose);
+  const iv = globalThis.crypto.getRandomValues(new Uint8Array(IV_BYTES));
+  const plain = new TextEncoder().encode(secret);
+  try {
+    const ct = new Uint8Array(
+      await subtle().encrypt({ name: 'AES-GCM', iv, additionalData: new TextEncoder().encode(`ferry-secret:v1:${purpose}`) }, key, plain),
+    );
+    return { v: 1, kdf: 'HKDF-SHA256', cipher: 'AES-GCM-256', purpose, iv: toB64(iv), ciphertext: toB64(ct) };
+  } finally {
+    zeroize(plain);
+  }
+}
+
+export async function openSecret(seed: Uint8Array, purpose: string, blob: unknown): Promise<string> {
+  const e = blob as Partial<SealedSecret> | null;
+  if (
+    e === null ||
+    typeof e !== 'object' ||
+    e.v !== 1 ||
+    e.kdf !== 'HKDF-SHA256' ||
+    e.cipher !== 'AES-GCM-256' ||
+    e.purpose !== purpose ||
+    typeof e.iv !== 'string' ||
+    typeof e.ciphertext !== 'string'
+  ) {
+    throw new SeedError('invalid_envelope', 'not a Ferry sealed secret for this purpose');
+  }
+  let iv: Uint8Array<ArrayBuffer>, ct: Uint8Array<ArrayBuffer>;
+  try {
+    iv = fromB64(e.iv);
+    ct = fromB64(e.ciphertext);
+  } catch {
+    throw new SeedError('invalid_envelope', 'sealed secret is not valid base64');
+  }
+  if (iv.length !== IV_BYTES) throw new SeedError('invalid_envelope', 'sealed secret has a bad iv');
+  const key = await secretKey(seed, purpose);
+  try {
+    const plain = new Uint8Array(
+      await subtle().decrypt({ name: 'AES-GCM', iv, additionalData: new TextEncoder().encode(`ferry-secret:v1:${purpose}`) }, key, ct),
+    );
+    const text = new TextDecoder().decode(plain);
+    zeroize(plain);
+    return text;
+  } catch {
+    throw new SeedError('wrong_passphrase', 'sealed secret does not open with this key');
+  }
+}

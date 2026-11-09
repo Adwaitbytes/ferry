@@ -181,14 +181,22 @@
   --ferry-shadow-4: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 16px rgba(2, 6, 14, 0.45), 0 32px 64px -12px rgba(2, 6, 14, 0.7);
 }
 
+/*
+ * The root keeps the browser's 16px so 1rem is 16px and every rem token renders at its DESIGN 2.3
+ * size. The 14px UI base is set on body (and on :host, the chip's shadow host), never on :root:
+ * setting it there shrank the whole scale to 87.5 percent and put micro text under 11px.
+ */
 :root, :host {
   background-color: var(--ferry-bg);
   color: var(--ferry-text-primary);
   font-family: var(--ferry-font-sans);
-  font-size: 0.875rem;
   line-height: 1.5714;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+body, :host {
+  font-size: 0.875rem;
 }
 
 ::selection { background: var(--ferry-selection); }

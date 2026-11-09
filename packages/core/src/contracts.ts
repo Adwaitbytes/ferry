@@ -51,6 +51,20 @@ export const ContentRequest = z.discriminatedUnion('type', [
 ]);
 export type ContentRequest = z.infer<typeof ContentRequest>;
 
+/** A browser tab id as `chrome.tabs` reports it; the side panel names the chat tab it acts on. */
+export const TabId = z.number().int().nonnegative().max(2 ** 31 - 1);
+
+/**
+ * Vault mode (F10) embedding provider. The key is the user's own (BYOK), sent once from the side
+ * panel to the worker, which seals it at rest and never hands it to a content script.
+ */
+export const EmbeddingSetup = z.object({
+  apiKey: z.string().trim().min(8).max(512),
+  apiBase: z.url({ protocol: /^https$/ }).max(200).optional(),
+  model: z.string().trim().min(1).max(100).optional(),
+});
+export type EmbeddingSetup = z.infer<typeof EmbeddingSetup>;
+
 export const PanelRequest = z.discriminatedUnion('type', [
   z.object({ type: z.literal('status.get') }),
   z.object({ type: z.literal('pairing.begin') }),
@@ -73,6 +87,13 @@ export const PanelRequest = z.discriminatedUnion('type', [
   z.object({ type: z.literal('settings.set'), patch: z.record(z.string(), z.unknown()) }),
   z.object({ type: z.literal('data.export') }),
   z.object({ type: z.literal('data.wipe'), confirm: z.literal('DELETE MY FERRY DATA') }),
+  /* Now tab: what the chat tab's last recall.suggest showed, and insert through inject.compose. */
+  z.object({ type: z.literal('now.suggestions'), tabId: TabId }),
+  z.object({ type: z.literal('now.insert'), tabId: TabId, refs: z.array(MemoryRef).min(1).max(20) }),
+  /* Vault mode (F10). Panel only: the web app can neither read nor change the storage mode. */
+  z.object({ type: z.literal('vault.status') }),
+  z.object({ type: z.literal('vault.enable'), embedding: EmbeddingSetup }),
+  z.object({ type: z.literal('vault.disable') }),
 ]);
 export type PanelRequest = z.infer<typeof PanelRequest>;
 
@@ -280,12 +301,44 @@ export const WebAppResponse = {
 } as const satisfies Record<WebAppRequest['type'], z.ZodType>;
 export type WebAppResponse<T extends WebAppRequest['type']> = z.infer<(typeof WebAppResponse)[T]>;
 
+/** What a chat tab's last `recall.suggest` showed. Read from the worker's cache; no relayer call. */
+export const NowSuggestions = z.object({
+  site: Site.nullable(),
+  suggestions: z.array(Suggestion).max(20),
+  /** Epoch ms of that recall, or null when the tab has not recalled since Ferry opened. */
+  updatedAt: z.number().int().nonnegative().nullable(),
+});
+export type NowSuggestions = z.infer<typeof NowSuggestions>;
+
+export const NowInserted = z.object({ inserted: z.number().int().min(1).max(20) });
+export type NowInserted = z.infer<typeof NowInserted>;
+
+export const StorageMode = z.enum(['standard', 'vault']);
+export type StorageMode = z.infer<typeof StorageMode>;
+
+/**
+ * Which engine takes new writes. `embedding` names the provider only; the key never leaves the
+ * worker. `sealSigner` is `delegate`: Seal session keys are signed by this browser's delegate key,
+ * which `memwal::account::seal_approve` accepts like the owner (RESEARCH 1.5).
+ */
+export const VaultStatus = z.object({
+  mode: StorageMode,
+  embedding: z.object({ apiBase: z.string().max(200), model: z.string().max(100) }).nullable(),
+  sealSigner: z.literal('delegate'),
+});
+export type VaultStatus = z.infer<typeof VaultStatus>;
+
 /** `data` schema for each PanelRequest type except settings, whose shape is extension-internal. */
 export const PanelResponse = {
   ...WebAppResponse,
   lock: ExtensionStatus,
   unlock: ExtensionStatus,
   'data.wipe': ExtensionStatus,
+  'now.suggestions': NowSuggestions,
+  'now.insert': NowInserted,
+  'vault.status': VaultStatus,
+  'vault.enable': VaultStatus,
+  'vault.disable': VaultStatus,
 } as const satisfies Record<Exclude<PanelRequest['type'], 'settings.get' | 'settings.set'>, z.ZodType>;
 
 /* ------------------------------------------------------------------ */

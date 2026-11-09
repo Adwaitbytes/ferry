@@ -1,4 +1,3 @@
 /* Self-hosted fonts (DESIGN 2.2). One path for web and extension; no remote font hosts. */
 @import "@fontsource-variable/bricolage-grotesque/standard.css";
-@import "@fontsource-variable/geist/index.css";
-@import "@fontsource-variable/geist-mono/index.css";
+@import "./fonts-text.css";

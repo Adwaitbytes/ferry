@@ -20,13 +20,19 @@ const TABS = [
 
 const POLL_MS = 3000;
 
+export interface ActiveChat {
+  site: Site | null;
+  /** The active tab, kept even off a chat site so the Now tab can name what it acts on. */
+  tabId: number | null;
+}
+
 /** The chat site in the active tab. The URL is only visible for hosts Ferry has permission for. */
-function useCurrentSite(): Site | null {
-  const [site, setSite] = useState<Site | null>(null);
+function useActiveChat(): ActiveChat {
+  const [chat, setChat] = useState<ActiveChat>({ site: null, tabId: null });
   useEffect(() => {
     const refresh = async () => {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      setSite(siteOf(tab?.url));
+      setChat({ site: siteOf(tab?.url), tabId: tab?.id ?? null });
     };
     void refresh();
     const onActivated = () => void refresh();
@@ -40,7 +46,7 @@ function useCurrentSite(): Site | null {
       browser.tabs.onUpdated.removeListener(onUpdated);
     };
   }, []);
-  return site;
+  return chat;
 }
 
 function siteOf(url: string | undefined): Site | null {
@@ -56,7 +62,8 @@ export function App() {
   const [status, setStatus] = useState<ExtensionStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabValue>('now');
-  const site = useCurrentSite();
+  const chat = useActiveChat();
+  const site = chat.site;
 
   const refresh = useCallback(async () => {
     const res = await call<ExtensionStatus>({ type: 'status.get' });
@@ -120,7 +127,7 @@ export function App() {
             className="pt-1"
           >
             <TabPanel value="now" className="pt-4">
-              <NowTab status={status} site={site} onChanged={refresh} />
+              <NowTab status={status} site={site} tabId={chat.tabId} onChanged={refresh} />
             </TabPanel>
             <TabPanel value="library" className="pt-4">
               <LibraryTab />
