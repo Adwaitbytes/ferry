@@ -4,7 +4,23 @@
 
 Replace every `{{FILL}}` before posting. Character counts are for the text as written; links on X count as 23 characters each.
 
-## X thread
+## X post (drafted in X, 9 Nov 2026, with the 30 second clip attached)
+
+```
+Claude knew 312 things about me
+Gemini knew none of them
+
+So I built Ferry: one memory I own on @WalrusProtocol that follows me into every AI
+
+Full demo: https://youtu.be/GNxrTnCBfXA
+
+#TotalRecall by @tatum_io x @WalrusFoundation on @SuiNetwork
+@claudeai @GeminiApp @ChatGPTapp
+```
+
+Reply: Every fact keeps a receipt: which AI heard it and when. Code, open source: https://github.com/Adwaitbytes/ferry
+
+## X thread (longer alternative)
 
 **1/8**
 Every AI you use remembers you. None of that memory is yours.

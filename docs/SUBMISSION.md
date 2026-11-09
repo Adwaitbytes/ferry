@@ -13,6 +13,8 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 | Track | Track 2: Smart Agents for Real Life |
 | Awards targeted | Best Walrus Memory; Best Use of Agent Payments |
 | Tatum dashboard Account ID | 6af19666059c9eaaf7a6e2bd |
+| Sui address | 0x3b1d6cbb38e58113e91642954a84998224fb6b2db0f18495905eb2afb0a9d376 |
+| Account ID (SUI) | 0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2 |
 | MEMWAL_AGENT_ID | aa0e1b0af8be8765d65d86876ca7034259fced902035d29c2420cdca5354e2ff |
 | Public repo | https://github.com/Adwaitbytes/ferry |
 | License | MIT |
@@ -27,15 +29,31 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 
 Note on MEMWAL_AGENT_ID: per the Walrus Memory docs it is the delegate public key in hex without `0x`, not the Sui address and not the account id. Get it from the extension's Devices panel or `memwal.getPublicKeyHex()`, and check it appears in the account's delegate keys on chain.
 
-## Description
+## Description (as entered in the form)
 
-Every AI assistant keeps a private profile of you, and none of it is yours. Switch from ChatGPT to Claude and you start over.
+Track 2: Smart Agents for Real Life. Also entering Best Walrus Memory and Best Use of Agent Payments.
 
-Ferry moves that memory into a store you own on Walrus Mainnet and brings it back into whichever AI you open next. A Chrome extension captures facts you tell any AI (with your approval) and offers the relevant ones when you start typing in another, inserted only when you click. Rescue imports your ChatGPT, Claude and Gemini exports, parsed on your own device, with the exact quote behind every fact. When facts conflict, Ferry asks which is true and supersedes the old one on Walrus with its history intact. The Blackout Drill cuts off a model mid chat and continues on another with 0 facts lost.
+Every AI assistant keeps a private profile of you, and none of it is yours. Switch from ChatGPT to Claude and you start over. Ferry moves that memory into a store you own on Walrus Mainnet, owned by your Sui wallet, and brings it back into whichever AI you open next.
 
-Ferry Gate lets agents pay for memory you choose to share: HTTP 402, 0.01 USDC on Sui over MPP, verified through Tatum and paid straight to your address. Gate reads only a separate Public profile account, so it can never see private memory.
+Rescue imports what ChatGPT, Claude or Gemini know about you, parsed on your device, with the quote behind every fact. I rescued 312 facts from my own Claude history onto Walrus Mainnet. Carry: a Chrome extension offers the right facts when you start typing in another AI, inserted only when you click. Gemini, which had never seen any of it, got 6 facts about my week. Stays current: conflicting facts are resolved by you, and the old one is superseded on Walrus with history kept. Blackout Drill: Claude was cut off mid chat and Gemini carried on from the same memory, 0 facts lost.
 
-Every chain read goes through Tatum's Sui gRPC gateway: delegate keys, blob epochs, payment verification and price data. Every fact carries a header on Walrus with its sources, date, confidence, supersede link and status. We state the limits plainly: Standard mode is not end to end encrypted (Vault mode with Seal is), and forget means hidden until the storage epoch ends, because Walrus has no delete.
+Share and Earn: Ferry Gate lets agents pay for a slice of memory you chose to publish. They get HTTP 402, pay 0.01 USDC on Sui over MPP, and the money goes to your address. Every chain read goes through Tatum's Sui gRPC gateway: delegate keys, blob epochs, payment verification and prices.
+
+Honest limits: the live paid recall ran on Sui Testnet (no real USDC); memory itself is on Mainnet. Standard mode is not end to end encrypted (Vault mode with Seal is). Forget means hidden, because Walrus has no delete.
+
+## Feedback answers (as entered in the form)
+
+**How was your experience building with Walrus?**
+
+Walrus Memory is the right primitive: remember, recall and restore with an owner-controlled account made it possible to build portable memory in days. The SDK and the delegate key model are clean. Main friction: the relayer sends no CORS headers (walrus-memory#1119), so a web app cannot call it directly. I had to make the Chrome extension the memory engine. Memories also have no tags or metadata, so I encode type, source, date and supersede links in a text header. There is no delete, so forget can only hide. And 30 points per minute per key needs a paced queue for large imports. Native metadata, CORS and a documented supersede pattern would help most.
+
+**How was your experience building with the Tatum AI Builder?**
+
+I did not use the AI Builder. I used Tatum's native Sui gRPC gateway directly for every chain read and payment verification, plus the price API. gRPC was fast and the anonymous plan let setup start without a key. The 3 requests per second free limit needed a token bucket and cache. A Sui gRPC example in TypeScript in the docs would save time.
+
+**One bug or friction point with Walrus Memory**
+
+The relayer has no CORS headers, so browser apps cannot use Walrus Memory directly without an extension or a server holding the user's delegate key.
 
 ## How each requirement is met
 
