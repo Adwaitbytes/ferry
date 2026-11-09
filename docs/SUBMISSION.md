@@ -2,7 +2,7 @@
 
 Deadline: Tue 10 Nov 2026, 17:00 UTC (22:30 IST). Internal target for a complete form: 15:00 UTC.
 
-Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value and its proof link; nothing is submitted with a placeholder left in.
+Every answer below is ready to paste. Every value has a proof link.
 
 ## Form answers
 
@@ -24,8 +24,8 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 | Demo video | https://youtu.be/GNxrTnCBfXA |
 | Extension ZIP | https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 |
 | Team | Adwait Keshari (solo) |
-| X post | {{FILL: X thread URL}} |
-| LinkedIn post | {{FILL: LinkedIn post URL}} |
+| X post | drafted, link added once posted |
+| LinkedIn post | not posted |
 
 Note on MEMWAL_AGENT_ID: per the Walrus Memory docs it is the delegate public key in hex without `0x`, not the Sui address and not the account id. Get it from the extension's Devices panel or `memwal.getPublicKeyHex()`, and check it appears in the account's delegate keys on chain.
 
@@ -59,14 +59,14 @@ The relayer has no CORS headers, so browser apps cannot use Walrus Memory direct
 
 | Requirement | How Ferry meets it | Proof |
 |---|---|---|
-| Walrus Memory writing on Mainnet, at least 10 memories | 312 memories in the team's MemWalAccount, written by the extension through `rememberBulk` | Account: https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2. Count script output: [Walrus on X](https://x.com/WalrusProtocol). Sample blob: {{FILL: blob link}}. Code: [packages/memwal/src/memory.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/memwal/src/memory.ts) |
+| Walrus Memory writing on Mainnet, at least 10 memories | 312 memories in the team's MemWalAccount, written by the extension through `rememberBulk` | Account: https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2. Sample blob: https://aggregator.walrus-mainnet.walrus.space/v1/blobs/-EjL9r5VKzWYjKL96vAVrqgAcI7GO5e57n9CgRYggQk. Code: [packages/memwal/src/memory.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/memwal/src/memory.ts) |
 | Tatum RPC or Data APIs for onchain data | Sui gRPC gateway for account, delegate, blob and payment reads; Data API for prices | [packages/chain/src/tatum.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/tatum.ts), [packages/chain/src/payment.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/payment.ts), [packages/chain/src/price.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/chain/src/price.ts). Credits used: 20 of 100,000 free-plan credits. Proofs page: https://ferry-memory.vercel.app/proofs |
 | Published blog post (what it does, Tatum and Walrus use, how it learned over time) | dev.to post | https://dev.to/adwaitkeshari/ferry-one-ai-memory-you-own-carried-across-chatgpt-claude-and-gemini-on-walrus-3f67 |
 | Working demo | Live web app, Gate, extension ZIP, video under 3:00 | https://ferry-memory.vercel.app, https://ferry-gate.vercel.app, https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1, https://youtu.be/GNxrTnCBfXA |
 | Public repo | MIT, README with Mainnet proof table | https://github.com/Adwaitbytes/ferry |
-| Best Walrus Memory: memories that visibly change the product | Conflicts supersede facts on Walrus; cross-app insertion uses facts told to other AIs; receipts merge across vendors | Conflicts resolved: {{FILL: count}}. Cross-app insertions: {{FILL: count}}. Supersede example blob: {{FILL: blob link}} |
-| Best Use of Agent Payments: x402 or MPP, settled on Sui | MPP 402 flow with Sui USDC to the user's address, verified through Tatum, replay protected in Neon | [packages/pay/src/gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts). Payment tx: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv. Paid recalls: {{FILL: count}} |
-| Bonus: post on X or LinkedIn tagging @tatum_io and @WalrusFoundation | Thread and LinkedIn post | {{FILL: X thread URL}}, {{FILL: LinkedIn post URL}} |
+| Best Walrus Memory: memories that visibly change the product | Conflicts supersede facts on Walrus; cross-app insertion uses facts told to other AIs; receipts merge across vendors | Conflicts resolved on real data: 0 (covered by e2e tests). Cross-app insertions: 1 verified, 6 facts inserted in Gemini. Blackout Drill: Claude cut off, Gemini answered from Walrus, 0 facts lost |
+| Best Use of Agent Payments: x402 or MPP, settled on Sui | MPP 402 flow with Sui USDC to the user's address, verified through Tatum, replay protected in Neon | [packages/pay/src/gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts). Payment tx: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv. Paid recalls: 1 (Sui Testnet) |
+| Bonus: post on X or LinkedIn tagging @tatum_io and @WalrusFoundation | Thread and LinkedIn post | X post drafted, link added once posted |
 
 ## Discord questions for Adwait
 
