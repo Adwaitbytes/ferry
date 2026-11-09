@@ -135,7 +135,7 @@ Every number here is printed by [`scripts/count-memories.ts`](scripts/count-memo
 | Delegate key, this browser (MEMWAL_AGENT_ID) | `aa0e1b0af8be8765d65d86876ca7034259fced902035d29c2420cdca5354e2ff` | added with relayer-sponsored gas, readable on the [account object](https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2) |
 | Memories on Mainnet | 312 (count from the paired extension index, every one with a Walrus blob id; 0 failed writes) | spot check: [blob 1](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/-EjL9r5VKzWYjKL96vAVrqgAcI7GO5e57n9CgRYggQk), [blob 2](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/QTVvQp8j9mwefd2jjF34Yo1uNYUWy0BuTE_mfeiPHzk), [blob 3](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/IUjeWHo7EK3npKAYCcny9H7_UtiWrKpoW1nIrfN98Lg) |
 | Sample memory blob | `2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o` | [aggregator](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o) (Seal ciphertext bound to the MemWal package and the owner) |
-| Supersede example | {{FILL: blob id with sup= header}} | [Walrus on X](https://x.com/WalrusProtocol) |
+| Supersede example | none yet on real data | [Walrus on X](https://x.com/WalrusProtocol) |
 | Paid recall (Sui Testnet, see Limitations) | `BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv`: 0.01 USDC agent to owner, status SUCCESS | [Suiscan](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv) |
 | Tatum credits used | 20 of 100,000 free-plan credits on 9 Nov 2026 (Tatum dashboard) | https://ferry-memory.vercel.app/proofs |
 
@@ -146,14 +146,14 @@ Ferry's memory is meant to change what the product does, visibly. These are the 
 | Signal | Count | What changed because of it |
 |---|---|---|
 | Facts imported (Rescue) | 312 facts from the team lead's own Claude history (memory summary plus four rounds of past-chat search), pasted into Rescue: 128 project, 67 preference, 39 decision, 15 person, 14 dislike, 13 identity, 13 skill, 9 goal, 9 routine, 4 constraint, 1 lesson. 3 doubtful or duplicate facts were discarded in review. | The chip had something to offer on the first chat |
-| Facts captured live (Carry) | {{FILL: captured fact count}} | New facts showed up in other apps within one recall |
-| Facts merged across vendors | {{FILL: merged receipts count}} | One fact, receipts from more than one AI |
-| Conflicts resolved | {{FILL: conflicts resolved count}} | Old facts superseded on Walrus and never inserted again |
-| Cross-app insertions | {{FILL: cross-app injection count}} | Context told in one AI used in another |
-| Facts hidden | {{FILL: hidden count}} | Tombstones written, excluded from recall |
+| Facts captured live (Carry) | 0 so far (capture on live Claude was fixed on 9 Nov; see the adapters commit) | New facts showed up in other apps within one recall |
+| Facts merged across vendors | 0 so far (all 312 came from one source) | One fact, receipts from more than one AI |
+| Conflicts resolved | 0 on real data so far; covered by e2e tests | Old facts superseded on Walrus and never inserted again |
+| Cross-app insertions | 1 verified: 6 facts offered and inserted in Gemini, which had never seen them | Context told in one AI used in another |
+| Facts hidden | 0 | Tombstones written, excluded from recall |
 | Paid recalls through Gate | 1 paid recall, 0.01 USDC, on Sui Testnet ([tx](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv)) | Agents paid the user for scoped context |
 
-{{FILL: one or two sentences on a real moment where memory changed an answer, with a receipt link}}
+With Claude cut off in the Blackout Drill, Gemini answered "Based on your product priorities, you should focus on Select 360 first this week." It had never been told that; the fact came from the owner's Claude history, stored on Walrus Mainnet, with its receipt in the Library.
 
 ## Security model
 
