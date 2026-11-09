@@ -1,4 +1,5 @@
-import { h, runContractSuite } from '../testing/contract.js';
+import { describe, expect, it, vi } from 'vitest';
+import { h, loadFixture, runContractSuite } from '../testing/contract.js';
 import { claudeAdapter } from './claude.js';
 
 const thread = (doc: Document): Element => {
@@ -61,4 +62,35 @@ runContractSuite({
     ['/chat/a.b', undefined],
   ],
   newConversationPath: '/chat/5e0c1f9a-0000-4000-8000-000000000000',
+});
+
+describe('claude: live thread that keeps only the newest exchange mounted', () => {
+  it('fires once when the single mounted user turn is replaced by the message just typed', async () => {
+    vi.useFakeTimers();
+    const doc = loadFixture('claude', 'conversation');
+    const sent: string[] = [];
+    const stop = claudeAdapter.observeUserMessages(doc, (m) => sent.push(m.text));
+    const composer = claudeAdapter.findComposer(doc);
+    if (!composer) throw new Error('composer missing');
+    composer.textContent = 'I moved to Pune last month.';
+    composer.dispatchEvent(new Event('input', { bubbles: true }));
+    // Claude unmounts older turns: the thread now holds only the new exchange.
+    const t = thread(doc);
+    while (t.firstChild) t.removeChild(t.firstChild);
+    t.appendChild(
+      h(doc, 'div', {}, [
+        h(doc, 'div', { 'data-cds': 'UserMessage' }, [
+          h(doc, 'div', { 'data-testid': 'user-message' }, [h(doc, 'p', {}, ['I moved to Pune last month.'])]),
+        ]),
+      ]),
+    );
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(sent).toEqual(['I moved to Pune last month.']);
+    // A re-render of the same turn does not fire again.
+    t.appendChild(h(doc, 'div', {}, []));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(sent).toHaveLength(1);
+    stop();
+    vi.useRealTimers();
+  });
 });

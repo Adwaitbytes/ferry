@@ -112,6 +112,11 @@ export function createAdapter(spec: SiteSpec): SiteAdapter {
       let count = 0;
       let url = doc.URL;
       let typed = false;
+      // The last draft the user typed. Some sites keep only the newest exchange mounted or
+      // re-render the whole thread on send, so a sent message is recognised by its text too.
+      let draft = '';
+      const fired = new Set<string>();
+      const norm = (text: string): string => text.replace(/\s+/gu, ' ').trim();
 
       const baseline = (turns: UserTurn[]): void => {
         for (const turn of turns) seen.add(turn.key);
@@ -122,7 +127,11 @@ export function createAdapter(spec: SiteSpec): SiteAdapter {
       const onInput = (event: Event): void => {
         const target = event.target;
         const composer = findComposer(doc);
-        if (composer && target instanceof Node && composer.contains(target)) typed = true;
+        if (composer && target instanceof Node && composer.contains(target)) {
+          typed = true;
+          const current = norm(readDraft(composer));
+          if (current !== '') draft = current;
+        }
       };
       doc.addEventListener('input', onInput, true);
 
@@ -133,10 +142,16 @@ export function createAdapter(spec: SiteSpec): SiteAdapter {
         const appendedOne = turns.length === count + 1 && (!navigated || count === 0);
         if (appendedOne && last && last.text === '') return;
         url = doc.URL;
-        if (appendedOne && last && typed && !seen.has(last.key)) {
+        const tail = draft.slice(-80);
+        const byDraft =
+          typed && tail !== '' ? [...turns].reverse().find((turn) => !fired.has(norm(turn.text)) && norm(turn.text).includes(tail)) : undefined;
+        const sent = byDraft ?? (appendedOne && last && typed && !seen.has(last.key) ? last : undefined);
+        if (sent && sent.text !== '') {
           typed = false;
+          draft = '';
+          fired.add(norm(sent.text));
           try {
-            onSent({ text: last.text, at: new Date() });
+            onSent({ text: sent.text, at: new Date() });
           } catch (error) {
             reportAdapterError('observeUserMessages.onSent', error);
           }
