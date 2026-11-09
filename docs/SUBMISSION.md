@@ -24,7 +24,7 @@ Every answer below is ready to paste. Every value has a proof link.
 | Demo video | https://youtu.be/GNxrTnCBfXA |
 | Extension ZIP | https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 |
 | Team | Adwait Keshari (solo) |
-| X post | drafted, link added once posted |
+| X post | https://x.com/AdwaitKeshari/status/2119761784483807436 |
 | LinkedIn post | not posted |
 
 Note on MEMWAL_AGENT_ID: per the Walrus Memory docs it is the delegate public key in hex without `0x`, not the Sui address and not the account id. Get it from the extension's Devices panel or `memwal.getPublicKeyHex()`, and check it appears in the account's delegate keys on chain.
@@ -66,7 +66,7 @@ The relayer has no CORS headers, so browser apps cannot use Walrus Memory direct
 | Public repo | MIT, README with Mainnet proof table | https://github.com/Adwaitbytes/ferry |
 | Best Walrus Memory: memories that visibly change the product | Conflicts supersede facts on Walrus; cross-app insertion uses facts told to other AIs; receipts merge across vendors | Conflicts resolved on real data: 0 (covered by e2e tests). Cross-app insertions: 1 verified, 6 facts inserted in Gemini. Blackout Drill: Claude cut off, Gemini answered from Walrus, 0 facts lost |
 | Best Use of Agent Payments: x402 or MPP, settled on Sui | MPP 402 flow with Sui USDC to the user's address, verified through Tatum, replay protected in Neon | [packages/pay/src/gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts). Payment tx: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv. Paid recalls: 1 (Sui Testnet) |
-| Bonus: post on X or LinkedIn tagging @tatum_io and @WalrusFoundation | Thread and LinkedIn post | X post drafted, link added once posted |
+| Bonus: post on X or LinkedIn tagging @tatum_io and @WalrusFoundation | Thread and LinkedIn post | https://x.com/AdwaitKeshari/status/2119761784483807436 |
 
 ## Discord questions for Adwait
 
