@@ -62,11 +62,13 @@ describe('ChainService', () => {
     expect(createChainService({ rpc, apiKey: KEY }).prices).toBeInstanceOf(PriceFeed);
   });
 
-  it('getChainService is a lazy singleton that needs TATUM_API_KEY', () => {
-    expect(() => getChainService({})).toThrow(MissingApiKeyError);
-    const first = getChainService({ TATUM_API_KEY: KEY });
-    expect(getChainService({})).toBe(first);
+  it('getChainService is a lazy singleton; without a key it reads on the anonymous plan but refuses prices', async () => {
+    const anonymous = getChainService({});
+    expect(getChainService({ TATUM_API_KEY: KEY })).toBe(anonymous);
+    await expect(anonymous.getUsdPrice('USDC')).rejects.toBeInstanceOf(MissingApiKeyError);
     resetChainService();
-    expect(() => getChainService({})).toThrow(MissingApiKeyError);
+    const keyed = getChainService({ TATUM_API_KEY: KEY });
+    expect(keyed).not.toBe(anonymous);
+    resetChainService();
   });
 });

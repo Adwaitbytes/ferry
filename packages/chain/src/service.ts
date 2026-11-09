@@ -2,7 +2,7 @@ import { CreditMeter, type MeterSnapshot } from './meter.js';
 import { ChainReaders } from './readers.js';
 import { PriceFeed } from './price.js';
 import { TatumSui, type SuiRpc } from './rpc.js';
-import { createTatumGrpcClient, tatumApiKeyFromEnv, tatumGrpcHost } from './tatum.js';
+import { createTatumGrpcClient, MissingApiKeyError, tatumApiKeyOrNull, tatumGrpcHost } from './tatum.js';
 import { verifyUsdcPayment, type PaymentVerification, type VerifyUsdcPaymentInput } from './payment.js';
 import { relaySignedTransaction, type RelayResult } from './allowlist.js';
 
@@ -10,7 +10,7 @@ import { relaySignedTransaction, type RelayResult } from './allowlist.js';
 export interface ChainService {
   sui: TatumSui;
   readers: ChainReaders;
-  prices: PriceFeed;
+  prices: PriceFeed | null;
   getMeter(): MeterSnapshot;
   readAccount: ChainReaders['readAccount'];
   readAccountByOwner: ChainReaders['readAccountByOwner'];
@@ -22,11 +22,12 @@ export interface ChainService {
   relaySignedTransaction(transactionBytes: Uint8Array, signatures: string[]): Promise<RelayResult>;
 }
 
-export function createChainService(options: { rpc: SuiRpc; apiKey: string; prices?: PriceFeed; meter?: CreditMeter }): ChainService {
+export function createChainService(options: { rpc: SuiRpc; apiKey: string | null; prices?: PriceFeed; meter?: CreditMeter }): ChainService {
   const meter = options.meter ?? new CreditMeter();
   const sui = new TatumSui({ rpc: options.rpc, meter });
   const readers = new ChainReaders(sui);
-  const prices = options.prices ?? new PriceFeed({ apiKey: options.apiKey, meter });
+  const apiKey = options.apiKey;
+  const prices = options.prices ?? (apiKey === null ? null : new PriceFeed({ apiKey, meter }));
   return {
     sui,
     readers,
@@ -37,7 +38,8 @@ export function createChainService(options: { rpc: SuiRpc; apiKey: string; price
     findAccountByOwner: (owner) => readers.findAccountByOwner(owner),
     readBlob: (id, opts) => readers.readBlob(id, opts),
     currentEpoch: () => readers.currentEpoch(),
-    getUsdPrice: (symbol) => prices.getUsdPrice(symbol),
+    // The Data API has no anonymous plan, so prices need a key; chain reads do not.
+    getUsdPrice: (symbol) => (prices ? prices.getUsdPrice(symbol) : Promise.reject(new MissingApiKeyError())),
     verifyUsdcPayment: (input) => verifyUsdcPayment(sui, input),
     relaySignedTransaction: (bytes, signatures) => relaySignedTransaction(sui, bytes, signatures),
   };
@@ -51,7 +53,7 @@ let shared: ChainService | undefined;
  */
 export function getChainService(env: Readonly<Record<string, string | undefined>> = process.env): ChainService {
   if (!shared) {
-    const apiKey = tatumApiKeyFromEnv(env);
+    const apiKey = tatumApiKeyOrNull(env);
     shared = createChainService({ rpc: createTatumGrpcClient({ apiKey, host: tatumGrpcHost(env) }), apiKey });
   }
   return shared;

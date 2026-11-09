@@ -17,6 +17,11 @@ export function tatumApiKeyFromEnv(env: Readonly<Record<string, string | undefin
   return key;
 }
 
+/** The key if configured, else null for Tatum's anonymous plan (heavily rate limited). */
+export function tatumApiKeyOrNull(env: Readonly<Record<string, string | undefined>> = process.env): string | null {
+  return env['TATUM_API_KEY']?.trim() || null;
+}
+
 /**
  * Host only (`host:port`), TLS always. Accepts the `https://` form from .env.example so one
  * variable serves both docs and code.
@@ -34,11 +39,12 @@ export function tatumGrpcHost(env: Readonly<Record<string, string | undefined>> 
  * fails against it (RESEARCH 2.1). This uses grpc-js and therefore runs on the Node runtime only.
  * The key travels as `x-api-key` call metadata and is never logged or echoed.
  */
-export function createTatumGrpcClient(options: { apiKey: string; host?: string }): SuiGrpcClient {
+export function createTatumGrpcClient(options: { apiKey: string | null; host?: string }): SuiGrpcClient {
   const transport = new GrpcTransport({
     host: options.host ?? TATUM_SUI_GRPC_HOST,
     channelCredentials: ChannelCredentials.createSsl(),
-    meta: { 'x-api-key': options.apiKey },
+    // Without a key Tatum serves the anonymous plan: a few requests per second, enough for setup.
+    meta: options.apiKey ? { 'x-api-key': options.apiKey } : {},
     timeout: 10_000,
   });
   return new SuiGrpcClient({ network: SUI_NETWORK, transport });
