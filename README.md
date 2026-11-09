@@ -12,7 +12,7 @@ Built for [Total Recall](https://tatum.io) by Tatum x Walrus. Track 2, Smart Age
 | Ferry Gate (paid recall API) | https://ferry-gate.vercel.app ([health](https://ferry-gate.vercel.app/health), [public profile](https://ferry-gate.vercel.app/v1/profile)) |
 | Extension ZIP | https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 |
 | Demo video (under 3 min) | {{FILL: video URL}} |
-| Blog post | {{FILL: dev.to URL}} |
+| Blog post | https://dev.to/adwaitkeshari/ferry-one-ai-memory-you-own-carried-across-chatgpt-claude-and-gemini-on-walrus-3f67 |
 
 ---
 

@@ -35,7 +35,7 @@ First real payment, on Sui Testnet: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy
 **7/8**
 Every chain read goes through @tatum_io Sui gRPC: delegate keys, blob epochs, payment verification, prices. 312 memories on Mainnet so far.
 
-How it works: {{FILL: dev.to URL}}
+How it works: https://dev.to/adwaitkeshari/ferry-one-ai-memory-you-own-carried-across-chatgpt-claude-and-gemini-on-walrus-3f67
 
 **8/8**
 Built for Total Recall by @tatum_io x @WalrusFoundation. Open source, MIT.
@@ -49,7 +49,7 @@ Switch AIs. Keep yourself.
 
 I use ChatGPT, Claude and Gemini every week. Each one keeps a private profile of me, and none of them shares it with the others. When I switch, I start over. I don't own any of it.
 
-So for Total Recall, the Tatum x Walrus hackathon, we built Ferry.
+So for Total Recall, the Tatum x Walrus hackathon, I built Ferry.
 
 Ferry gives you one memory that you own. It lives on Walrus Mainnet, it belongs to your Sui wallet, and every fact carries a receipt showing which AI heard it and when.
 
@@ -62,10 +62,10 @@ What it does:
 
 Under the hood: Walrus Memory for storage with receipts, Seal for the encrypted Vault mode, Tatum's Sui gRPC gateway for every chain read and payment check, and MPP for agent payments on Sui. 312 memories on Mainnet so far.
 
-We were careful about what we claim. Standard mode is not end to end encrypted, and forget means hidden, not deleted, because Walrus has no delete. Both are spelled out in the README.
+I was careful about what I claim. Standard mode is not end to end encrypted, and forget means hidden, not deleted, because Walrus has no delete. Both are spelled out in the README.
 
 Demo: {{FILL: video URL}}
-Write up: {{FILL: dev.to URL}}
+Write up: https://dev.to/adwaitkeshari/ferry-one-ai-memory-you-own-carried-across-chatgpt-claude-and-gemini-on-walrus-3f67
 Code (MIT): https://github.com/Adwaitbytes/ferry
 
 Thanks to Tatum and the Walrus Foundation for running this.
