@@ -223,6 +223,9 @@ export function createApp(deps: GateDeps): Hono<Env> {
     const query = GateRecallQuery.safeParse({ q: rawQuery });
     if (!query.success) return jsonError(c, 400, 'invalid_request');
     const resource = new URL(c.req.url);
+    // Vercel terminates TLS before the function, so the request URL says http; paying clients
+    // compare the challenge resource with the URL they called, which is https.
+    if (c.req.header('x-forwarded-proto') === 'https') resource.protocol = 'https:';
     resource.search = '';
 
     if (GatePayments.dialectOf(c.req.raw) === null) {
