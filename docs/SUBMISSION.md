@@ -47,7 +47,7 @@ Every chain read goes through Tatum's Sui gRPC gateway: delegate keys, blob epoc
 | Working demo | Live web app, Gate, extension ZIP, video under 3:00 | https://ferry-memory.vercel.app, https://ferry-gate.vercel.app, https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1, {{FILL: video URL}} |
 | Public repo | MIT, README with Mainnet proof table | https://github.com/Adwaitbytes/ferry |
 | Best Walrus Memory: memories that visibly change the product | Conflicts supersede facts on Walrus; cross-app insertion uses facts told to other AIs; receipts merge across vendors | Conflicts resolved: {{FILL: count}}. Cross-app insertions: {{FILL: count}}. Supersede example blob: {{FILL: blob link}} |
-| Best Use of Agent Payments: x402 or MPP, settled on Sui | MPP 402 flow with Sui USDC to the user's address, verified through Tatum, replay protected in Neon | [packages/pay/src/gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts). Payment tx: {{FILL: payment tx explorer link}}. Paid recalls: {{FILL: count}} |
+| Best Use of Agent Payments: x402 or MPP, settled on Sui | MPP 402 flow with Sui USDC to the user's address, verified through Tatum, replay protected in Neon | [packages/pay/src/gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts). Payment tx: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv. Paid recalls: {{FILL: count}} |
 | Bonus: post on X or LinkedIn tagging @tatum_io and @WalrusFoundation | Thread and LinkedIn post | {{FILL: X thread URL}}, {{FILL: LinkedIn post URL}} |
 
 ## Discord questions for Adwait

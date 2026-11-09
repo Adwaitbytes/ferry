@@ -136,7 +136,7 @@ Every number here is printed by [`scripts/count-memories.ts`](scripts/count-memo
 | Memories on Mainnet | 312 (count from the paired extension index, every one with a Walrus blob id; 0 failed writes) | spot check: [blob 1](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/-EjL9r5VKzWYjKL96vAVrqgAcI7GO5e57n9CgRYggQk), [blob 2](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/QTVvQp8j9mwefd2jjF34Yo1uNYUWy0BuTE_mfeiPHzk), [blob 3](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/IUjeWHo7EK3npKAYCcny9H7_UtiWrKpoW1nIrfN98Lg) |
 | Sample memory blob | `2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o` | [aggregator](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o) (Seal ciphertext bound to the MemWal package and the owner) |
 | Supersede example | {{FILL: blob id with sup= header}} | {{FILL: link}} |
-| Paid recall | {{FILL: USDC payment tx digest}} | {{FILL: explorer link}} |
+| Paid recall (Sui Testnet, see Limitations) | `BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv`: 0.01 USDC agent to owner, status SUCCESS | [Suiscan](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv) |
 | Tatum credits used | 20 of 100,000 free-plan credits on 9 Nov 2026 (Tatum dashboard) | https://ferry-memory.vercel.app/proofs |
 
 ## How Ferry learned over time
@@ -151,7 +151,7 @@ Ferry's memory is meant to change what the product does, visibly. These are the 
 | Conflicts resolved | {{FILL: conflicts resolved count}} | Old facts superseded on Walrus and never inserted again |
 | Cross-app insertions | {{FILL: cross-app injection count}} | Context told in one AI used in another |
 | Facts hidden | {{FILL: hidden count}} | Tombstones written, excluded from recall |
-| Paid recalls through Gate | {{FILL: paid recall count and USDC total}} | Agents paid the user for scoped context |
+| Paid recalls through Gate | 1 paid recall, 0.01 USDC, on Sui Testnet ([tx](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv)) | Agents paid the user for scoped context |
 
 {{FILL: one or two sentences on a real moment where memory changed an answer, with a receipt link}}
 
@@ -187,6 +187,8 @@ Full threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md). Disclosure: [SE
 | **Total** | **81** | **81 of 81 ids blocked, 108 test cases, run on every push by `pnpm redteam` in [CI](https://github.com/Adwaitbytes/ferry/actions/workflows/ci.yml)** |
 
 ## Limitations, stated plainly
+
+- **The live paid recall ran on Sui Testnet.** We had no real money for Mainnet USDC, so the demo payment used faucet USDC on Sui Testnet through a second Gate ([ferry-gate-testnet.vercel.app](https://ferry-gate-testnet.vercel.app/health)). The code path is identical; `GATE_SUI_NETWORK` picks the network, and the Mainnet Gate at [ferry-gate.vercel.app](https://ferry-gate.vercel.app/health) is live and answers HTTP 402 in Mainnet USDC. Memory itself is on Walrus Mainnet either way.
 
 - **Standard mode is not end to end encrypted.** The hosted Walrus Memory relayer encrypts and stores your facts, but it sees the text while it processes them. Vault mode embeds and Seal-encrypts in your browser, so the relayer never sees the text. It still sees encrypted vectors, your owner address, the namespace and when you search, and the text goes to the embedding provider you choose.
 - **Forget means hidden, not deleted.** Walrus Memory has no delete API. Ferry writes a tombstone and never inserts the fact again, but the encrypted blob stays in Walrus storage until its storage epoch ends. The receipt drawer shows that epoch.

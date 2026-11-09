@@ -30,7 +30,7 @@ Blackout Drill: cut off the model mid chat and continue on another one. Your mem
 **6/8**
 Share and Earn: publish a slice of your memory. An agent gets HTTP 402, pays 0.01 USDC on @SuiNetwork with MPP, and gets only that slice. Paid to your own address.
 
-Real Mainnet payment: {{FILL: payment tx explorer link}}
+Real Mainnet payment: https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv
 
 **7/8**
 Every chain read goes through @tatum_io Sui gRPC: delegate keys, blob epochs, payment verification, prices. 312 memories on Mainnet so far.

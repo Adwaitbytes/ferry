@@ -87,12 +87,12 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 **On screen:**
 1. Web app Share and Earn. URL `/share`. A "Food" Share Card priced at 0.01 USDC.
 2. Split screen: a terminal on the left, Earnings on the right.
-3. Terminal runs the TripScout example: `{{FILL: exact TripScout command}}`.
+3. Terminal runs the TripScout example: `pnpm --filter tripscout start`.
 4. Terminal prints the 402 challenge, the payment digest, then the food preferences.
 5. Earnings page ticks up by 0.01 USDC with the agent address and a Tatum verified badge.
 6. Click the transaction link; the explorer shows the USDC transfer to the owner's address.
 
-**Must be real:** the Mainnet USDC payment and its digest: {{FILL: TripScout payment tx digest}}.
+**Must be real:** the Mainnet USDC payment and its digest: BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv.
 
 **Voiceover:**
 > My memory can also earn. I share my food preferences as a card. An agent called TripScout asks, gets a payment request, and pays one cent in USDC on Sui. Ferry checks the payment through Tatum, then answers. The money goes straight to my wallet.
@@ -154,7 +154,7 @@ The web app and Gate shots are recorded with Playwright. The chat site shots (3 
 | 04-carry-claude | `goto('https://claude.ai/new')`, type "plan Friday dinner", wait for the chip, click it, click Insert, Enter, wait for the reply to finish streaming, scroll, open the side panel with Alt+F, hover the fact |
 | 05-conflict | `goto('/library?status=conflict')`, click Keep newer, open the timeline |
 | 06-desk | `goto('/desk')`, send the question, wait for the reply, click Cut off, wait for the transition, send the follow up, wait for "0 facts lost" |
-| 07-share | `goto('/share')` in the right half; the terminal half is a separate screen recording of `{{FILL: exact TripScout command}}`, composited in edit |
+| 07-share | `goto('/share')` in the right half; the terminal half is a separate screen recording of `pnpm --filter tripscout start`, composited in edit |
 | 08-proofs | `goto('/proofs')`, wait for the credit meter, hold 8s |
 | 09-close | `goto('/')`, hold, end card added in edit |
 

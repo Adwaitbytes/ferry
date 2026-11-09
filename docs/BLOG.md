@@ -84,7 +84,7 @@ Gate speaks MPP, the Machine Payments Protocol, using `@suimpp/mpp` on Sui Mainn
 
 Ferry never holds the money. And because Walrus delegate keys can read a whole account, Gate never gets a key to your private memory. It reads from a separate Public profile account that only contains what you published ([gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts)).
 
-Our test agent, TripScout, pays from a terminal in about 13 lines. The first real Mainnet payment is here: {{FILL: payment tx explorer link}}.
+Our test agent, TripScout, pays from a terminal in about 13 lines. The first real payment ran on Sui Testnet, because we had no real money for Mainnet USDC: TripScout paid 0.01 USDC straight to the card owner, the Gate checked it through Tatum, and five facts came back ([transaction](https://suiscan.xyz/testnet/tx/BfqBDhWvz3gcy9Dys1mUPxjm4Tvisu6uLSnT2KQ1j4Gv)). The same code runs on Mainnet; only one setting changes.
 
 {{FILL: screenshot of the Earnings page after a paid recall}}
 
