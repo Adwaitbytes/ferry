@@ -127,14 +127,14 @@ Every number here is printed by [`scripts/count-memories.ts`](scripts/count-memo
 
 | What | Value | Proof |
 |---|---|---|
-| MemWalAccount (main) | {{FILL: account object id}} | {{FILL: explorer link}} |
+| MemWalAccount (main) | `0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2` | [object](https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2) |
 | MemWalAccount (Public profile) | `0x3a75eca8c67b7f70a7a2de8cdc7d8fb85137e3231c6023fc555e37e3ec4cfe8f` | [object](https://suiscan.xyz/mainnet/object/0x3a75eca8c67b7f70a7a2de8cdc7d8fb85137e3231c6023fc555e37e3ec4cfe8f), [create_account tx](https://suiscan.xyz/mainnet/tx/Hih5RG5uqiyZ85dEDaHqKTAKVrpTCNPTJx9pKBNDJQjs) |
 | Public profile owner | `0x53ec2bc08e0b15040c0e6863cb175ee66428d64f9e6ac5c7480bd6efe5d3f73b` | [account](https://suiscan.xyz/mainnet/account/0x53ec2bc08e0b15040c0e6863cb175ee66428d64f9e6ac5c7480bd6efe5d3f73b) |
 | Gate delegate key | `5c1bbed45123364f5f695a8e691372cc4a336a9e1d36780abd7fa9f388f95603` | [add_delegate_key tx](https://suiscan.xyz/mainnet/tx/2Ra4iESUsJwdQBMdbqtfN3ue4r2dZv7j9ryfyejLtfZY) |
-| Main owner address | {{FILL: owner Sui address}} | {{FILL: explorer link}} |
-| Delegate key (MEMWAL_AGENT_ID) | {{FILL: 64 hex delegate public key}} | {{FILL: add_delegate_key tx link}} |
+| Main owner address | `0x3b1d6cbb38e58113e91642954a84998224fb6b2db0f18495905eb2afb0a9d376` | [account](https://suiscan.xyz/mainnet/account/0x3b1d6cbb38e58113e91642954a84998224fb6b2db0f18495905eb2afb0a9d376) |
+| Delegate key, this browser (MEMWAL_AGENT_ID) | `aa0e1b0af8be8765d65d86876ca7034259fced902035d29c2420cdca5354e2ff` | added with relayer-sponsored gas, readable on the [account object](https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2) |
 | Memories on Mainnet | {{FILL: mainnet memory count from count script}} | {{FILL: count script output link}} |
-| Sample memory blob | {{FILL: blob id}} | {{FILL: aggregator or explorer link}} |
+| Sample memory blob | `2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o` | [aggregator](https://aggregator.walrus-mainnet.walrus.space/v1/blobs/2ftbRjXVHxXDiqagXST7A156q_U4SaaMt4GXFbZeL2o) (Seal ciphertext bound to the MemWal package and the owner) |
 | Supersede example | {{FILL: blob id with sup= header}} | {{FILL: link}} |
 | Paid recall | {{FILL: USDC payment tx digest}} | {{FILL: explorer link}} |
 | Tatum credits used | {{FILL: credits from Proofs page meter}} | {{FILL: Proofs page link}} |

@@ -13,7 +13,7 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 | Track | Track 2: Smart Agents for Real Life |
 | Awards targeted | Best Walrus Memory; Best Use of Agent Payments |
 | Tatum dashboard Account ID | {{FILL: Tatum dashboard Account ID}} |
-| MEMWAL_AGENT_ID | {{FILL: delegate public key, 64 hex characters, no 0x}} |
+| MEMWAL_AGENT_ID | aa0e1b0af8be8765d65d86876ca7034259fced902035d29c2420cdca5354e2ff |
 | Public repo | https://github.com/Adwaitbytes/ferry |
 | License | MIT |
 | Live web app | https://ferry-memory.vercel.app |
