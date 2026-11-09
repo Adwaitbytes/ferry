@@ -269,7 +269,7 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm copycheck
 
 ## Team
 
-- **Adwait**, Adwait Keshari. {{FILL: Adwait X and GitHub handles}}
+- **Adwait Keshari**, solo builder. GitHub [@Adwaitbytes](https://github.com/Adwaitbytes).
 
 ## License
 

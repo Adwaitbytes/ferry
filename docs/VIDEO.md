@@ -6,7 +6,7 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 
 - Everything on screen is real Mainnet data from the team's own account, except the Cut off, which shows the DEMO label as designed.
 - No fake numbers. If a count on screen is not real, reshoot.
-- The 0:12 counter shows whatever Adwait's real export produces. The voiceover reads that number: {{FILL: real import count from Adwait's export}}.
+- The 0:12 counter shows whatever the owner's real export produces. The voiceover reads that number: {{FILL: real import count from Adwait's export}}.
 - No faces, no personal inbox, no wallet balances other than the demo wallet. Close every other tab.
 - Browser zoom 100 percent, dark theme for the Ferry app, chat sites in their default theme.
 - Voiceover has no dashes and no filler. Read it slowly; each block fits its window at about 150 words a minute.
@@ -24,7 +24,7 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 
 **On screen:**
 1. Click "Rescue" in the nav. URL `/rescue`.
-2. Drag Adwait's real ChatGPT export ZIP onto the drop zone.
+2. Drag the owner's real export onto the drop zone.
 3. Parsing progress with text ("Distilling facts: N of M chunks").
 4. Review cards appear grouped by type. Open one receipt to show the quote.
 5. Click "Approve all" on two groups, then "Move to Walrus".
@@ -90,7 +90,7 @@ Target length 2:55, hard cap 3:00. Footage recorded with Playwright at 1920x1080
 3. Terminal runs the TripScout example: `{{FILL: exact TripScout command}}`.
 4. Terminal prints the 402 challenge, the payment digest, then the food preferences.
 5. Earnings page ticks up by 0.01 USDC with the agent address and a Tatum verified badge.
-6. Click the transaction link; the explorer shows the USDC transfer to Adwait's address.
+6. Click the transaction link; the explorer shows the USDC transfer to the owner's address.
 
 **Must be real:** the Mainnet USDC payment and its digest: {{FILL: TripScout payment tx digest}}.
 
@@ -139,7 +139,7 @@ The web app and Gate shots are recorded with Playwright. The chat site shots (3 
 
 - `@playwright/test` 1.65.0, Chromium channel `chrome`, viewport `{ width: 1920, height: 1080 }`, `deviceScaleFactor: 1`, `recordVideo: { dir: 'recordings/', size: { width: 1920, height: 1080 } }`.
 - `chromium.launchPersistentContext(profileDir, { headless: false, args: ['--disable-extensions-except=<ext path>', '--load-extension=<ext path>'] })` with the release build of the extension, already paired to the demo account and unlocked.
-- Profile already logged into chatgpt.com and claude.ai by Adwait. The script never types credentials.
+- Profile already logged into chatgpt.com and claude.ai by the owner. The script never types credentials.
 - `slowMo: 60` and explicit `waitForTimeout` pauses of 600 to 1200ms after each visible change, so the viewer can read it.
 - Cursor overlay script injected on each page so clicks are visible.
 - One spec per beat, so a bad take reshoots only that beat: `recordings/specs/01-hero.spec.ts` through `09-close.spec.ts`.

@@ -1,6 +1,6 @@
 # FERRY: Product Requirements Document
 
-Version 1.0, 9 Nov 2026. Owner: Adwait (Adwait Keshari). Build lead: Claude (goal mode, parallel agents).
+Version 1.0, 9 Nov 2026. Owner: Adwait Keshari. Build lead: Claude (goal mode, parallel agents).
 
 Target: Total Recall hackathon by Tatum x Walrus. Win Track 2 (Smart Agents for Real Life), Best Walrus Memory, and Best Use of Agent Payments. Submit an optional separate AI Builder entry if the rules allow.
 
@@ -654,7 +654,7 @@ You are the lead. You own architecture, `packages/core` contracts, integration, 
 6. **LLM keys:** Anthropic (required), OpenAI (embeddings for Vault mode, and GPT in Desk) and Google AI Studio (Gemini in Desk), or one OpenRouter key.
 7. **Optional:** an Enoki API key for zkLogin. An Upstash Redis URL for rate limits; otherwise use Neon.
 8. **Real data:**
-   - Adwait's own ChatGPT export ZIP (request it now, since it takes time to arrive by email).
+   - the owner's own ChatGPT export ZIP (request it now, since it takes time to arrive by email).
    - Optionally the Claude export and Gemini Takeout.
    - Real usage across sites during the build, to produce honest Mainnet memories.
 9. **Accounts logged into Chrome:** dev.to, X and LinkedIn. Text is approved before anything is posted.

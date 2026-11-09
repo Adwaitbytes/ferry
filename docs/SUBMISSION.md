@@ -21,7 +21,7 @@ Every answer below is ready to paste. Resolve each `{{FILL}}` with a real value 
 | Blog post | {{FILL: dev.to URL}} |
 | Demo video | {{FILL: video URL}} |
 | Extension ZIP | https://github.com/Adwaitbytes/ferry/releases/tag/v0.1.0-beta.1 |
-| Team | Adwait, Adwait Keshari |
+| Team | Adwait Keshari (solo) |
 | X post | {{FILL: X thread URL}} |
 | LinkedIn post | {{FILL: LinkedIn post URL}} |
 

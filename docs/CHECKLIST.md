@@ -25,10 +25,10 @@ A box is ticked only with evidence: a link, a command output or a screenshot.
 
 - [ ] dev.to blog published (tags walrus, sui, tatum, hackathon), 1,200 to 1,800 words, screenshots in place
 - [ ] Demo video under 3:00, follows docs/VIDEO.md, uploaded and linked
-- [ ] X thread approved by Adwait and posted, tags @tatum_io @WalrusFoundation @WalrusProtocol @SuiNetwork
+- [ ] X thread approved by the owner and posted, tags @tatum_io @WalrusFoundation @WalrusProtocol @SuiNetwork
 - [ ] LinkedIn version approved and posted
 - [ ] docs/SUBMISSION.md complete, every field filled and every proof link opens
-- [ ] Discord questions approved by Adwait and posted
+- [ ] Discord questions approved by the owner and posted
 
 ## Quality gates (PRD section 9)
 

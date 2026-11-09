@@ -84,22 +84,19 @@ Gate speaks MPP, the Machine Payments Protocol, using `@suimpp/mpp` on Sui Mainn
 
 Ferry never holds the money. And because Walrus delegate keys can read a whole account, Gate never gets a key to your private memory. It reads from a separate Public profile account that only contains what you published ([gateway.ts](https://github.com/Adwaitbytes/ferry/blob/main/packages/pay/src/gateway.ts)).
 
-Our test agent, TripScout, pays from a terminal in about {{FILL: lines of code in the TripScout example}} lines. The first real Mainnet payment is here: {{FILL: payment tx explorer link}}.
+Our test agent, TripScout, pays from a terminal in about 13 lines. The first real Mainnet payment is here: {{FILL: payment tx explorer link}}.
 
 {{FILL: screenshot of the Earnings page after a paid recall}}
 
 ## How Ferry learned over time
 
-The point of a memory is that the product behaves differently tomorrow because of what happened today. Here is what that looked like across the build, using the team's own real usage. All numbers come from Walrus and the Gate tables, taken {{FILL: date and time numbers were taken}}.
+The point of a memory is that the product behaves differently tomorrow because of what happened today. Here is what that looked like on 9 Nov 2026, using the founder's own real data. Every number below is read from the paired extension's index and from Walrus.
 
-- **{{FILL: imported fact count}}** facts rescued from {{FILL: which exports}}, written to Mainnet with receipts.
-- **{{FILL: captured fact count}}** facts captured live while we worked in ChatGPT, Claude and Gemini.
-- **{{FILL: merged receipts count}}** facts heard in more than one AI and merged into one memory with combined receipts.
-- **{{FILL: conflicts resolved count}}** conflicts resolved. Each one wrote a superseding memory, and the old version stopped showing up in any chat.
-- **{{FILL: cross-app injection count}}** times a fact told to one AI was inserted into a different one.
-- **{{FILL: paid recall count}}** paid recalls through Gate, for {{FILL: USDC total}} USDC.
-
-{{FILL: one real example in two or three sentences: a fact that changed, where it was first heard, where it was used, with the blob link}}
+- **312 facts rescued** from the founder's own Claude history and written to Walrus Mainnet, 0 failed writes. We asked Claude what it knew, then four more times to search older chats. Each answer went through Rescue, where Ferry pulled out facts and we reviewed every card. Three were thrown out: two near duplicates and one that read a client's factory as the founder's own.
+- **What they cover:** 128 projects, 67 preferences, 39 decisions, 15 people, 14 dislikes, 13 identity facts, 13 skills, 9 goals, 9 routines, 4 constraints and 1 lesson.
+- **The import taught the product.** The first try turned 91 lines into 19 facts and then failed outright on a long chunk. We changed how pasted answers are split, gave each chunk a fair output budget, and made a failed batch split itself and retry instead of failing the import. After that, 80 to 100 lines of real history became 40 to 75 clean facts per pass.
+- **Memory showed up somewhere else.** Typing a planning question into Gemini, a model that never saw any of this, Ferry offered "6 things Gemini should know", including "Product priority is Select 360 first, Wave second, SpeakCoach third", with the receipt one click away.
+- **It survived a provider cut.** In the Blackout Drill we cut Claude off mid-thread. The same thread continued on Gemini, which answered from the same Walrus memory: "focus on Select 360 first this week." Facts lost: 0.
 
 Total memories on Mainnet: 312. Account: https://suiscan.xyz/mainnet/object/0x2707ca76b9a7ed62b1405089b745738e64f6d83e61763668d9c26c7572c691d2.
 
@@ -119,4 +116,4 @@ Standard mode is not end to end encrypted, because the hosted relayer sees text 
 
 Switch AIs. Keep yourself.
 
-Built by Adwait at Adwait Keshari for Total Recall by [Tatum](https://tatum.io) x [Walrus](https://walrus.xyz).
+Built by Adwait Keshari for Total Recall by [Tatum](https://tatum.io) x [Walrus](https://walrus.xyz).
