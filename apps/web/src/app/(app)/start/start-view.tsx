@@ -1,6 +1,7 @@
 'use client';
 
 import { buildAddDelegateKeyTx, buildCreateAccountTx } from '@ferry/chain/tx';
+import { SponsorUnavailableError, sponsoredExecute } from '@/lib/sponsor';
 import { keyFingerprint, type AccountView } from '@ferry/core';
 import { Button, cn, IndeterminateProgress, MonoId, Notice, VerifyCheck } from '@ferry/ui';
 import { useCurrentAccount, useDAppKit } from '@mysten/dapp-kit-react';
@@ -86,11 +87,13 @@ function AccountStep({ owner, account }: { owner: string; account: ReturnType<ty
   const create = async () => {
     setState({ kind: 'creating' });
     try {
-      const result = await dAppKit.signAndExecuteTransaction({ transaction: buildCreateAccountTx() });
-      if (result.FailedTransaction) {
-        setState({ kind: 'error', message: 'Account creation failed on Sui. Nothing was charged beyond gas. Try again.' });
-        return;
-      }
+      // Relayer-sponsored gas first, so a wallet with no SUI can still create its account.
+      // Any sponsorship failure (relayer limit, network, declined authorization) falls back to gas
+      // paid by the wallet; a rejection there is the user's final answer.
+      await sponsoredExecute(dAppKit, owner, buildCreateAccountTx()).catch(async () => {
+        const result = await dAppKit.signAndExecuteTransaction({ transaction: buildCreateAccountTx() });
+        if (result.FailedTransaction) throw new Error('failed on chain');
+      });
     } catch {
       setState({ kind: 'error', message: 'Account creation failed: the transaction was rejected. Nothing was charged. Try again.' });
       return;
@@ -209,10 +212,15 @@ function PairStep({ account, onPaired }: { account: AccountView; onPaired: () =>
   const pair = async (offer: PairingOffer) => {
     setState({ kind: 'signing', offer });
     try {
-      const tx = buildAddDelegateKeyTx({ accountId: account.accountId, publicKey32: hexToBytes(offer.publicKeyHex), label });
-      const result = await dAppKit.signAndExecuteTransaction({ transaction: tx });
-      if (result.FailedTransaction) {
-        setState({ kind: 'error', message: `Sui rejected the key: ${result.FailedTransaction.status.error?.message ?? 'no reason given'}.` });
+      const build = () => buildAddDelegateKeyTx({ accountId: account.accountId, publicKey32: hexToBytes(offer.publicKeyHex), label });
+      const sender = dAppKit.stores.$connection.get().account?.address;
+      let rejected: string | null = null;
+      await (sender ? sponsoredExecute(dAppKit, sender, build()) : Promise.reject(new SponsorUnavailableError('no sender'))).catch(async () => {
+        const result = await dAppKit.signAndExecuteTransaction({ transaction: build() });
+        if (result.FailedTransaction) rejected = result.FailedTransaction.status.error?.message ?? 'no reason given';
+      });
+      if (rejected) {
+        setState({ kind: 'error', message: `Sui rejected the key: ${rejected}.` });
         return;
       }
     } catch {

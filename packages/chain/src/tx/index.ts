@@ -91,3 +91,4 @@ export function buildRemoveDelegateKeyTx(input: RemoveDelegateKeyInput): Transac
   });
   return tx;
 }
+export * from './sponsor.js';

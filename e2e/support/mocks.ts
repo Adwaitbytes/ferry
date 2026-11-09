@@ -106,6 +106,10 @@ export async function installMocks(page: Page, options: MockOptions = {}): Promi
 
   await page.route(`${WEB_ORIGIN}/api/providers`, (route) => json(route, 200, { providers }));
 
+  // The CI wallet cannot produce a relayer-accepted sponsor signature, so sponsorship reports
+  // unavailable and onboarding takes its wallet-paid path, which the mock wallet signs.
+  await page.route(`${WEB_ORIGIN}/api/sponsor`, (route) => json(route, 503, { error: 'SPONSOR_UNAVAILABLE' }));
+
   await page.route(`${WEB_ORIGIN}/api/distill`, (route) => {
     const response = distill(route.request().postDataJSON(), log);
     return response === null ? json(route, 400, { error: 'INVALID_REQUEST' }) : json(route, 200, response);
